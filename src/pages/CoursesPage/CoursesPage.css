@@ -1,0 +1,117 @@
+.courses-page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.courses-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.section-header h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.section-header p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.upload-section {
+  margin-bottom: 20px;
+}
+
+.form-section {
+  margin-bottom: 20px;
+}
+
+.images-section {
+  margin-top: 30px;
+}
+
+/* Avatar Seçimi Bölümü */
+.avatar-selection-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+}
+
+.avatar-selection-section h3 {
+  margin: 0 0 16px 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.avatar-selection-content {
+  margin-bottom: 12px;
+}
+
+.selected-avatar-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px solid #3498db;
+}
+
+.avatar-icon {
+  font-size: 1.5rem;
+}
+
+.avatar-name {
+  flex: 1;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.change-avatar-button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+.select-avatar-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+.avatar-info-text {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .courses-page {
+    padding: 15px;
+  }
+  
+  .courses-section {
+    padding: 20px;
+  }
+  
+  .section-header h2 {
+    font-size: 1.5rem;
+  }
+} 

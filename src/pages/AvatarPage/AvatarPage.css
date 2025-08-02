@@ -1,0 +1,263 @@
+.avatar-page {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.avatar-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-header h2 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 2.2rem;
+  font-weight: 600;
+}
+
+.section-header p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.avatar-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.avatar-preview {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  padding: 50px 30px;
+  text-align: center;
+  border: 2px dashed #dee2e6;
+  min-height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.avatar-preview:hover {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f0f2ff 0%, #e6e9ff 100%);
+}
+
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar-icon {
+  font-size: 4.5rem;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.preview-placeholder h3 {
+  color: #333;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.preview-placeholder p {
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.avatar-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  justify-content: center;
+  height: 100%;
+}
+
+.control-group {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e1e5e9;
+}
+
+.control-group h3 {
+  color: #333;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+}
+
+.control-group p {
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.create-avatar-button {
+  width: 100%;
+  font-size: 1.1rem;
+  padding: 18px 30px;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.create-avatar-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.avatar-result {
+  background: rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.avatar-result h4 {
+  color: #667eea;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.avatar-result p {
+  color: #555;
+  font-size: 0.9rem;
+  margin: 0;
+  word-break: break-all;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.avatar-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.avatar-link:hover {
+  color: #5a67d8;
+  text-decoration: underline;
+}
+
+.download-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.download-icon {
+  font-size: 1rem;
+}
+
+.download-text {
+  color: #667eea;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.save-avatar-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.save-avatar-button {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.save-avatar-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .avatar-page {
+    padding: 15px;
+  }
+  
+  .avatar-section {
+    padding: 25px;
+  }
+  
+  .section-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .avatar-content {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  
+  .avatar-preview {
+    min-height: 250px;
+    padding: 40px 20px;
+  }
+  
+  .avatar-icon {
+    font-size: 3.5rem;
+  }
+  
+  .control-group {
+    padding: 25px;
+  }
+  
+  .create-avatar-button {
+    padding: 16px 25px;
+  }
+} 

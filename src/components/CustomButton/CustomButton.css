@@ -1,0 +1,44 @@
+.custom-button {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 120px;
+}
+
+.custom-button.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.custom-button.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.custom-button.secondary {
+  background: transparent;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.custom-button.secondary:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+}
+
+.custom-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.custom-button:active:not(:disabled) {
+  transform: translateY(0);
+} 

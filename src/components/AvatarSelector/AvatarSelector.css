@@ -1,0 +1,152 @@
+.avatar-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-selector-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.avatar-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.avatar-selector-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #7f8c8d;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #e74c3c;
+}
+
+.avatar-list {
+  margin-bottom: 20px;
+}
+
+.avatar-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.avatar-item:hover {
+  border-color: #3498db;
+  background: #f8f9fa;
+}
+
+.avatar-item.selected {
+  border-color: #3498db;
+  background: #ebf3fd;
+}
+
+.avatar-preview {
+  margin-right: 12px;
+}
+
+.avatar-icon {
+  font-size: 2rem;
+  display: block;
+}
+
+.avatar-info {
+  flex: 1;
+}
+
+.avatar-info h4 {
+  margin: 0 0 4px 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.avatar-info p {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.selected-indicator {
+  color: #27ae60;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.no-avatars {
+  text-align: center;
+  padding: 40px 20px;
+  color: #7f8c8d;
+}
+
+.no-avatars p {
+  margin: 8px 0;
+}
+
+.avatar-selector-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #e1e5e9;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e1e5e9;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  text-align: center;
+  color: #e74c3c;
+}
+
+.error-message p {
+  margin-bottom: 16px;
+} 
