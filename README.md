@@ -255,8 +255,8 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICE
 
 ## 📞 **İletişim**
 
-- **Proje Linki**: [https://github.com/yourusername/edugems](https://github.com/yourusername/edugems)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/edugems/issues)
+- **Proje Linki**: [https://github.com/mertunver31/edugem](https://github.com/mertunver31/edugem)
+- **Issues**: [GitHub Issues](https://github.com/mertunver31/edugem/issues)
 
 ---
 
