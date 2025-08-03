@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage/LoginPage'
 import DashboardPage from './pages/DashboardPage/DashboardPage'
 import CreateCoursePage from './pages/CreateCoursePage/CreateCoursePage'
+import DevelopmentModeIndicator from './components/DevelopmentModeIndicator/DevelopmentModeIndicator'
 import { testConnection } from './services/supabaseService'
 import './App.css'
 
@@ -15,6 +16,7 @@ function App() {
   return (
     <Router>
       <div className="App">
+        <DevelopmentModeIndicator />
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />

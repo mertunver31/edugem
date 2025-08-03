@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { isDevelopmentMode } from '../../config/development'
 import DashboardNavigation from '../../components/DashboardNavigation/DashboardNavigation'
 import ProfilePage from '../ProfilePage/ProfilePage'
 import CoursesPage from '../CoursesPage/CoursesPage'
@@ -13,13 +14,31 @@ import TextWorkerTest from '../../components/TextWorkerTest/TextWorkerTest'
 import ImageWorkerTest from '../../components/ImageWorkerTest/ImageWorkerTest'
 import ConcurrencyControlTest from '../../components/ConcurrencyControlTest/ConcurrencyControlTest'
 import PDFPipelineTest from '../../components/PDFPipelineTest/PDFPipelineTest'
+import CourseStructureTest from '../../components/CourseStructureTest/CourseStructureTest'
 import './DashboardPage.css'
 
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('courses')
+  const [devMode, setDevMode] = useState(isDevelopmentMode())
+
+  useEffect(() => {
+    setDevMode(isDevelopmentMode())
+  }, [])
+
+  // Development mode değiştiğinde active tab'ı kontrol et
+  useEffect(() => {
+    if (!devMode) {
+      // Development mode kapandığında, eğer development tab'ındaysa courses'a yönlendir
+      const developmentTabs = ['pdf-test', 'gemini-test', 'document-understanding', 'segment-planner', 'task-queue', 'text-worker', 'image-worker', 'concurrency-control', 'pdf-pipeline']
+      if (developmentTabs.includes(activeTab)) {
+        setActiveTab('courses')
+      }
+    }
+  }, [devMode, activeTab])
 
   const renderActiveTab = () => {
     switch (activeTab) {
+      // Production Components - Her zaman erişilebilir
       case 'profile':
         return <ProfilePage />
       case 'courses':
@@ -28,24 +47,30 @@ const DashboardPage = () => {
         return <CreateCoursePage />
       case 'avatar':
         return <AvatarPage />
+      
+      // Development Components - Sadece development mode'da erişilebilir
       case 'pdf-test':
-        return <PDFTestArea />
+        return devMode ? <PDFTestArea /> : <CoursesPage />
       case 'gemini-test':
-        return <GeminiTestArea />
+        return devMode ? <GeminiTestArea /> : <CoursesPage />
       case 'document-understanding':
-        return <DocumentUnderstandingTest />
+        return devMode ? <DocumentUnderstandingTest /> : <CoursesPage />
       case 'segment-planner':
-        return <SegmentPlannerTest />
+        return devMode ? <SegmentPlannerTest /> : <CoursesPage />
       case 'task-queue':
-        return <TaskQueueTest />
+        return devMode ? <TaskQueueTest /> : <CoursesPage />
       case 'text-worker':
-        return <TextWorkerTest />
+        return devMode ? <TextWorkerTest /> : <CoursesPage />
       case 'image-worker':
-        return <ImageWorkerTest />
+        return devMode ? <ImageWorkerTest /> : <CoursesPage />
       case 'concurrency-control':
-        return <ConcurrencyControlTest />
+        return devMode ? <ConcurrencyControlTest /> : <CoursesPage />
       case 'pdf-pipeline':
-        return <PDFPipelineTest />
+        return devMode ? <PDFPipelineTest /> : <CoursesPage />
+      
+      case 'course-structure':
+        return devMode ? <CourseStructureTest /> : <CoursesPage />
+      
       default:
         return <CoursesPage />
     }
@@ -53,7 +78,12 @@ const DashboardPage = () => {
 
   return (
     <div className="dashboard-page">
-      <DashboardNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+      <DashboardNavigation 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
+        devMode={devMode}
+        setDevMode={setDevMode}
+      />
       <div className="dashboard-content">
         {renderActiveTab()}
       </div>

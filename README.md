@@ -111,13 +111,34 @@ VITE_HUGGINGFACE_API_KEY=your_huggingface_api_key
 - ✅ Progress Tracking - Her aşamada ilerleme takibi
 - ✅ Detailed Results Display - Text ve Image processing sonuçlarını detaylı görüntüleme
 
-#### **GÜN 10: Integration & API** 🔄
+#### **GÜN 10: Course Visual Integration** 🔄
+- 🔄 Course Visual Generator - Kurs yapısına göre görsel üretimi
+- 🔄 AI-Powered Image Prompts - Gemini ile akıllı görsel prompt'ları
+- 🔄 Visual-Learning Mapping - Görsel-öğrenme eşleştirmesi
+- 🔄 Course Media Library - Kurs medya kütüphanesi
+- 🔄 Interactive Visual Elements - Etkileşimli görsel elementler
+
+#### **GÜN 11: Enhanced Content Generation** 🔄
+- 🔄 Educational Content AI - Eğitim içeriği AI'sı
+- 🔄 Interactive Elements - Etkileşimli elementler
+- 🔄 Gamification Features - Oyunlaştırma özellikleri
+- 🔄 Progress Tracking - İlerleme takibi
+- 🔄 Assessment Generation - Değerlendirme oluşturma
+
+#### **GÜN 12: Web Application Interface** 🔄
+- 🔄 Course Builder Dashboard - Kurs oluşturma paneli
+- 🔄 Student Learning Interface - Öğrenci öğrenme arayüzü
+- 🔄 Course Preview System - Kurs önizleme sistemi
+- 🔄 Content Editor - İçerik düzenleyici
+- 🔄 Course Publishing - Kurs yayınlama
+
+#### **GÜN 13: Integration & API** 🔄
 - 🔄 REST API - Dış sistem entegrasyonu
 - 🔄 Export Features - Dışa aktarma
 - 🔄 Webhook System - Webhook sistemi
 - 🔄 Third-party Integrations - Üçüncü parti entegrasyonlar
 
-#### **GÜN 11: Production Ready** 🔄
+#### **GÜN 14: Production Ready** 🔄
 - 🔄 Security Hardening - Güvenlik güçlendirme
 - 🔄 Performance Optimization - Performans optimizasyonu
 - 🔄 Documentation - Dokümantasyon
@@ -179,7 +200,7 @@ supabase/
 
 ### **End-to-End PDF Processing Pipeline**
 ```
-PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation → Segment Planning → Text Worker → Image Worker → Final Results
+PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation → Segment Planning → Text Worker → Image Worker → Course Structure → Course Visual Integration → Final Results
 ```
 
 ### **Concurrency Control System**
