@@ -122,6 +122,13 @@ const DashboardNavigation = ({ activeTab, setActiveTab, devMode, setDevMode }) =
             >
               📚 Course Structure
             </button>
+            
+            <button
+              className={`nav-tab ${activeTab === 'course-visual-integration' ? 'active' : ''}`}
+              onClick={() => setActiveTab('course-visual-integration')}
+            >
+              🎨 Course Visual Integration
+            </button>
           </>
         )}
       </div>

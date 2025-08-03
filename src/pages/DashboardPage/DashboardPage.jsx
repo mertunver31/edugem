@@ -15,6 +15,7 @@ import ImageWorkerTest from '../../components/ImageWorkerTest/ImageWorkerTest'
 import ConcurrencyControlTest from '../../components/ConcurrencyControlTest/ConcurrencyControlTest'
 import PDFPipelineTest from '../../components/PDFPipelineTest/PDFPipelineTest'
 import CourseStructureTest from '../../components/CourseStructureTest/CourseStructureTest'
+import CourseVisualIntegration from '../../components/CourseVisualIntegration/CourseVisualIntegration'
 import './DashboardPage.css'
 
 const DashboardPage = () => {
@@ -29,7 +30,7 @@ const DashboardPage = () => {
   useEffect(() => {
     if (!devMode) {
       // Development mode kapandığında, eğer development tab'ındaysa courses'a yönlendir
-      const developmentTabs = ['pdf-test', 'gemini-test', 'document-understanding', 'segment-planner', 'task-queue', 'text-worker', 'image-worker', 'concurrency-control', 'pdf-pipeline']
+      const developmentTabs = ['pdf-test', 'gemini-test', 'document-understanding', 'segment-planner', 'task-queue', 'text-worker', 'image-worker', 'concurrency-control', 'pdf-pipeline', 'course-structure', 'course-visual-integration']
       if (developmentTabs.includes(activeTab)) {
         setActiveTab('courses')
       }
@@ -70,6 +71,9 @@ const DashboardPage = () => {
       
       case 'course-structure':
         return devMode ? <CourseStructureTest /> : <CoursesPage />
+      
+      case 'course-visual-integration':
+        return devMode ? <CourseVisualIntegration /> : <CoursesPage />
       
       default:
         return <CoursesPage />
