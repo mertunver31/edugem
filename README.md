@@ -210,17 +210,250 @@ supabase/
 - **API**: Görsel üretimi için text-to-image
 - **Features**: Segment tabanlı görsel oluşturma (Main, Concept, Example)
 
-### **End-to-End PDF Processing Pipeline**
+## 🔧 **Sistem Mimarisi ve Algoritmalar**
+
+### **1. Document Understanding Pipeline**
+```
+PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation
+```
+
+**Detaylı İşleyiş:**
+1. **PDF Upload & Storage**: PDF dosyası Supabase Storage'a yüklenir
+2. **Metadata Extraction**: PDF-lib ile sayfa sayısı, boyut, metadata çıkarılır
+3. **Gemini AI Processing**: Supabase Edge Function ile PDF Gemini Files API'ye gönderilir
+4. **Content Analysis**: Gemini AI PDF içeriğini analiz eder ve yapıyı çıkarır
+5. **Outline Generation**: Başlıklar, alt başlıklar, bölümler otomatik organize edilir
+
+**Kullanılan Teknolojiler:**
+- **Supabase Edge Functions**: Serverless PDF processing
+- **Gemini Files API**: PDF içerik analizi
+- **PDF-lib**: Metadata extraction
+- **JSON Response**: Structured outline format
+
+### **2. Segment Planning Algorithm**
+```
+Document Analysis → Smart Merging → Validation → Database Storage
+```
+
+**Algoritma Detayları:**
+- **Minimum Segment Size**: 3 sayfa
+- **Maximum Segment Size**: 20 sayfa
+- **Smart Merging**: Küçük segmentleri otomatik birleştirme
+- **Overlap Detection**: Sayfa çakışmalarını tespit etme
+- **Gap Detection**: Boş sayfa aralıklarını bulma
+- **Validation**: Segment bütünlüğü kontrolü
+
+**Segment Oluşturma Kuralları:**
+```javascript
+// Segment boyutu hesaplama
+const segmentSize = Math.min(Math.max(totalPages / 5, 3), 20);
+
+// Akıllı birleştirme algoritması
+if (currentSegment.pages < 3) {
+  mergeWithNextSegment();
+}
+
+// Çakışma kontrolü
+if (segmentOverlaps(segment1, segment2)) {
+  adjustSegmentBoundaries();
+}
+```
+
+### **3. Worker System Architecture**
+```
+Task Queue → Concurrency Manager → Worker Coordinator → Text/Image Workers
+```
+
+**Sistem Bileşenleri:**
+
+#### **A. Task Queue System**
+- **Priority Levels**: HIGH (3), MEDIUM (2), LOW (1)
+- **Retry Logic**: Başarısız task'lar için otomatik yeniden deneme
+- **Event Emission**: Task durumu değişikliklerinde event'ler
+- **Database Persistence**: Task durumları PostgreSQL'de saklanır
+
+#### **B. Concurrency Manager**
+- **Worker Registration**: Aktif worker'ları kayıt eder
+- **Rate Limiting**: API limitlerini kontrol eder
+- **Status Tracking**: Worker durumlarını takip eder
+- **Resource Management**: Sistem kaynaklarını yönetir
+
+#### **C. Worker Coordinator**
+- **Dependency Management**: Worker'lar arası bağımlılıkları yönetir
+- **Sequential Execution**: Sıralı çalıştırma
+- **Timeout Handling**: Zaman aşımı kontrolü
+- **Error Recovery**: Hata durumunda kurtarma
+
+### **4. Text Worker System**
+```
+Segment Input → AI Content Generation → Metadata Extraction → Database Storage
+```
+
+**İşlem Adımları:**
+1. **Segment Analysis**: Segment içeriği analiz edilir
+2. **AI Prompt Generation**: Gemini AI için akıllı prompt oluşturulur
+3. **Content Generation**: AI ile eğitim içeriği üretilir
+4. **Metadata Extraction**: Anahtar kelimeler, özet, zorluk seviyesi çıkarılır
+5. **Database Storage**: Sonuçlar worker_results tablosuna kaydedilir
+
+**AI Prompt Örneği:**
+```javascript
+const prompt = `
+  Bu segment için eğitim içeriği oluştur:
+  - Başlık: ${segment.title}
+  - İçerik: ${segment.content}
+  - Hedef: Öğrenci dostu, anlaşılır eğitim materyali
+  - Format: Markdown
+  - Özellikler: Örnekler, açıklamalar, pratik uygulamalar
+`;
+```
+
+### **5. Image Worker System**
+```
+Segment Input → Prompt Generation → Stable Diffusion XL → Image Processing → Storage
+```
+
+**Görsel Üretim Süreci:**
+1. **Content Analysis**: Segment içeriği analiz edilir
+2. **Prompt Engineering**: Stable Diffusion için optimize edilmiş prompt'lar
+3. **Image Generation**: Hugging Face API ile görsel üretimi
+4. **Quality Optimization**: Görsel kalitesi iyileştirme
+5. **Storage & Metadata**: Supabase Storage'a kaydetme
+
+**Görsel Türleri:**
+- **Main Topic Image**: Ana konu görseli (768x768px)
+- **Concept Diagram**: Kavram diyagramı (1024x1024px)
+- **Example Image**: Örnek görsel (768x768px)
+
+**Prompt Optimizasyonu:**
+```javascript
+const imagePrompts = {
+  mainTopic: `Educational illustration of ${topic}, clean design, no text, professional`,
+  conceptDiagram: `Concept diagram for ${concept}, visual learning, infographic style`,
+  example: `Practical example of ${concept}, real-world application, clear visualization`
+};
+```
+
+### **6. End-to-End PDF Processing Pipeline**
 ```
 PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation → Segment Planning → Text Worker → Image Worker → Course Structure → Course Visual Integration → Final Results
 ```
 
-### **Course Structure Generation**
-- **AI-Powered Analysis**: Gemini AI ile PDF analizi ve kurs yapısı oluşturma
-- **Smart Organization**: Bölümler, dersler ve öğrenme hedefleri otomatik organizasyonu
-- **Segment Mapping**: Segment'lerin kurs yapısına akıllı eşleştirilmesi
-- **Learning Objectives**: Her bölüm için öğrenme hedefleri oluşturma
-- **Development Mode**: Geliştirici araçları için ayrı mod sistemi
+**Pipeline Orchestration:**
+- **Sequential Processing**: Her adım sırayla çalışır
+- **Progress Tracking**: Her aşamada ilerleme takibi
+- **Error Handling**: Hata durumunda pipeline durdurma
+- **Background Processing**: Arka planda kesintisiz işlem
+- **Status Updates**: Database'de durum güncellemeleri
+
+**Pipeline Durumları:**
+```javascript
+const PIPELINE_STATUS = {
+  IDLE: 'IDLE',
+  UPLOADING: 'UPLOADING',
+  SEGMENTING: 'SEGMENTING',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+};
+```
+
+### **7. Course Structure Generation**
+```
+Document Analysis → AI Course Planning → Chapter Organization → Lesson Mapping → Database Storage
+```
+
+**Kurs Yapısı Oluşturma Süreci:**
+1. **Document Analysis**: PDF outline ve segment'ler analiz edilir
+2. **AI Course Planning**: Gemini AI ile kurs yapısı planlanır
+3. **Chapter Organization**: Bölümler mantıklı şekilde organize edilir
+4. **Lesson Mapping**: Dersler segment'lere eşleştirilir
+5. **Learning Objectives**: Her bölüm için öğrenme hedefleri oluşturulur
+
+**AI Prompt Yapısı:**
+```javascript
+const coursePrompt = `
+  Bu PDF için kapsamlı bir eğitim kursu yapısı oluştur:
+  
+  PDF Bilgileri:
+  - Başlık: ${outline.title}
+  - Yazar: ${outline.author}
+  - Toplam Sayfa: ${outline.total_pages}
+  
+  PDF Yapısı: ${JSON.stringify(outline.headings)}
+  Segment'ler: ${segments.map(seg => `Segment ${seg.seg_no}: ${seg.title}`)}
+  
+  Kurallar:
+  1. Segment'leri mantıklı bölümlere grupla
+  2. Her bölüm 3-7 ders içersin
+  3. Öğrenme hedefleri net ve ölçülebilir olsun
+  4. Zorluk seviyesi içeriğe uygun olsun
+`;
+```
+
+**Kurs Yapısı Formatı:**
+```json
+{
+  "title": "Kurs Başlığı",
+  "description": "Kurs açıklaması",
+  "learningObjectives": ["Hedef 1", "Hedef 2"],
+  "estimatedDuration": "8-10 saat",
+  "difficultyLevel": "Orta",
+  "chapters": [
+    {
+      "id": "chapter-1",
+      "title": "Bölüm Başlığı",
+      "description": "Bölüm açıklaması",
+      "order": 1,
+      "estimatedDuration": "2-3 saat",
+      "lessons": [
+        {
+          "id": "lesson-1-1",
+          "title": "Ders Başlığı",
+          "description": "Ders açıklaması",
+          "order": 1,
+          "estimatedDuration": "30-45 dakika",
+          "segmentId": "segment-uuid",
+          "contentType": "text",
+          "learningPoints": ["Nokta 1", "Nokta 2"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+### **8. Development Mode System**
+```
+Environment Check → Local Storage → UI State Management → Component Rendering
+```
+
+**Development Mode Özellikleri:**
+- **Environment Variables**: `VITE_DEV_MODE=true`
+- **Local Storage**: `devMode` key ile durum saklama
+- **Toggle Functionality**: Açma/kapama butonu
+- **Conditional Rendering**: Test component'leri sadece dev mode'da görünür
+- **State Management**: React state ile anlık güncelleme
+
+**Kullanım:**
+```javascript
+// Development mode kontrolü
+const isDevMode = () => {
+  return process.env.NODE_ENV === 'development' ||
+         process.env.VITE_DEV_MODE === 'true' ||
+         localStorage.getItem('devMode') === 'true';
+};
+
+// Toggle fonksiyonu
+const toggleDevMode = () => {
+  if (isDevMode()) {
+    localStorage.removeItem('devMode');
+  } else {
+    localStorage.setItem('devMode', 'true');
+  }
+  window.location.reload();
+};
+```
 
 ### **Concurrency Control System**
 - **Concurrency Manager**: Worker kayıt, durum takibi, rate limiting
@@ -362,6 +595,25 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICE
 
 - **Proje Linki**: [https://github.com/mertunver31/edugem](https://github.com/mertunver31/edugem)
 - **Issues**: [GitHub Issues](https://github.com/mertunver31/edugem/issues)
+
+## 📋 **Dokümantasyon Notları**
+
+### **Sistem Açıklamaları Politikası**
+Bu projede eklenen her yeni sistem, algoritma veya pipeline için **mutlaka detaylı açıklama** yapılmalıdır. Bu açıklamalar şunları içermelidir:
+
+1. **Sistem Mimarisi**: Nasıl çalıştığı ve bileşenleri
+2. **Algoritma Detayları**: Kullanılan algoritmalar ve kurallar
+3. **Kod Örnekleri**: Önemli kod parçaları ve kullanım örnekleri
+4. **Teknoloji Stack**: Hangi teknolojilerin kullanıldığı
+5. **Performans Metrikleri**: Sistem performansı ve sınırları
+
+### **Yeni Sistem Ekleme Kuralları**
+- ✅ Sistem mimarisini açıkla
+- ✅ Algoritma detaylarını belirt
+- ✅ Kod örnekleri ekle
+- ✅ Kullanılan teknolojileri listele
+- ✅ Performans metriklerini belirt
+- ❌ Sadece "yapıldı" demek yeterli değil
 
 ---
 
