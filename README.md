@@ -109,6 +109,7 @@ VITE_HUGGINGFACE_API_KEY=your_huggingface_api_key
 - ✅ Process Flow: PDF Upload → Segment Planning → Text Worker → Image Worker → Final Results
 - ✅ Background Processing - Arka planda kesintisiz işlem
 - ✅ Progress Tracking - Her aşamada ilerleme takibi
+- ✅ Detailed Results Display - Text ve Image processing sonuçlarını detaylı görüntüleme
 
 #### **GÜN 10: Integration & API** 🔄
 - 🔄 REST API - Dış sistem entegrasyonu
@@ -151,6 +152,7 @@ src/
 │   ├── queueManagerService.js # Queue Manager
 │   ├── workerCoordinatorService.js # Worker Coordinator
 │   ├── pdfProcessingPipelineService.js # PDF Pipeline
+│   ├── taskQueueService.js    # Task Queue servisi
 │   └── supabaseService.js     # Supabase bağlantısı
 ├── config/                    # Konfigürasyon
 │   └── supabase.js           # Supabase client
@@ -179,6 +181,11 @@ supabase/
 ```
 PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation → Segment Planning → Text Worker → Image Worker → Final Results
 ```
+
+### **Concurrency Control System**
+- **Concurrency Manager**: Worker kayıt, durum takibi, rate limiting
+- **Queue Manager**: Task prioritization, retry logic, event emission
+- **Worker Coordinator**: Segment işleme koordinasyonu, dependency management
 
 ### **Segment Planning Algorithm**
 - **Smart Merging**: Küçük segmentleri otomatik birleştirme
