@@ -111,6 +111,14 @@ VITE_HUGGINGFACE_API_KEY=your_huggingface_api_key
 - ✅ Progress Tracking - Her aşamada ilerleme takibi
 - ✅ Detailed Results Display - Text ve Image processing sonuçlarını detaylı görüntüleme
 
+#### **GÜN 9.5: Course Structure Generator** ✅
+- ✅ AI-Powered Course Creation - Gemini AI ile otomatik kurs yapısı oluşturma
+- ✅ Course Structure Service - Kurs yapısı oluşturma servisi
+- ✅ Chapter & Lesson Organization - Bölüm ve ders organizasyonu
+- ✅ Learning Objectives Generation - Öğrenme hedefleri oluşturma
+- ✅ Segment-Course Mapping - Segment-kurs eşleştirmesi
+- ✅ Development Mode System - Geliştirici modu sistemi
+
 #### **GÜN 10: Course Visual Integration** 🔄
 - 🔄 Course Visual Generator - Kurs yapısına göre görsel üretimi
 - 🔄 AI-Powered Image Prompts - Gemini ile akıllı görsel prompt'ları
@@ -156,6 +164,8 @@ src/
 │   ├── ImageWorkerTest/       # Image Worker test alanı
 │   ├── ConcurrencyControlTest/ # Concurrency Control test alanı
 │   ├── PDFPipelineTest/       # PDF Pipeline test alanı
+│   ├── CourseStructureTest/   # Course Structure test alanı
+│   ├── DevelopmentModeIndicator/ # Development mode göstergesi
 │   ├── AvatarPage/            # Avatar oluşturma
 │   └── PanoramicViewer/       # 360° görüntüleyici
 ├── pages/                     # Sayfa bileşenleri
@@ -174,9 +184,11 @@ src/
 │   ├── workerCoordinatorService.js # Worker Coordinator
 │   ├── pdfProcessingPipelineService.js # PDF Pipeline
 │   ├── taskQueueService.js    # Task Queue servisi
+│   ├── courseStructureService.js # Course Structure servisi
 │   └── supabaseService.js     # Supabase bağlantısı
 ├── config/                    # Konfigürasyon
-│   └── supabase.js           # Supabase client
+│   ├── supabase.js           # Supabase client
+│   └── development.js        # Development mode konfigürasyonu
 └── styles/                    # Global stiller
 
 supabase/
@@ -202,6 +214,13 @@ supabase/
 ```
 PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation → Segment Planning → Text Worker → Image Worker → Course Structure → Course Visual Integration → Final Results
 ```
+
+### **Course Structure Generation**
+- **AI-Powered Analysis**: Gemini AI ile PDF analizi ve kurs yapısı oluşturma
+- **Smart Organization**: Bölümler, dersler ve öğrenme hedefleri otomatik organizasyonu
+- **Segment Mapping**: Segment'lerin kurs yapısına akıllı eşleştirilmesi
+- **Learning Objectives**: Her bölüm için öğrenme hedefleri oluşturma
+- **Development Mode**: Geliştirici araçları için ayrı mod sistemi
 
 ### **Concurrency Control System**
 - **Concurrency Manager**: Worker kayıt, durum takibi, rate limiting
@@ -229,10 +248,11 @@ PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation
 - **Row Level Security** - Veri güvenliği
 
 ### **AI & Processing**
-- **Google Gemini AI** - PDF analizi ve content generation
+- **Google Gemini AI** - PDF analizi, content generation ve kurs yapısı oluşturma
 - **Hugging Face API** - Görsel üretimi (Stable Diffusion XL)
 - **PDF-lib** - PDF metadata extraction
 - **Custom Algorithms** - Segment planning ve validation
+- **Development Mode** - Geliştirici araçları için ayrı mod sistemi
 
 ## 📈 **Performans**
 
@@ -242,9 +262,16 @@ PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation
 - **AI Response**: Gemini API ile hızlı analiz
 - **Validation**: Real-time segment validation
 
+### **Course Generation**
+- **Course Structure Time**: ~10-20 saniye (PDF karmaşıklığına göre)
+- **AI-Powered Organization**: Otomatik bölüm ve ders organizasyonu
+- **Learning Objectives**: Her bölüm için öğrenme hedefleri
+- **Development Mode**: Geliştirici araçları için ayrı mod
+
 ### **Database**
 - **Segments Table**: Optimized indexing
-- **Documents Table**: Efficient storage
+- **Documents Table**: Efficient storage with course_structure support
+- **Course Structure**: JSONB formatında kurs yapısı saklama
 - **RLS Policies**: Secure data access
 
 ## 🔧 **Geliştirme**
@@ -293,6 +320,18 @@ const documents = await pdfService.getDocuments()
 
 // Document understanding
 const outline = await documentUnderstandingService.extractDocumentOutline(documentId)
+```
+
+### **Course Structure Service**
+```javascript
+// Kurs yapısı oluşturma
+const courseStructure = await courseStructureService.generateCourseStructure(documentId)
+
+// Kurs yapısını getirme
+const existingStructure = await courseStructureService.getCourseStructure(documentId)
+
+// Test fonksiyonu
+const testResult = await courseStructureService.testCourseStructureGeneration(documentId)
 ```
 
 ### **Segment Service**
