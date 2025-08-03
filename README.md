@@ -65,6 +65,9 @@ VITE_GEMINI_API_KEY=your_gemini_api_key
 
 # Ready Player Me
 VITE_READY_PLAYER_ME_SUBDOMAIN=your_subdomain
+
+# Hugging Face API
+VITE_HUGGINGFACE_API_KEY=your_huggingface_api_key
 ```
 
 ## 📊 **Proje Durumu**
@@ -94,11 +97,30 @@ VITE_READY_PLAYER_ME_SUBDOMAIN=your_subdomain
 
 ### 🔄 **Geliştirme Aşamasında**
 
-#### **GÜN 6: Worker System**
-- 🔄 Task Queue sistemi
-- 🔄 Text Worker (AI content generation)
-- 🔄 Image Worker (visual content)
-- 🔄 Concurrency control
+#### **GÜN 6-8: Worker System**
+- ✅ Task Queue sistemi
+- ✅ Text Worker (AI content generation)
+- ✅ Image Worker (Stable Diffusion XL entegrasyonu)
+- ✅ Concurrency Control (Worker koordinasyonu)
+
+#### **GÜN 9: End-to-End PDF Processing Pipeline** ✅
+- ✅ Automated PDF Processing - Tek PDF yüklendiğinde otomatik işlem
+- ✅ Pipeline Orchestration - Tüm servislerin sırayla çalışması
+- ✅ Process Flow: PDF Upload → Segment Planning → Text Worker → Image Worker → Final Results
+- ✅ Background Processing - Arka planda kesintisiz işlem
+- ✅ Progress Tracking - Her aşamada ilerleme takibi
+
+#### **GÜN 10: Integration & API** 🔄
+- 🔄 REST API - Dış sistem entegrasyonu
+- 🔄 Export Features - Dışa aktarma
+- 🔄 Webhook System - Webhook sistemi
+- 🔄 Third-party Integrations - Üçüncü parti entegrasyonlar
+
+#### **GÜN 11: Production Ready** 🔄
+- 🔄 Security Hardening - Güvenlik güçlendirme
+- 🔄 Performance Optimization - Performans optimizasyonu
+- 🔄 Documentation - Dokümantasyon
+- 🔄 Testing & QA - Test ve kalite kontrol
 
 ## 🏗️ **Proje Yapısı**
 
@@ -108,6 +130,10 @@ src/
 │   ├── PDFTestArea/           # PDF test alanı
 │   ├── DocumentUnderstandingTest/  # AI test alanı
 │   ├── SegmentPlannerTest/    # Segment test alanı
+│   ├── TextWorkerTest/        # Text Worker test alanı
+│   ├── ImageWorkerTest/       # Image Worker test alanı
+│   ├── ConcurrencyControlTest/ # Concurrency Control test alanı
+│   ├── PDFPipelineTest/       # PDF Pipeline test alanı
 │   ├── AvatarPage/            # Avatar oluşturma
 │   └── PanoramicViewer/       # 360° görüntüleyici
 ├── pages/                     # Sayfa bileşenleri
@@ -119,6 +145,12 @@ src/
 │   ├── pdfService.js          # PDF işlemleri
 │   ├── segmentService.js      # Segment algoritması
 │   ├── documentUnderstandingService.js  # AI servisi
+│   ├── textWorkerService.js   # Text Worker servisi
+│   ├── imageWorkerService.js  # Image Worker servisi
+│   ├── concurrencyManagerService.js # Concurrency Manager
+│   ├── queueManagerService.js # Queue Manager
+│   ├── workerCoordinatorService.js # Worker Coordinator
+│   ├── pdfProcessingPipelineService.js # PDF Pipeline
 │   └── supabaseService.js     # Supabase bağlantısı
 ├── config/                    # Konfigürasyon
 │   └── supabase.js           # Supabase client
@@ -138,9 +170,14 @@ supabase/
 - **API**: Document Understanding için özel Edge Function
 - **Features**: PDF analizi, outline extraction, content classification
 
-### **Document Understanding Pipeline**
+### **Hugging Face API**
+- **Model**: `stabilityai/stable-diffusion-xl-base-1.0` (Stable Diffusion XL)
+- **API**: Görsel üretimi için text-to-image
+- **Features**: Segment tabanlı görsel oluşturma (Main, Concept, Example)
+
+### **End-to-End PDF Processing Pipeline**
 ```
-PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation → Segment Planning → Database Storage
+PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation → Segment Planning → Text Worker → Image Worker → Final Results
 ```
 
 ### **Segment Planning Algorithm**
@@ -165,6 +202,7 @@ PDF Upload → Metadata Extraction → Gemini AI Analysis → Outline Generation
 
 ### **AI & Processing**
 - **Google Gemini AI** - PDF analizi ve content generation
+- **Hugging Face API** - Görsel üretimi (Stable Diffusion XL)
 - **PDF-lib** - PDF metadata extraction
 - **Custom Algorithms** - Segment planning ve validation
 

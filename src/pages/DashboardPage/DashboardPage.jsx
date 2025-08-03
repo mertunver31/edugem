@@ -8,6 +8,11 @@ import PDFTestArea from '../../components/PDFTestArea/PDFTestArea'
 import GeminiTestArea from '../../components/GeminiTestArea/GeminiTestArea'
 import DocumentUnderstandingTest from '../../components/DocumentUnderstandingTest/DocumentUnderstandingTest'
 import SegmentPlannerTest from '../../components/SegmentPlannerTest/SegmentPlannerTest'
+import TaskQueueTest from '../../components/TaskQueueTest/TaskQueueTest'
+import TextWorkerTest from '../../components/TextWorkerTest/TextWorkerTest'
+import ImageWorkerTest from '../../components/ImageWorkerTest/ImageWorkerTest'
+import ConcurrencyControlTest from '../../components/ConcurrencyControlTest/ConcurrencyControlTest'
+import PDFPipelineTest from '../../components/PDFPipelineTest/PDFPipelineTest'
 import './DashboardPage.css'
 
 const DashboardPage = () => {
@@ -31,6 +36,16 @@ const DashboardPage = () => {
         return <DocumentUnderstandingTest />
       case 'segment-planner':
         return <SegmentPlannerTest />
+      case 'task-queue':
+        return <TaskQueueTest />
+      case 'text-worker':
+        return <TextWorkerTest />
+      case 'image-worker':
+        return <ImageWorkerTest />
+      case 'concurrency-control':
+        return <ConcurrencyControlTest />
+      case 'pdf-pipeline':
+        return <PDFPipelineTest />
       default:
         return <CoursesPage />
     }

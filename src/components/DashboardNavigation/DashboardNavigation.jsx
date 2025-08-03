@@ -60,6 +60,41 @@ const DashboardNavigation = ({ activeTab, setActiveTab }) => {
         >
           📋 Segment Planner
         </button>
+        
+        <button
+          className={`nav-tab ${activeTab === 'task-queue' ? 'active' : ''}`}
+          onClick={() => setActiveTab('task-queue')}
+        >
+          ⚙️ Task Queue
+        </button>
+        
+        <button
+          className={`nav-tab ${activeTab === 'text-worker' ? 'active' : ''}`}
+          onClick={() => setActiveTab('text-worker')}
+        >
+          📝 Text Worker
+        </button>
+        
+        <button
+          className={`nav-tab ${activeTab === 'image-worker' ? 'active' : ''}`}
+          onClick={() => setActiveTab('image-worker')}
+        >
+          🎨 Image Worker
+        </button>
+        
+        <button
+          className={`nav-tab ${activeTab === 'concurrency-control' ? 'active' : ''}`}
+          onClick={() => setActiveTab('concurrency-control')}
+        >
+          🔄 Concurrency Control
+        </button>
+        
+        <button
+          className={`nav-tab ${activeTab === 'pdf-pipeline' ? 'active' : ''}`}
+          onClick={() => setActiveTab('pdf-pipeline')}
+        >
+          🚀 PDF Pipeline
+        </button>
       </div>
     </nav>
   )

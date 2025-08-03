@@ -318,18 +318,23 @@ INSERT INTO segments (
 ### ⚙️ **GÜN 6: Worker System**
 
 #### **Görevler:**
-- [ ] **Task Queue Sistemi**
-  - SELECT ... FOR UPDATE
-  - Concurrency control
-  - Status management
-- [ ] **Text Worker**
+- ✅ **AŞAMA 1 TAMAMLANDI: Task Queue Sistemi**
+  - ✅ Database schema (task_queue, worker_results tabloları)
+  - ✅ Concurrency control (SELECT ... FOR UPDATE)
+  - ✅ Status management (PENDING, PROCESSING, COMPLETED, FAILED)
+  - ✅ Helper functions (lock_task, complete_task, fail_task)
+  - ✅ TaskQueueService (modüler yapı)
+  - ✅ TaskQueueTest component (UI test alanı)
+  - ✅ Dashboard entegrasyonu
+- 🔄 **AŞAMA 2: Text Worker**
   - Segment text processing
   - Gemini text generation
   - Markdown formatting
-- [ ] **Visual Worker**
+- 🔄 **AŞAMA 3: Image Worker**
   - Image generation
   - Chart creation
   - Visual content
+
 
 #### **Teknik Detaylar:**
 ```javascript
