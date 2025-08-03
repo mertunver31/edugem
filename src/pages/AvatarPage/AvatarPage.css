@@ -1,15 +1,16 @@
 .avatar-page {
-  padding: 20px;
-  max-width: 1000px;
+  padding: 20px 30px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
-.avatar-section {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
+.avatar-create-section {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
   padding: 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .section-header {
@@ -17,201 +18,423 @@
   margin-bottom: 40px;
 }
 
-.section-header h2 {
-  color: #333;
-  margin-bottom: 15px;
-  font-size: 2.2rem;
-  font-weight: 600;
+.section-header h1 {
+  color: white;
+  margin-bottom: 10px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .section-header p {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 1.1rem;
   margin: 0;
   line-height: 1.5;
 }
 
-.avatar-content {
+/* Avatar Önizleme */
+.avatar-preview-section {
+  margin-bottom: 40px;
+}
+
+.avatar-preview-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.preview-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
-  align-items: start;
+  align-items: center;
 }
 
-.avatar-preview {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 15px;
-  padding: 50px 30px;
-  text-align: center;
-  border: 2px dashed #dee2e6;
-  min-height: 350px;
+.avatar-preview-area {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+}
+
+.avatar-placeholder-large {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 60px 30px;
+  text-align: center;
+  width: 100%;
   transition: all 0.3s ease;
 }
 
-.avatar-preview:hover {
-  border-color: #667eea;
-  background: linear-gradient(135deg, #f0f2ff 0%, #e6e9ff 100%);
+.avatar-placeholder-large:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.preview-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+.avatar-icon-large {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 20px;
 }
 
-.avatar-icon {
-  font-size: 4.5rem;
-  margin-bottom: 10px;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-}
-
-.preview-placeholder h3 {
-  color: #333;
-  font-size: 1.6rem;
+.avatar-placeholder-large h3 {
+  color: white;
+  font-size: 1.5rem;
   font-weight: 600;
+  margin: 0 0 10px 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.avatar-placeholder-large p {
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
 }
 
-.preview-placeholder p {
-  color: #666;
-  font-size: 1rem;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.avatar-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  justify-content: center;
-  height: 100%;
-}
-
-.control-group {
-  background: white;
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e1e5e9;
-}
-
-.control-group h3 {
-  color: #333;
-  font-size: 1.4rem;
+.avatar-controls h3 {
+  color: white;
+  font-size: 1.8rem;
   font-weight: 600;
   margin: 0 0 15px 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.control-group p {
-  color: #666;
+.description {
+  color: rgba(255, 255, 255, 0.8);
   font-size: 1rem;
-  margin: 0;
   line-height: 1.6;
+  margin-bottom: 25px;
 }
 
-.action-buttons {
+.avatar-features {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.feature-icon {
+  font-size: 1.2rem;
+}
+
+.create-avatar-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(238, 90, 111, 0.3);
+}
+
+.create-avatar-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(238, 90, 111, 0.4);
+}
+
+.create-avatar-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Avatar Sonuç */
+.avatar-result-section {
+  margin-bottom: 40px;
+}
+
+.result-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.result-card h3 {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.avatar-url-display {
+  margin-bottom: 20px;
+}
+
+.avatar-url-display label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.url-container {
+  display: flex;
+  gap: 10px;
+}
+
+.url-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 14px;
+  font-family: monospace;
+}
+
+.copy-btn {
+  background: linear-gradient(135deg, #4caf50, #45a049);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.copy-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+.avatar-actions {
+  display: flex;
   gap: 15px;
 }
 
-.create-avatar-button {
-  width: 100%;
-  font-size: 1.1rem;
-  padding: 18px 30px;
-  font-weight: 600;
-  border-radius: 12px;
+.download-btn,
+.save-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.create-avatar-button:hover {
+.download-btn {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+  color: white;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+}
+
+.download-btn:hover,
+.save-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
 }
 
-.avatar-result {
-  background: rgba(102, 126, 234, 0.08);
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  border-radius: 12px;
-  padding: 20px;
-  margin-top: 10px;
+/* Kaydedilen Avatarlar */
+.avatars-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
 }
 
-.avatar-result h4 {
-  color: #667eea;
-  font-size: 1.1rem;
+.avatars-header h3 {
+  color: white;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin: 0 0 10px 0;
-}
-
-.avatar-result p {
-  color: #555;
-  font-size: 0.9rem;
   margin: 0;
-  word-break: break-all;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(102, 126, 234, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.avatar-link {
-  color: #667eea;
-  text-decoration: none;
+.create-new-avatar-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 20px;
+  font-size: 14px;
   font-weight: 500;
-  transition: color 0.3s ease;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(238, 90, 111, 0.3);
 }
 
-.avatar-link:hover {
-  color: #5a67d8;
-  text-decoration: underline;
+.create-new-avatar-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(238, 90, 111, 0.4);
 }
 
-.download-info {
+.saved-avatars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.saved-avatar-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+}
+
+.saved-avatar-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+}
+
+.avatar-thumbnail {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  padding: 8px 12px;
-  background: rgba(102, 126, 234, 0.05);
-  border-radius: 6px;
-  border: 1px solid rgba(102, 126, 234, 0.1);
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  box-shadow: 0 8px 25px rgba(156, 39, 176, 0.3);
 }
 
-.download-icon {
-  font-size: 1rem;
+.avatar-details {
+  text-align: center;
 }
 
-.download-text {
-  color: #667eea;
-  font-size: 0.85rem;
+.avatar-details h4 {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.avatar-details p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  margin: 0 0 8px 0;
+}
+
+.avatar-status {
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 10px;
   font-weight: 500;
 }
 
-.save-avatar-section {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid rgba(102, 126, 234, 0.1);
+.avatar-status.active {
+  background: linear-gradient(135deg, #4caf50, #45a049);
+  color: white;
 }
 
-.save-avatar-button {
+.avatar-status:not(.active) {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.avatar-card-actions {
+  display: flex;
+  gap: 6px;
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-weight: 600;
+}
+
+.use-btn,
+.edit-btn,
+.delete-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
   border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.save-avatar-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+.use-btn {
+  background: linear-gradient(135deg, #4caf50, #45a049);
+  color: white;
 }
 
+.edit-btn {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+  color: white;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+}
+
+.use-btn:hover,
+.delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+}
+
+.empty-avatar-slot {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 200px;
+}
+
+.empty-avatar-slot:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.plus-icon {
+  font-size: 3rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-avatar-slot p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  margin: 0;
+  text-align: center;
+}
+
+/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -226,38 +449,38 @@
   padding: 20px;
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
   .avatar-page {
     padding: 15px;
   }
   
-  .avatar-section {
+  .avatar-create-section {
     padding: 25px;
   }
   
-  .section-header h2 {
+  .section-header h1 {
     font-size: 1.8rem;
   }
   
-  .avatar-content {
+  .preview-content {
     grid-template-columns: 1fr;
     gap: 25px;
   }
   
-  .avatar-preview {
-    min-height: 250px;
+  .avatar-placeholder-large {
     padding: 40px 20px;
   }
   
-  .avatar-icon {
-    font-size: 3.5rem;
+  .saved-avatars-grid {
+    grid-template-columns: 1fr;
   }
   
-  .control-group {
-    padding: 25px;
+  .avatar-actions {
+    flex-direction: column;
   }
   
-  .create-avatar-button {
-    padding: 16px 25px;
+  .url-container {
+    flex-direction: column;
   }
-} 
+}

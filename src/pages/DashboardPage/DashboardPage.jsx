@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { isDevelopmentMode } from '../../config/development'
 import DashboardNavigation from '../../components/DashboardNavigation/DashboardNavigation'
+import DashboardHeader from '../../components/DashboardHeader/DashboardHeader'
 import ProfilePage from '../ProfilePage/ProfilePage'
 import CoursesPage from '../CoursesPage/CoursesPage'
 import CreateCoursePage from '../CreateCoursePage/CreateCoursePage'
 import AvatarPage from '../AvatarPage/AvatarPage'
+import OnlineLessonsPage from '../OnlineLessonsPage/OnlineLessonsPage'
+import TeachersPage from '../TeachersPage/TeachersPage'
 import PDFTestArea from '../../components/PDFTestArea/PDFTestArea'
 import GeminiTestArea from '../../components/GeminiTestArea/GeminiTestArea'
 import DocumentUnderstandingTest from '../../components/DocumentUnderstandingTest/DocumentUnderstandingTest'
@@ -44,10 +47,14 @@ const DashboardPage = () => {
         return <ProfilePage />
       case 'courses':
         return <CoursesPage />
-      case 'create-course':
-        return <CreateCoursePage />
       case 'avatar':
         return <AvatarPage />
+      case 'lessons':
+        return <TeachersPage />
+      case 'course-create':
+        return <CreateCoursePage />
+      case 'online-lessons':
+        return <OnlineLessonsPage />
       
       // Development Components - Sadece development mode'da erişilebilir
       case 'pdf-test':
@@ -82,6 +89,7 @@ const DashboardPage = () => {
 
   return (
     <div className="dashboard-page">
+      <DashboardHeader />
       <DashboardNavigation 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}

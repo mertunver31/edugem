@@ -12,31 +12,45 @@ const DashboardNavigation = ({ activeTab, setActiveTab, devMode, setDevMode }) =
       <div className="nav-tabs">
         {/* Production Navigation - Her zaman görünür */}
         <button
-          className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`}
-          onClick={() => setActiveTab('profile')}
-        >
-          👤 Profil
-        </button>
-        
-        <button
           className={`nav-tab ${activeTab === 'courses' ? 'active' : ''}`}
           onClick={() => setActiveTab('courses')}
         >
-          📚 Dersler
+          🏠 Ana Sayfa
         </button>
         
         <button
-          className={`nav-tab ${activeTab === 'create-course' ? 'active' : ''}`}
-          onClick={() => setActiveTab('create-course')}
+          className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`}
+          onClick={() => setActiveTab('profile')}
         >
-          ➕ Ders Oluştur
+          👤 Profilim
         </button>
         
         <button
           className={`nav-tab ${activeTab === 'avatar' ? 'active' : ''}`}
           onClick={() => setActiveTab('avatar')}
         >
-          🎭 Avatar Oluştur
+          🎭 Avatarlarım
+        </button>
+        
+        <button
+          className={`nav-tab ${activeTab === 'lessons' ? 'active' : ''}`}
+          onClick={() => setActiveTab('lessons')}
+        >
+          🏆 Öğretmenlerim
+        </button>
+        
+        <button
+          className={`nav-tab ${activeTab === 'course-create' ? 'active' : ''}`}
+          onClick={() => setActiveTab('course-create')}
+        >
+          📚 Derslerim / Ders Oluştur
+        </button>
+        
+        <button
+          className={`nav-tab ${activeTab === 'online-lessons' ? 'active' : ''}`}
+          onClick={() => setActiveTab('online-lessons')}
+        >
+          💻 Online Dersler
         </button>
         
         {/* Development Mode Toggle Button */}

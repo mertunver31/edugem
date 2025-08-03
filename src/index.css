@@ -1,3 +1,53 @@
+:root {
+  /* Ana Renkler */
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --secondary: #f59e0b;
+  --secondary-dark: #d97706;
+  --success: #10b981;
+  --success-dark: #059669;
+  --danger: #ef4444;
+  --danger-dark: #dc2626;
+  --warning: #f97316;
+  --warning-dark: #ea580c;
+  
+  /* Nötr Renkler */
+  --white: #ffffff;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  
+  /* Gradient Renkler */
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+  --gradient-success: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+  --gradient-danger: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+  --gradient-warning: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+  
+  /* Arka Plan */
+  --bg-primary: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
+  --bg-glass: rgba(255, 255, 255, 0.1);
+  --bg-glass-hover: rgba(255, 255, 255, 0.15);
+  
+  /* Gölgeler */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* Geçişler */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,8 +56,9 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg-primary);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 #root {

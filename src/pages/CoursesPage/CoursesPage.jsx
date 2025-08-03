@@ -153,7 +153,39 @@ const CoursesPage = () => {
 
   return (
     <div className="courses-page">
-      <div className="courses-section">
+      <div className="main-dashboard">
+        <div className="section-header">
+          <h1>Ana Sayfa</h1>
+        </div>
+        
+        <div className="stats-grid">
+          <div className="stat-card purple">
+            <div className="stat-icon">📚</div>
+            <div className="stat-content">
+              <h3>Toplam Dersler</h3>
+              <div className="stat-number">9</div>
+            </div>
+          </div>
+          
+          <div className="stat-card blue">
+            <div className="stat-icon">🎭</div>
+            <div className="stat-content">
+              <h3>Avatarlar</h3>
+              <div className="stat-number">2</div>
+            </div>
+          </div>
+          
+          <div className="stat-card red">
+            <div className="stat-icon">💻</div>
+            <div className="stat-content">
+              <h3>Online Dersler</h3>
+              <div className="stat-number">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="courses-section" style={{display: 'none'}}>
         <div className="section-header">
           <h2>Panoramik Görüntüler</h2>
           <p>360° panoramik görüntülerinizi yükleyin ve yönetin</p>

@@ -25,16 +25,24 @@ const DashboardHeader = () => {
     <header className="dashboard-header">
       <div className="header-content">
         <div className="header-left">
-          <h1>Panoramik Sınıflar</h1>
-          <span className="user-info">Hoş geldiniz, Kullanıcı</span>
+          <div className="logo-section">
+            <div className="logo-circle">
+              <span className="logo-text">E</span>
+            </div>
+            <div className="brand-info">
+              <h1>EduGem</h1>
+              <span className="subtitle">Eğitim Platformu</span>
+            </div>
+          </div>
         </div>
         <div className="header-right">
-          <CustomButton
-            text="Çıkış Yap"
-            onClick={handleLogout}
-            variant="secondary"
-            className="logout-button"
-          />
+          <div className="user-greeting">
+            <span className="greeting-text">Hoş geldin, alifuat</span>
+            <span className="user-email">mankidultt127@gmail.com</span>
+          </div>
+          <button className="logout-button" onClick={handleLogout}>
+            Çıkış
+          </button>
         </div>
       </div>
     </header>

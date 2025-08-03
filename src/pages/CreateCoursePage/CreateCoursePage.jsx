@@ -54,49 +54,51 @@ const CreateCoursePage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
-      if (file.type !== 'application/pdf') {
-        alert('Sadece PDF dosyaları kabul edilir!')
-        e.target.value = ''
+      // Dosya boyutu kontrolü (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Dosya boyutu 10MB\'dan büyük olamaz!')
         return
       }
       
-      if (file.size > 20 * 1024 * 1024) { // 20MB limit
-        alert('Dosya boyutu 20MB\'dan büyük olamaz!')
-        e.target.value = ''
+      // Dosya tipi kontrolü
+      if (file.type !== 'application/pdf') {
+        alert('Sadece PDF dosyaları desteklenmektedir!')
         return
       }
       
       setSelectedFile(file)
-      setUploadStatus('PDF seçildi. Ders oluştur butonuna tıklayarak yükleyebilirsiniz.')
+      setUploadStatus('')
     }
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault() // Sayfa yenilenmesini engelle
+    e.preventDefault()
     
-    // Form validasyonu
     if (!validateForm()) {
-      alert('Lütfen gerekli alanları doldurun!')
       return
     }
-    
+
     setIsLoading(true)
-    
+    setUploadStatus('İşlem başlatılıyor...')
+
     try {
-      // Önce PDF yükle (eğer seçilmişse)
-      let pdfResult = null
+      console.log('Ders verisi:', courseData)
+      
       if (selectedFile) {
-        setUploadStatus('PDF yükleniyor...')
-        pdfResult = await uploadPDF(selectedFile)
-        setUploadStatus('PDF başarıyla yüklendi!')
-        console.log('PDF upload result:', pdfResult)
+        setUploadStatus('PDF dosyası yükleniyor...')
+        const uploadResult = await uploadPDF(selectedFile)
+        
+        if (uploadResult.success) {
+          console.log('PDF başarıyla yüklendi:', uploadResult.data)
+          setUploadStatus('PDF başarıyla yüklendi. Ders oluşturuluyor...')
+        } else {
+          throw new Error(uploadResult.error)
+        }
+      } else {
+        setUploadStatus('Ders oluşturuluyor...')
       }
 
-      // Ders oluşturma işlemi
-      console.log('Ders oluşturuluyor:', courseData)
-      console.log('PDF bilgisi:', pdfResult)
-      
-      // Simüle edilmiş bekleme
+      // Simülasyon - gerçek API çağrısı buraya gelecek
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       alert('Ders başarıyla oluşturuldu!')
@@ -130,145 +132,223 @@ const CreateCoursePage = () => {
 
   return (
     <div className="create-course-page">
-      <div className="create-course-container">
-        <div className="page-header">
-          <h1>Yeni Ders Oluştur</h1>
-          <p>Panoramik ders ortamınız için yeni bir ders oluşturun</p>
+      <div className="courses-section">
+        <div className="section-header">
+          <h1>Derslerim</h1>
+          <p>Çalışma derslerinizi yönetin ve yeni dersler oluşturun</p>
         </div>
 
-        <form className="course-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="title">Ders Başlığı *</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={courseData.title}
-              onChange={handleInputChange}
-              placeholder="Ders başlığını girin"
-              className={errors.title ? 'error' : ''}
-            />
-            {errors.title && <span className="error-message">{errors.title}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="description">Ders Açıklaması</label>
-            <textarea
-              id="description"
-              name="description"
-              value={courseData.description}
-              onChange={handleInputChange}
-              placeholder="Ders hakkında açıklama yazın"
-              rows="4"
-            />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="subject">Ders Konusu *</label>
-              <select
-                id="subject"
-                name="subject"
-                value={courseData.subject}
-                onChange={handleInputChange}
-                className={errors.subject ? 'error' : ''}
-              >
-                <option value="">Konu seçin</option>
-                <option value="matematik">Matematik</option>
-                <option value="fizik">Fizik</option>
-                <option value="kimya">Kimya</option>
-                <option value="biyoloji">Biyoloji</option>
-                <option value="tarih">Tarih</option>
-                <option value="cografya">Coğrafya</option>
-                <option value="edebiyat">Edebiyat</option>
-                <option value="ingilizce">İngilizce</option>
-                <option value="diger">Diğer</option>
-              </select>
-              {errors.subject && <span className="error-message">{errors.subject}</span>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="grade">Sınıf Seviyesi *</label>
-              <select
-                id="grade"
-                name="grade"
-                value={courseData.grade}
-                onChange={handleInputChange}
-                className={errors.grade ? 'error' : ''}
-              >
-                <option value="">Sınıf seçin</option>
-                <option value="ilkokul">İlkokul</option>
-                <option value="ortaokul">Ortaokul</option>
-                <option value="lise">Lise</option>
-                <option value="universite">Üniversite</option>
-                <option value="genel">Genel</option>
-              </select>
-              {errors.grade && <span className="error-message">{errors.grade}</span>}
+        {/* Ders İstatistikleri */}
+        <div className="course-stats">
+          <div className="stat-item">
+            <div className="stat-icon">📚</div>
+            <div className="stat-info">
+              <span className="stat-number">4</span>
+              <span className="stat-label">Aktif Ders</span>
             </div>
           </div>
-
-          <div className="form-group">
-            <label htmlFor="duration">Tahmini Süre (Dakika)</label>
-            <input
-              type="number"
-              id="duration"
-              name="duration"
-              value={courseData.duration}
-              onChange={handleInputChange}
-              placeholder="45"
-              min="1"
-              max="180"
-            />
+          <div className="stat-item">
+            <div className="stat-icon">✅</div>
+            <div className="stat-info">
+              <span className="stat-number">8</span>
+              <span className="stat-label">Tamamlanan</span>
+            </div>
           </div>
+          <div className="stat-item">
+            <div className="stat-icon">⏱️</div>
+            <div className="stat-info">
+              <span className="stat-number">24h</span>
+              <span className="stat-label">Toplam Süre</span>
+            </div>
+          </div>
+        </div>
 
-          {/* PDF Yükleme Bölümü */}
-          <div className="form-group">
-            <label htmlFor="pdf-file">PDF Materyal Yükle (Opsiyonel)</label>
-            <div className="pdf-upload-section">
-              <input
-                type="file"
-                id="pdf-file"
-                accept=".pdf"
-                onChange={handleFileChange}
-                className="file-input"
-              />
-              <div className="file-info">
-                {selectedFile && (
-                  <div className="selected-file">
-                    <span className="file-name">📄 {selectedFile.name}</span>
-                    <span className="file-size">({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</span>
-                  </div>
-                )}
-                {uploadStatus && (
-                  <div className={`upload-status ${uploadStatus.includes('Hata') ? 'error' : 'success'}`}>
-                    {uploadStatus}
-                  </div>
-                )}
+        {/* Oluşturulmuş Dersler */}
+        <div className="created-courses">
+          <div className="courses-header">
+            <h2>📖 Mevcut Derslerim</h2>
+            <button className="create-new-btn">➕ Yeni Ders Oluştur</button>
+          </div>
+          <div className="courses-grid">
+            <div className="course-card">
+              <div className="course-status active">Aktif</div>
+              <div className="course-content">
+                <h3>efişrenfik</h3>
+                <span className="course-subject">Matematik</span>
+                <div className="course-info">
+                  <span className="info-icon">📚</span>
+                  <span>Eğitim seviyesi: Eğitim gevezeliği</span>
+                </div>
+                <div className="course-info">
+                  <span className="info-icon">🕐</span>
+                  <span>Süre: yakın</span>
+                </div>
+              </div>
+              <div className="course-actions">
+                <button className="action-btn enter-btn">
+                  🚪 Derse Gir
+                </button>
+                <button className="action-btn delete-btn">
+                  🗑️ Sil
+                </button>
               </div>
             </div>
-            <small className="form-help">
-              Maksimum dosya boyutu: 20MB. Sadece PDF dosyaları kabul edilir. PDF yükleme opsiyoneldir.
-            </small>
+
+            <div className="course-card">
+              <div className="course-status inactive">Pasif</div>
+              <div className="course-content">
+                <h3>aaab</h3>
+                <span className="course-subject">bbb</span>
+                <div className="course-info">
+                  <span className="info-icon">📚</span>
+                  <span>Eğitim seviyesi: Eğitim gevezeliği</span>
+                </div>
+                <div className="course-info">
+                  <span className="info-icon">🕐</span>
+                  <span>Süre: yakın</span>
+                </div>
+              </div>
+              <div className="course-actions">
+                <button className="action-btn enter-btn">
+                  🚪 Derse Gir
+                </button>
+                <button className="action-btn delete-btn">
+                  🗑️ Sil
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Yeni Çalışma Dersi Oluştur */}
+        <div className="create-course-section">
+          <h2>Yeni Çalışma Dersi Oluştur</h2>
+          
+          <div className="form-sections">
+            {/* Çalışma Dersi */}
+            <div className="form-section">
+              <h3>Çalışma Dersi</h3>
+              <div className="form-field">
+                <label>Çalışacağınız konunun kısa açıklamasını yazın</label>
+                <input type="text" placeholder="Çalışacağınız konunun kısa açıklamasını yazın..." className="form-input" />
+              </div>
+            </div>
+
+            {/* Çalışma Profili */}
+            <div className="form-section">
+              <h3>Çalışma Profili</h3>
+              <div className="form-row">
+                <div className="form-field">
+                  <label>Eğitim Seviyesi</label>
+                  <select className="form-select">
+                    <option>Eğitim seviyesi seçin...</option>
+                    <option>İlkokul</option>
+                    <option>Ortaokul</option>
+                    <option>Lise</option>
+                    <option>Üniversite</option>
+                  </select>
+                </div>
+                <div className="form-field">
+                  <label>Bilgi seviyesi seçin</label>
+                  <select className="form-select">
+                    <option>Bilgi seviyesi seçin...</option>
+                    <option>Başlangıç</option>
+                    <option>Orta</option>
+                    <option>İleri</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Bu Konu Hakkında Bilgi */}
+            <div className="form-section">
+              <h3>Bu Konu Hakkında Bilgi</h3>
+              <div className="form-field">
+                <label>Çalışma amacınız nedir?</label>
+                <select className="form-select">
+                  <option>Çalışma amacınızı seçin...</option>
+                  <option>Sınav Hazırlığı</option>
+                  <option>Genel Bilgi</option>
+                  <option>Proje Çalışması</option>
+                  <option>Hobisi Olarak</option>
+                </select>
+              </div>
+            </div>
+
+            {/* AI Öğretmen */}
+            <div className="form-section">
+              <h3>AI Öğretmen Seçimi</h3>
+              <div className="form-field">
+                <label>AI Öğretmen seçin (opsiyonel)</label>
+                <select className="form-select">
+                  <option>Seçiniz...</option>
+                  <option>Prof. Dr. Matematik</option>
+                  <option>Dr. Fizik Uzmanı</option>
+                  <option>Kimya Öğretmeni</option>
+                </select>
+              </div>
+              <div className="ai-note">
+                💡 Seçenek yok öğretmen dersler sonunda çalışma planları ve bunlara eşlik edeceği yönetimciler olacak.
+              </div>
+            </div>
+
+            {/* Özel Notlar */}
+            <div className="form-section">
+              <h3>Özel Notlar</h3>
+              <div className="form-field">
+                <textarea 
+                  placeholder="Konunuzla ilgili özel notlar; detaylarımız, vantajlarımız ödemlendirme kullanarak gösterilebilir"
+                  className="form-textarea"
+                  rows="4"
+                ></textarea>
+              </div>
+            </div>
+
+            {/* Çalışma Materyali */}
+            <div className="form-section material-section">
+              <h3>📚 Çalışma Materyali</h3>
+              <div className="material-upload">
+                <div className="upload-area">
+                  <span className="upload-icon">📎</span>
+                  <p>Çalışma dosyalarınızı buraya sürükleyin</p>
+                  <button type="button" className="upload-btn">
+                    📁 Dosya Seç
+                  </button>
+                </div>
+                <div className="upload-note">
+                  Desteklenen formatlar: TXT, DOCX (PDF desteği gelecektir)
+                </div>
+              </div>
+            </div>
+
+            {/* AI Asistan İle Çalışma */}
+            <div className="form-section ai-section">
+              <h3>✨ AI Asistan İle Çalışma Planı</h3>
+              <div className="ai-features">
+                <div className="feature-item">
+                  <span className="feature-icon">🤖</span>
+                  <span>Merhaba! Ben AI asistanınızım. Size çalışma planı oluşturmakta yardımcı olacağım.</span>
+                </div>
+                <div className="ai-actions">
+                  <button type="button" className="ai-btn">
+                    🎯 Hangi konuyu çalışacağız planını >
+                  </button>
+                </div>
+              </div>
+              <div className="ai-note">
+                AI asistanım çalışma planı ve bununa şifresisz birimi olacak yapılış lama özteli ki,
+                🚀 Hangi konuya özelleştirilecek
+              </div>
+            </div>
           </div>
 
-          <div className="form-actions">
-            <CustomButton
-              type="button"
-              text="İptal"
-              variant="secondary"
-              onClick={() => window.history.back()}
-            />
-            <CustomButton
-              type="submit"
-              text={isLoading ? "İşleniyor..." : "Ders Oluştur"}
-              variant="primary"
-              disabled={isLoading}
-            />
-          </div>
-        </form>
+          <button className="create-btn">
+            ✨ Çalışma Dersini Oluştur
+          </button>
+        </div>
       </div>
     </div>
   )
 }
 
-export default CreateCoursePage 
+export default CreateCoursePage
