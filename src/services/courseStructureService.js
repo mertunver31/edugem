@@ -181,6 +181,9 @@ class CourseStructureService {
    */
   async generateCourseStructureWithAI(outline, segments, documentInfo) {
     try {
+      // Gerçek segment ID'lerini hazırla
+      const segmentIds = segments.map(seg => seg.id)
+      
       const prompt = `
         Bu PDF için kapsamlı bir eğitim kursu yapısı oluştur.
         
@@ -192,8 +195,8 @@ class CourseStructureService {
         PDF Yapısı:
         ${JSON.stringify(outline.headings, null, 2)}
         
-        Segment'ler:
-        ${segments.map(seg => `Segment ${seg.seg_no}: ${seg.title} (Sayfa ${seg.p_start}-${seg.p_end})`).join('\n')}
+        KULLANILABİLİR SEGMENT ID'LERİ (BUNLARI KULLAN):
+        ${segments.map((seg, index) => `${index + 1}. ${seg.id} - ${seg.title} (Sayfa ${seg.p_start}-${seg.p_end})`).join('\n')}
         
         Lütfen şu JSON formatında kurs yapısı oluştur:
         {
@@ -219,7 +222,7 @@ class CourseStructureService {
                   "description": "Ders açıklaması",
                   "order": 1,
                   "estimatedDuration": "30-45 dakika",
-                  "segmentId": "segment-id",
+                  "segmentId": "${segments[0]?.id || ''}",
                   "contentType": "text|video|interactive",
                   "learningPoints": [
                     "Öğrenme noktası 1",
@@ -230,6 +233,15 @@ class CourseStructureService {
             }
           ]
         }
+        
+        KRİTİK KURALLAR:
+        1. segmentId alanında YUKARIDAKİ LİSTEDEN SADECE GERÇEK UUID'LERİ KULLAN
+        2. Toplam ${segments.length} segment var, lesson sayısını buna göre ayarla
+        3. Her lesson için farklı segment kullan, aynı segment'i birden fazla lesson'a atama
+        4. SADECE YUKARIDAKİ LİSTEDEKİ UUID'LERİ KULLAN
+        5. SAHTE UUID'LER ÜRETME! SADECE LİSTEDEKİLERİ KULLAN!
+        6. "segment-1", "segment-2" gibi string'ler KULLANMA!
+        7. 12345678-abcd-ef01-2345-67890abcdef0 gibi sahte UUID'ler KULLANMA!
         
         Kurallar:
         1. Segment'leri mantıklı bölümlere grupla
@@ -279,34 +291,63 @@ class CourseStructureService {
    * @returns {Object} Güncellenmiş kurs yapısı
    */
   mapSegmentIds(courseStructure, segments) {
-    // Her ders için uygun segment'i bul
+    console.log('🔧 Segment ID mapping başlatılıyor...')
+    console.log('Mevcut segmentler:', segments.map(s => ({ id: s.id, title: s.title })))
+    
+    // Kullanılabilir segment ID'lerini hazırla
+    const availableSegmentIds = segments.map(seg => seg.id)
+    let usedSegmentIds = new Set()
+    let fixedCount = 0
+    
     courseStructure.chapters.forEach(chapter => {
       chapter.lessons.forEach(lesson => {
-        // Segment ID'si varsa kontrol et, yoksa uygun segment'i bul
-        if (!lesson.segmentId) {
-          // Ders başlığına göre en uygun segment'i bul
-          const matchingSegment = segments.find(seg => 
-            seg.title && lesson.title.toLowerCase().includes(seg.title.toLowerCase())
-          )
+        // Geçersiz UUID'leri düzelt
+        if (lesson.segmentId && !this.isValidUUID(lesson.segmentId)) {
+          console.log(`❌ Geçersiz UUID tespit edildi: ${lesson.segmentId} (Lesson: ${lesson.title})`)
           
-          if (matchingSegment) {
-            lesson.segmentId = matchingSegment.id
+          // Kullanılmamış bir segment ID'si bul
+          const availableId = availableSegmentIds.find(id => !usedSegmentIds.has(id))
+          if (availableId) {
+            lesson.segmentId = availableId
+            usedSegmentIds.add(availableId)
+            fixedCount++
+            console.log(`✅ Düzeltildi: ${lesson.title} -> ${availableId}`)
           } else {
-            // İlk uygun segment'i ata
-            const availableSegment = segments.find(seg => 
-              !courseStructure.chapters.some(ch => 
-                ch.lessons.some(les => les.segmentId === seg.id)
-              )
-            )
-            if (availableSegment) {
-              lesson.segmentId = availableSegment.id
-            }
+            console.log(`❌ Kullanılabilir segment ID kalmadı`)
+          }
+        } else if (lesson.segmentId && this.isValidUUID(lesson.segmentId)) {
+          // Geçerli UUID'yi kullanıldı olarak işaretle
+          usedSegmentIds.add(lesson.segmentId)
+          console.log(`✅ Geçerli UUID: ${lesson.segmentId} (Lesson: ${lesson.title})`)
+        } else if (!lesson.segmentId) {
+          // Segment ID'si yoksa, kullanılmamış bir tane ata
+          const availableId = availableSegmentIds.find(id => !usedSegmentIds.has(id))
+          if (availableId) {
+            lesson.segmentId = availableId
+            usedSegmentIds.add(availableId)
+            fixedCount++
+            console.log(`✅ Ata: ${lesson.title} -> ${availableId}`)
           }
         }
       })
     })
 
+    if (fixedCount > 0) {
+      console.log(`🔧 ${fixedCount} segment ID düzeltildi`)
+    }
+
+    console.log('✅ Segment ID mapping tamamlandı')
     return courseStructure
+  }
+
+  /**
+   * UUID formatını kontrol et
+   * @param {string} uuid - Kontrol edilecek string
+   * @returns {boolean} UUID formatında mı
+   */
+  isValidUUID(uuid) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    return uuidRegex.test(uuid)
   }
 
   /**
@@ -394,6 +435,21 @@ class CourseStructureService {
     } else {
       console.log('❌ Course Structure Generator test başarısız:', result.error)
       return false
+    }
+  }
+
+  /**
+   * Mevcut course structure'ı düzelt (geçersiz segment ID'leri için)
+   * @param {string} documentId - Document ID
+   * @returns {Object} Düzeltme sonucu
+   * @deprecated Bu fonksiyon artık kullanılmıyor. AI prompt'ı düzeltildi.
+   */
+  async fixCourseStructure(documentId) {
+    console.warn('⚠️ fixCourseStructure fonksiyonu artık kullanılmıyor. AI prompt\'ı düzeltildi.')
+    return {
+      success: false,
+      error: 'Bu fonksiyon artık kullanılmıyor. AI prompt\'ı düzeltildi.',
+      documentId: documentId
     }
   }
 }

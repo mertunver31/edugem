@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage/LoginPage'
 import DashboardPage from './pages/DashboardPage/DashboardPage'
 import CreateCoursePage from './pages/CreateCoursePage/CreateCoursePage'
+import GeminiEmbeddingTest from './components/GeminiEmbeddingTest/GeminiEmbeddingTest'
 import DevelopmentModeIndicator from './components/DevelopmentModeIndicator/DevelopmentModeIndicator'
 import { testConnection } from './services/supabaseService'
 import './App.css'
@@ -21,6 +22,7 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/create-course" element={<CreateCoursePage />} />
+          <Route path="/gemini-embedding-test" element={<GeminiEmbeddingTest />} />
         </Routes>
       </div>
     </Router>

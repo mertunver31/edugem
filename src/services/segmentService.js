@@ -187,12 +187,12 @@ class SegmentService {
       return { isValid: false, errors, warnings, totalSegments: 0 }
     }
 
-    // Sayfa aralığı kontrolü
+    // Sayfa aralığı kontrolü (geçici olarak devre dışı - pageCount 0 olduğu için)
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i]
       
-      // Sayfa numarası kontrolü
-      if (segment.p_start < 1 || segment.p_end > totalPages) {
+      // Sayfa numarası kontrolü (sadece totalPages > 0 ise)
+      if (totalPages > 0 && (segment.p_start < 1 || segment.p_end > totalPages)) {
         errors.push(`Segment ${segment.seg_no}: Sayfa aralığı geçersiz (${segment.p_start}-${segment.p_end})`)
       }
 

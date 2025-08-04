@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase'
+import { pdfTextExtractionService } from './pdfTextExtractionService'
 
 /**
  * Text Worker Service
@@ -226,10 +227,42 @@ class TextWorkerService {
         }
       }
 
-      // Ana içerik alanı (placeholder)
-      content += `## İçerik\n\n`
-      content += `Bu segment ${segmentInfo.p_start} ile ${segmentInfo.p_end} sayfaları arasındaki içeriği kapsamaktadır. `
-      content += `Toplam ${segmentInfo.p_end - segmentInfo.p_start + 1} sayfa içerik bulunmaktadır.\n\n`
+      // PDF'den gerçek içeriği çıkar
+      console.log(`PDF'den segment içeriği çıkarılıyor: ${segmentInfo.id}`)
+      const extractionResult = await pdfTextExtractionService.extractSegmentContent(
+        segmentInfo.document_id,
+        [segmentInfo.id]
+      )
+
+      if (extractionResult.success && extractionResult.data.segments.length > 0) {
+        const extractedSegment = extractionResult.data.segments[0]
+        content += `## PDF İçeriği\n\n`
+        content += extractedSegment.content.text || 'İçerik çıkarılamadı.\n\n'
+        
+        // Tablolar varsa ekle
+        if (extractedSegment.content.tables && extractedSegment.content.tables.length > 0) {
+          content += `\n## Tablolar\n\n`
+          extractedSegment.content.tables.forEach((table, index) => {
+            content += `### Tablo ${index + 1} (Sayfa ${table.pageNum})\n\n`
+            if (table.headers && table.headers.length > 0) {
+              content += `| ${table.headers.join(' | ')} |\n`
+              content += `| ${table.headers.map(() => '---').join(' | ')} |\n`
+            }
+            if (table.rows && table.rows.length > 0) {
+              table.rows.forEach(row => {
+                content += `| ${row.join(' | ')} |\n`
+              })
+            }
+            content += '\n'
+          })
+        }
+      } else {
+        // Fallback: placeholder içerik
+        content += `## İçerik\n\n`
+        content += `Bu segment ${segmentInfo.p_start} ile ${segmentInfo.p_end} sayfaları arasındaki içeriği kapsamaktadır. `
+        content += `Toplam ${segmentInfo.p_end - segmentInfo.p_start + 1} sayfa içerik bulunmaktadır.\n\n`
+        content += `**Not:** PDF içeriği çıkarılamadı. (${extractionResult.error || 'Bilinmeyen hata'})\n\n`
+      }
 
       // Segment notları varsa ekle
       if (segmentInfo.notes) {

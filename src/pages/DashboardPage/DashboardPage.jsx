@@ -19,6 +19,11 @@ import ConcurrencyControlTest from '../../components/ConcurrencyControlTest/Conc
 import PDFPipelineTest from '../../components/PDFPipelineTest/PDFPipelineTest'
 import CourseStructureTest from '../../components/CourseStructureTest/CourseStructureTest'
 import CourseVisualIntegration from '../../components/CourseVisualIntegration/CourseVisualIntegration'
+import EnhancedContentTest from '../../components/EnhancedContentTest/EnhancedContentTest'
+import PDFExtractionTest from '../../components/PDFExtractionTest/PDFExtractionTest'
+import FullPipelineTest from '../../components/FullPipelineTest/FullPipelineTest'
+import GeminiEmbeddingTest from '../../components/GeminiEmbeddingTest/GeminiEmbeddingTest'
+import RetrievalTest from '../../components/RetrievalTest/RetrievalTest'
 import './DashboardPage.css'
 
 const DashboardPage = () => {
@@ -33,7 +38,7 @@ const DashboardPage = () => {
   useEffect(() => {
     if (!devMode) {
       // Development mode kapandığında, eğer development tab'ındaysa courses'a yönlendir
-      const developmentTabs = ['pdf-test', 'gemini-test', 'document-understanding', 'segment-planner', 'task-queue', 'text-worker', 'image-worker', 'concurrency-control', 'pdf-pipeline', 'course-structure', 'course-visual-integration']
+              const developmentTabs = ['pdf-test', 'gemini-test', 'document-understanding', 'segment-planner', 'task-queue', 'text-worker', 'image-worker', 'concurrency-control', 'pdf-pipeline', 'course-structure', 'course-visual-integration', 'enhanced-content', 'pdf-extraction', 'full-pipeline', 'gemini-embedding-test', 'retrieval-test']
       if (developmentTabs.includes(activeTab)) {
         setActiveTab('courses')
       }
@@ -81,6 +86,18 @@ const DashboardPage = () => {
       
       case 'course-visual-integration':
         return devMode ? <CourseVisualIntegration /> : <CoursesPage />
+      
+      case 'enhanced-content':
+        return devMode ? <EnhancedContentTest /> : <CoursesPage />
+      
+      case 'pdf-extraction':
+        return devMode ? <PDFExtractionTest /> : <CoursesPage />
+      case 'full-pipeline':
+        return devMode ? <FullPipelineTest /> : <CoursesPage />
+                   case 'gemini-embedding-test':
+               return devMode ? <GeminiEmbeddingTest /> : <CoursesPage />
+             case 'retrieval-test':
+               return devMode ? <RetrievalTest /> : <CoursesPage />
       
       default:
         return <CoursesPage />

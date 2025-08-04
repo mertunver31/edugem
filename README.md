@@ -131,16 +131,28 @@ VITE_HUGGINGFACE_API_KEY=your_huggingface_api_key
 
 ### **10. Enhanced Content Generation System**
 ```
-Course Structure → AI Content Generation → Interactive Elements → Gamification → Progress Tracking → Assessment
+Course Structure → Segment Content Integration → Learning Context Enhancement → AI Content Generation → Content Quality Enhancement → Interactive Elements → Gamification → Progress Tracking → Assessment
 ```
 
 **Gelişmiş İçerik Üretim Süreci:**
-1. **Content Analysis**: Kurs yapısı ve segment'ler analiz edilir
-2. **AI Content Generation**: Gemini AI ile eğitim içeriği üretilir
-3. **Interactive Elements**: Etkileşimli elementler eklenir
-4. **Gamification**: Oyunlaştırma özellikleri entegre edilir
-5. **Progress Tracking**: Kullanıcı ilerleme takibi
-6. **Assessment**: Otomatik değerlendirme oluşturma
+1. **Segment Content Integration**: PDF segment içerikleri Enhanced Content Service'e aktarılır
+2. **Learning Context Enhancement**: Öğrenme hedefleri, önceki lesson bağlantıları ve seviye bilgisi toplanır
+3. **AI Content Generation**: Zenginleştirilmiş context ile Gemini AI eğitim içeriği üretir
+4. **Content Quality Enhancement**: AI prompt'ları iyileştirilir ve içerik kalitesi artırılır
+5. **Interactive Elements**: Etkileşimli elementler eklenir
+6. **Gamification**: Oyunlaştırma özellikleri entegre edilir
+7. **Progress Tracking**: Kullanıcı ilerleme takibi
+8. **Assessment**: Otomatik değerlendirme oluşturma
+
+**Enhanced Content Service Özellikleri:**
+- **AI-Powered Content Generation**: Gemini AI ile detaylı ders içeriği üretimi
+- **Segment Content Integration**: PDF segment içeriklerini AI prompt'larına entegre etme
+- **Learning Context Enhancement**: Öğrenme hedefleri, önceki lesson bağlantıları ve seviye bilgisi ile context zenginleştirme
+- **Multiple Content Types**: Açıklayıcı metin, madde listeleri, tablolar, kod örnekleri, pratik örnekler, özetler
+- **Content Quality Assessment**: Otomatik içerik kalitesi değerlendirmesi
+- **Content Versioning**: İçerik versiyonlama sistemi
+- **Database Integration**: Enhanced content veritabanında saklanır
+- **Course Structure Integration**: Mevcut kurs yapısı ile entegre çalışır
 
 **İçerik Türleri:**
 ```javascript
@@ -157,20 +169,34 @@ const contentTypes = {
 ```javascript
 // Her ders için gelişmiş içerik üret
 for (const lesson of courseStructure.lessons) {
-  // Ana ders içeriği
-  const lessonContent = await generateLessonContent(lesson);
+  // Segment içeriğini al
+  const segmentContent = await getSegmentContent(lesson.segmentIds);
+  
+  // Öğrenme hedeflerini al
+  const learningObjectives = await getLearningObjectives(lesson.chapterId);
+  
+  // Önceki lesson bağlantılarını al
+  const previousLessons = await getPreviousLessons(lesson.chapterId, lesson.order);
+  
+  // Zenginleştirilmiş context ile AI içerik üret
+  const lessonContent = await generateLessonContent(lesson, {
+    segmentContent: segmentContent,
+    learningObjectives: learningObjectives,
+    previousLessons: previousLessons,
+    studentLevel: courseStructure.targetLevel
+  });
   
   // Etkileşimli quiz
-  const interactiveQuiz = await generateInteractiveQuiz(lesson);
+  const interactiveQuiz = await generateInteractiveQuiz(lesson, lessonContent);
   
   // Pratik alıştırma
-  const practicalExercise = await generatePracticalExercise(lesson);
+  const practicalExercise = await generatePracticalExercise(lesson, lessonContent);
   
   // Oyunlaştırma görevi
-  const gamifiedChallenge = await generateGamifiedChallenge(lesson);
+  const gamifiedChallenge = await generateGamifiedChallenge(lesson, lessonContent);
   
   // Değerlendirme
-  const assessment = await generateAssessment(lesson);
+  const assessment = await generateAssessment(lesson, lessonContent);
 }
 ```
 
@@ -222,7 +248,119 @@ const progressTracking = {
 };
 ```
 
-#### **GÜN 11: Web Application Interface** 🔄
+#### **GÜN 11: Enhanced Content Generation** ✅ **TAMAMLANDI**
+- ✅ **Enhanced Content Service - Segment Integration** - PDF segment içeriklerini Enhanced Content Service'e entegre etme
+- ✅ **AI Content Generation with Full Context** - Segment içerikleri, öğrenme hedefleri ve önceki lesson bağlantıları ile AI içerik üretimi
+- ✅ **Content Quality Enhancement** - AI prompt'larını iyileştirme ve içerik kalitesini artırma
+- ✅ **Chapter-Based Content Generation** - Chapter bazında tüm segment'leri birleştirip tek seferde AI'ya gönderme
+- ✅ **Content Quality Assessment** - Otomatik içerik kalitesi değerlendirmesi ve öneriler
+- 🔄 **Interactive Elements** - Etkileşimli elementler (Quiz, alıştırmalar)
+- 🔄 **Gamification System** - Oyunlaştırma sistemi (Puan, rozet, seviye)
+- 🔄 **Progress Tracking** - İlerleme takibi ve analitikler
+- 🔄 **Assessment Generation** - AI ile değerlendirme oluşturma
+
+**🎯 Başarılan Özellikler:**
+- ✅ **UUID Sorunu Çözüldü**: Course Structure'da string ID'ler (segment-1) yerine gerçek UUID'ler kullanılıyor
+- ✅ **PDF İçeriği Entegrasyonu**: Gerçek PDF metin, görsel ve tablo içerikleri Gemini'ye gönderiliyor
+- ✅ **Segment Content Extraction**: PDF.js ile metin, görsel ve tablo çıkarma sistemi
+- ✅ **AI Content Generation**: Gemini ile detaylı eğitim içeriği üretimi (açıklayıcı metin, örnekler, özetler)
+- ✅ **Chapter-Based Processing**: Her chapter için tüm segment'ler birleştirilip tek seferde işleniyor
+- ✅ **Content Quality Assessment**: Otomatik içerik kalitesi değerlendirmesi
+- ✅ **Database Integration**: Enhanced content veritabanında saklanıyor
+- ✅ **Development Mode**: Enhanced Content Test bileşeni ile test sistemi
+
+**📊 Test Sonuçları:**
+- ✅ **İlk 2 Lesson Başarılı**: PDF içeriği + AI yanıtı çalışıyor
+- ✅ **Segment Content Length**: 7,591 ve 4,769 karakter başarıyla işlendi
+- ✅ **Gemini Response**: 4,600 ve 5,416 karakterlik kaliteli yanıtlar
+- ⚠️ **Token Limit Sorunu**: 975K karakterlik büyük segmentlerde token limiti aşılıyor
+
+**🔧 Teknik Detaylar:**
+- ✅ **UUID Validation**: Regex ile UUID format kontrolü
+- ✅ **Segment ID Mapping**: String ID'leri gerçek UUID'lere dönüştürme
+- ✅ **PDF Text Extraction**: PDF.js + Tesseract.js ile OCR
+- ✅ **Image & Table Extraction**: Görsel ve tablo çıkarma sistemi
+- ✅ **Error Handling**: JSON parse hataları için markdown temizleme
+- ✅ **Debug Logging**: Kapsamlı debug sistemi
+- ✅ **Chapter-Based AI Processing**: Chapter bazında segment birleştirme ve tek seferde AI işleme
+
+**🚧 Bilinen Sorunlar:**
+- ⚠️ **Token Limit**: 975K+ karakterlik segmentler Gemini token limitini aşıyor
+- ⚠️ **JSON Parse Error**: Büyük içeriklerde AI JSON formatında yanıt vermiyor
+- 🔄 **Optimization Needed**: Segment boyutu optimizasyonu gerekiyor
+
+#### **GÜN 12: Master Pipeline System** ✅ **TAMAMLANDI**
+- ✅ **Master Pipeline Service** - Tüm servisleri koordine eden ana pipeline sistemi
+- ✅ **Full Pipeline Test Component** - Tek tıkla tam eğitim kursu oluşturma arayüzü
+- ✅ **7 Aşamalı Pipeline**: PDF Upload → Document Understanding → Segment Planning → PDF Text Extraction → Course Structure → Course Visual → Enhanced Content
+- ✅ **Progress Tracking**: Her aşamada detaylı ilerleme takibi
+- ✅ **Pipeline History**: Kullanıcının pipeline geçmişini görüntüleme
+- ✅ **Error Handling**: Her aşamada hata yönetimi ve kurtarma
+- ✅ **Background Processing**: Arka planda kesintisiz işlem
+- ✅ **Database Integration**: Pipeline durumları veritabanında saklanıyor
+
+**🎯 Pipeline Aşamaları:**
+1. **PDF Upload & Validation (5%)** - PDF yükleme ve doğrulama
+2. **Document Understanding (15%)** - AI ile PDF analizi ve outline çıkarma
+3. **Segment Planning (10%)** - PDF'yi öğrenme segmentlerine bölme
+4. **PDF Text Extraction (25%)** - Segment'lerden metin, görsel ve tablo çıkarma
+5. **Course Structure Generation (15%)** - AI ile kurs yapısı oluşturma
+6. **Course Visual Generation (20%)** - AI ile görsel materyal üretimi
+7. **Enhanced Content Generation (10%)** - AI ile detaylı eğitim içeriği üretimi
+
+**📊 Pipeline Özellikleri:**
+- ✅ **Automated Processing**: Tek PDF yüklendiğinde otomatik tam kurs oluşturma
+- ✅ **Real-time Progress**: Canlı ilerleme çubuğu ve aşama bilgileri
+- ✅ **Pipeline ID Tracking**: Her pipeline için benzersiz ID ve takip
+- ✅ **User-specific History**: Kullanıcıya özel pipeline geçmişi
+- ✅ **Comprehensive Results**: Tüm aşamaların sonuçlarını detaylı görüntüleme
+- ✅ **Development Mode Integration**: Development mode'da test bileşeni olarak çalışma
+
+**🔧 Teknik Detaylar:**
+- ✅ **Service Orchestration**: Tüm servislerin sıralı çalıştırılması
+- ✅ **Progress Weighting**: Her aşama için ağırlık sistemi
+- ✅ **Database Persistence**: Pipeline durumları PostgreSQL'de saklanıyor
+- ✅ **Error Recovery**: Hata durumunda pipeline durdurma ve bilgi verme
+- ✅ **UUID Generation**: Her pipeline için benzersiz ID oluşturma
+- ✅ **Status Management**: STARTED, IN_PROGRESS, COMPLETED, FAILED durumları
+
+#### **GÜN 13: RAG (Retrieval-Augmented Generation) System** 🔄 **DEVAM EDİYOR**
+- ✅ **Vector Database Setup** - Supabase pgvector entegrasyonu ✅ **TAMAMLANDI**
+- ✅ **Gemini Embedding Service** - text-embedding-004 ile 768-dimensional embeddings ✅ **TAMAMLANDI**
+- ✅ **Retrieval Service** - Semantic search, context building, cross-chapter context ve mevcut yapıya entegrasyon ✅ **TAMAMLANDI**
+- ✅ **Knowledge Base Service** - Vector database ile entegrasyon ✅ **TAMAMLANDI**
+- 🔄 **Enhanced Content Service Güncelleme** - RAG entegrasyonu
+- 🔄 **Context-Aware Content Generation** - Bağlam zenginleştirilmiş AI prompt'ları
+- 🔄 **Cross-Chapter Consistency** - Chapter'lar arası tutarlılık
+- 🔄 **Personalized Content** - Kullanıcı tercihlerine göre kişiselleştirme
+- 🔄 **Advanced Prompt Engineering** - RAG tabanlı gelişmiş prompt'lar
+
+**🎯 RAG Sistemi Aşamaları:**
+1. **Vector Database Kurulumu** ✅ **TAMAMLANDI** - pgvector extension ve tablolar
+2. **Gemini Embedding Service** ✅ **TAMAMLANDI** - text-embedding-004 entegrasyonu
+3. **Retrieval Service** ✅ **TAMAMLANDI** - Semantic search, context building, cross-chapter context ve mevcut yapıya entegrasyon
+3. **Knowledge Base Service** ✅ **TAMAMLANDI** - Vector database entegrasyonu
+4. **Enhanced Content Service Güncelleme** 🔄 - RAG entegrasyonu
+5. **Enhanced Content Service** 🔄 - RAG tabanlı içerik üretimi
+6. **Testing & Optimization** 🔄 - Performans ve kalite testleri
+
+**📊 RAG Avantajları:**
+- 🔄 **Bağlam Zenginliği**: Önceki chapter'lar ve benzer konular
+- 🔄 **Tutarlılık**: Aynı kavramlar tutarlı şekilde kullanılır
+- 🔄 **Kişiselleştirme**: Kullanıcı geçmişi ve tercihleri
+- 🔄 **Güncellik**: En güncel bilgiler kullanılır
+- 🔄 **Kalite Artışı**: Daha zengin ve tutarlı içerik
+
+**🗄️ Vector Database Özellikleri:**
+- ✅ **4 Ana Tablo**: knowledge_base, concept_embeddings, chapter_relationships, rag_context_cache
+- ✅ **768-Dimensional Vectors**: text-embedding-004 uyumlu (Supabase compatible)
+- ✅ **Semantic Search Indexes**: HNSW index'ler ile yüksek boyutlu hızlı arama
+- ✅ **RAG Functions**: find_similar_content, find_related_concepts, get_rag_context
+- ✅ **Performance Optimization**: Cache sistemi ve otomatik temizlik
+- ✅ **Security**: Row Level Security (RLS) politikaları
+- ✅ **Testing**: Kapsamlı test script'leri
+
+#### **GÜN 14: Web Application Interface** 🔄
 - 🔄 Course Builder Dashboard - Kurs oluşturma paneli
 - 🔄 Student Learning Interface - Öğrenci öğrenme arayüzü
 - 🔄 Course Preview System - Kurs önizleme sistemi
@@ -255,6 +393,11 @@ src/
 │   ├── PDFPipelineTest/       # PDF Pipeline test alanı
 │   ├── CourseStructureTest/   # Course Structure test alanı
 │   ├── CourseVisualIntegration/ # Course Visual Integration
+│   ├── EnhancedContentTest/ # Enhanced Content Generation test ✅
+│   ├── PDFExtractionTest/ # PDF Text Extraction test ✅
+│   ├── FullPipelineTest/ # Master Pipeline test ✅
+│   ├── GeminiEmbeddingTest/ # Gemini Embedding test ✅
+│   ├── RetrievalTest/ # Retrieval Service test (Mevcut yapıya entegre) ✅
 │   ├── DevelopmentModeIndicator/ # Development mode göstergesi
 │   ├── AvatarPage/            # Avatar oluşturma
 │   └── PanoramicViewer/       # 360° görüntüleyici
@@ -276,6 +419,12 @@ src/
 │   ├── taskQueueService.js    # Task Queue servisi
 │   ├── courseStructureService.js # Course Structure servisi
 │   ├── courseVisualService.js # Course Visual servisi
+│   ├── enhancedContentService.js # Enhanced Content servisi ✅
+│   ├── pdfTextExtractionService.js # PDF Text Extraction servisi ✅
+│   ├── geminiEmbeddingService.js # Gemini Embedding servisi ✅
+│   ├── knowledgeBaseService.js # Knowledge Base servisi ✅
+│   ├── retrievalService.js # Retrieval Service (Mevcut yapıya entegre) ✅
+│   ├── masterPipelineService.js # Master Pipeline servisi ✅
 │   └── supabaseService.js     # Supabase bağlantısı
 ├── config/                    # Konfigürasyon
 │   ├── supabase.js           # Supabase client
@@ -286,7 +435,13 @@ supabase/
 ├── functions/                 # Edge Functions
 │   ├── pdf_broker/           # PDF webhook handler
 │   └── gemini_document_understanding/  # AI processing
-└── migrations/               # Database migrations
+├── migrations/               # Database migrations
+│   └── 20241201000000_vector_database_rag.sql ✅ **YENİ**
+└── config.toml              # Supabase konfigürasyonu
+
+**Database Files:**
+├── database_vector_rag.sql ✅ **YENİ** - Vector database setup
+├── test_vector_database.sql ✅ **YENİ** - Vector database test script
 ```
 
 ## 🤖 **AI Entegrasyonu**
@@ -574,7 +729,207 @@ evaluation.imageQuality = calculateImageQuality(images);
 evaluation.integrationQuality = (evaluation.promptQuality + evaluation.imageQuality) / 2;
 ```
 
-### **11. Development Mode System**
+### **11. Master Pipeline System**
+```
+PDF Upload → Document Understanding → Segment Planning → PDF Text Extraction → Course Structure → Course Visual → Enhanced Content → Final Results
+```
+
+**Master Pipeline Özellikleri:**
+- **Service Orchestration**: Tüm servislerin sıralı çalıştırılması
+- **Progress Tracking**: Her aşamada detaylı ilerleme takibi
+- **Error Handling**: Her aşamada hata yönetimi ve kurtarma
+- **Background Processing**: Arka planda kesintisiz işlem
+- **Database Integration**: Pipeline durumları veritabanında saklanıyor
+- **User History**: Kullanıcının pipeline geçmişini görüntüleme
+
+**Pipeline Aşamaları ve Ağırlıkları:**
+```javascript
+const pipelineStages = [
+  { name: 'PDF Upload & Validation', weight: 5 },
+  { name: 'Document Understanding', weight: 15 },
+  { name: 'Segment Planning', weight: 10 },
+  { name: 'PDF Text Extraction', weight: 25 },
+  { name: 'Course Structure Generation', weight: 15 },
+  { name: 'Course Visual Generation', weight: 20 },
+  { name: 'Enhanced Content Generation', weight: 10 }
+];
+```
+
+**Pipeline Execution Flow:**
+```javascript
+// Pipeline başlatma
+const pipelineResult = await masterPipelineService.runFullPipeline(pdfFile, userId);
+
+// Her aşama için progress güncelleme
+await this.updatePipelineProgress(pipelineId, stageName, percentage);
+
+// Pipeline tamamlama
+await this.completePipeline(pipelineId, 'COMPLETED', pipelineData);
+
+// Kullanıcı pipeline geçmişi
+const userPipelines = await masterPipelineService.getUserPipelines(userId);
+```
+
+**Database Schema:**
+```sql
+-- Pipeline executions tablosu
+CREATE TABLE pipeline_executions (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id),
+  status TEXT CHECK (status IN ('STARTED', 'IN_PROGRESS', 'COMPLETED', 'FAILED')),
+  current_stage TEXT,
+  progress_percentage INTEGER DEFAULT 0,
+  started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  completed_at TIMESTAMP WITH TIME ZONE,
+  result_data JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### **12. RAG (Retrieval-Augmented Generation) System**
+```
+Knowledge Base → Vector Embeddings → Semantic Search → Context Retrieval → Augmented Prompt → AI Generation
+```
+
+**RAG Sistemi Özellikleri:**
+- **Vector Database**: Supabase pgvector ile semantic search
+- **Embedding Service**: OpenAI embeddings ile metin vektörizasyonu
+- **Knowledge Base**: Chapter içeriklerini vector olarak saklama
+- **Retrieval Service**: İlgili bağlamları akıllıca çekme, cross-chapter context ve mevcut yapıya entegrasyon
+- **Context-Aware Generation**: Bağlam zenginleştirilmiş AI prompt'ları
+- **Cross-Chapter Consistency**: Chapter'lar arası tutarlılık
+
+**RAG İşlem Akışı:**
+```javascript
+// 1. Knowledge Base'e içerik ekleme
+const knowledgeEntry = {
+  chapterId: chapter.id,
+  content: chapterContent,
+  embeddings: await generateEmbeddings(chapterContent),
+  metadata: {
+    title: chapter.title,
+    keyConcepts: extractedConcepts,
+    difficulty: chapter.difficulty
+  }
+};
+
+// 2. İlgili bağlamları çekme
+const relevantContext = await retrievalService.findRelevantContext({
+  currentChapter: chapter,
+  previousChapters: await getPreviousChapters(chapter.order),
+  similarConcepts: await findSimilarConcepts(chapter.keywords),
+  userPreferences: await getUserPreferences(userId)
+});
+
+// 3. Augmented prompt oluşturma
+const ragPrompt = `
+KURS BAĞLAMI:
+${courseStructure.title}
+
+ÖNCEKİ CHAPTER'LAR:
+${relevantContext.previousChapters.map(ch => `- ${ch.title}: ${ch.keyConcepts}`).join('\n')}
+
+BENZER KAVRAMLAR:
+${relevantContext.similarConcepts.map(concept => `- ${concept.title}: ${concept.explanation}`).join('\n')}
+
+MEVCUT CHAPTER:
+${chapter.title}
+${segmentContent}
+
+TALİMAT: Yukarıdaki bağlamı kullanarak tutarlı içerik üret
+`;
+
+// 4. AI ile içerik üretimi
+const result = await this.model.generateContent(ragPrompt);
+```
+
+**Database Schema:**
+```sql
+-- Vector database tablosu
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE knowledge_base (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chapter_id UUID REFERENCES chapters(id),
+  content TEXT NOT NULL,
+  embeddings vector(1536), -- OpenAI embeddings
+  metadata JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Semantic search index
+CREATE INDEX ON knowledge_base USING ivfflat (embeddings vector_cosine_ops);
+
+-- Benzerlik arama fonksiyonu
+SELECT * FROM knowledge_base 
+WHERE embeddings IS NOT NULL
+ORDER BY embeddings <=> $1 
+LIMIT 5;
+```
+
+**Embedding Service:**
+```javascript
+class EmbeddingService {
+  constructor() {
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+  }
+
+  async generateEmbeddings(text) {
+    const response = await this.openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: text
+    });
+    return response.data[0].embedding;
+  }
+
+  async findSimilarContent(query, limit = 5) {
+    const queryEmbedding = await this.generateEmbeddings(query);
+    
+    const { data, error } = await supabase
+      .from('knowledge_base')
+      .select('*')
+      .order(`embeddings <=> '[${queryEmbedding.join(',')}]'::vector`)
+      .limit(limit);
+
+    return data || [];
+  }
+}
+```
+
+**Retrieval Service (Mevcut Yapıya Entegre):**
+```javascript
+class RetrievalService {
+  constructor(embeddingService) {
+    this.embeddingService = embeddingService;
+  }
+
+  async findRelevantContext(currentChapter, courseStructure) {
+    // 1. Önceki chapter'ları çek
+    const previousChapters = await this.getPreviousChapters(currentChapter.order);
+    
+    // 2. Benzer kavramları bul
+    const similarConcepts = await this.findSimilarConcepts(currentChapter.keywords);
+    
+    // 3. Kullanıcı tercihlerini al
+    const userPreferences = await this.getUserPreferences();
+    
+    return {
+      previousChapters,
+      similarConcepts,
+      userPreferences
+    };
+  }
+
+  async findSimilarConcepts(keywords) {
+    const query = keywords.join(' ');
+    return await this.embeddingService.findSimilarContent(query);
+  }
+}
+```
+
+### **13. Development Mode System**
 ```
 Environment Check → Local Storage → UI State Management → Component Rendering
 ```
@@ -742,6 +1097,91 @@ const prompts = await courseVisualService.getVisualPrompts(documentId)
 
 // Kurs görsellerini getirme
 const images = await courseVisualService.getCourseImages(documentId)
+```
+
+### **Enhanced Content Service**
+```javascript
+// Gelişmiş içerik üretimi
+const enhancedContent = await enhancedContentService.generateEnhancedContent(documentId)
+
+// Segment içeriği alma
+const segmentContent = await enhancedContentService.getSegmentContent(segmentIds)
+
+// Lesson içeriği üretimi
+const lessonContent = await enhancedContentService.generateLessonContent(lesson, context)
+
+// İçerik kalitesi değerlendirmesi
+const qualityScore = await enhancedContentService.assessContentQuality(content)
+```
+
+### **Master Pipeline Service**
+```javascript
+// Tam pipeline çalıştırma
+const pipelineResult = await masterPipelineService.runFullPipeline(pdfFile, userId)
+
+// Pipeline durumu alma
+const pipelineStatus = await masterPipelineService.getPipelineStatus(pipelineId)
+
+// Kullanıcı pipeline geçmişi
+const userPipelines = await masterPipelineService.getUserPipelines(userId)
+
+// Pipeline sonuçları
+const result = {
+  success: true,
+  pipelineId: 'uuid',
+  documentId: 'uuid',
+  data: {
+    segments: [...],
+    courseStructure: {...},
+    courseImages: [...],
+    enhancedContent: {...}
+  }
+}
+```
+
+### **RAG Services**
+```javascript
+// Embedding Service
+const embeddingService = new EmbeddingService();
+
+// Metin için embedding oluşturma
+const embeddings = await embeddingService.generateEmbeddings(text);
+
+// Benzer içerik bulma
+const similarContent = await embeddingService.findSimilarContent(query, limit);
+
+// Retrieval Service (Mevcut Yapıya Entegre)
+const retrievalService = new RetrievalService(embeddingService);
+
+// İlgili bağlamları çekme
+const relevantContext = await retrievalService.findRelevantContext(currentChapter, courseStructure);
+
+// Knowledge Base Service
+const knowledgeBaseService = new KnowledgeBaseService();
+
+// İçerik ekleme
+await knowledgeBaseService.addContent({
+  chapterId: 'uuid',
+  content: 'text',
+  embeddings: [...],
+  metadata: {...}
+});
+
+// Semantic search
+const results = await knowledgeBaseService.searchSimilar(query, limit);
+```
+
+### **PDF Text Extraction Service**
+```javascript
+// PDF segment içeriği çıkarma
+const extractedContent = await pdfTextExtractionService.extractSegmentContent(documentId, segmentIds)
+
+// Çıkarılan içeriği kaydetme
+await pdfTextExtractionService.saveExtractedContent(segmentId, extractedContent)
+
+// Görsel ve tablo çıkarma
+const images = await pdfTextExtractionService.extractImagesFromPage(page)
+const tables = await pdfTextExtractionService.detectTablesFromText(text)
 ```
 
 ### **Segment Service**

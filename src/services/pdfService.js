@@ -62,20 +62,8 @@ export const extractPDFMetadata = async (file) => {
       fileName: file.name
     }
     
-    // PDF metadata'sını al
-    const pdfMetadata = pdfDoc.getTitle()
-    if (pdfMetadata) {
-      const info = pdfDoc.getInfo()
-      
-      metadata.title = info.Title || null
-      metadata.author = info.Author || null
-      metadata.subject = info.Subject || null
-      metadata.creator = info.Creator || null
-      metadata.producer = info.Producer || null
-      metadata.creationDate = info.CreationDate || null
-      metadata.modificationDate = info.ModDate || null
-      metadata.keywords = info.Keywords || null
-    }
+    // PDF metadata'sını al (PDF-lib'de getInfo() fonksiyonu yok, sadece sayfa sayısını alıyoruz)
+    metadata.pageCount = pdfDoc.getPageCount()
     
     console.log('PDF metadata başarıyla çıkarıldı:', metadata)
     return metadata
@@ -348,4 +336,16 @@ export const deleteDocument = async (documentId) => {
     console.error('Delete document service error:', error)
     throw error
   }
-} 
+}
+
+// Default export - tüm fonksiyonları içeren servis objesi
+const pdfService = {
+  extractPDFMetadata,
+  getPDFPageCount,
+  uploadPDF,
+  getDocuments,
+  getDocumentSegments,
+  deleteDocument
+}
+
+export default pdfService 

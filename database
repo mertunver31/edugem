@@ -1,962 +1,1820 @@
 [
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "name",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "subject",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "specialization",
-      "data_type": "text",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "personality_type",
-      "data_type": "character varying",
-      "is_nullable": "YES",
-      "column_default": "'friendly'::character varying"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "teaching_style",
-      "data_type": "character varying",
-      "is_nullable": "YES",
-      "column_default": "'interactive'::character varying"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "education_level",
-      "data_type": "character varying",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "experience_level",
-      "data_type": "integer",
-      "is_nullable": "YES",
-      "column_default": "5"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "bio",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "avatar_url",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "system_prompt",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "is_active",
-      "data_type": "boolean",
-      "is_nullable": "YES",
-      "column_default": "true"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ai_teachers",
-      "column_name": "custom_prompt",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "audio_lessons",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "gen_random_uuid()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "audio_lessons",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "audio_lessons",
-      "column_name": "source_file_path",
-      "data_type": "text",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "audio_lessons",
-      "column_name": "extracted_text",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "audio_lessons",
-      "column_name": "generated_audio_path",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "audio_lessons",
-      "column_name": "status",
-      "data_type": "text",
-      "is_nullable": "NO",
-      "column_default": "'uploaded'::text"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "audio_lessons",
-      "column_name": "error_message",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "audio_lessons",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "NO",
-      "column_default": "timezone('utc'::text, now())"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "audio_lessons",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "NO",
-      "column_default": "timezone('utc'::text, now())"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "name",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "file_path",
-      "data_type": "text",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "file_size",
-      "data_type": "bigint",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "file_type",
-      "data_type": "character varying",
-      "is_nullable": "YES",
-      "column_default": "'model/gltf-binary'::character varying"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "is_uploaded",
-      "data_type": "boolean",
-      "is_nullable": "YES",
-      "column_default": "true"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "rpm_avatar_url",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "thumbnail_url",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "avatars",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_enrollments",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_enrollments",
-      "column_name": "course_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_enrollments",
-      "column_name": "student_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_enrollments",
-      "column_name": "enrolled_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_materials",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_materials",
-      "column_name": "course_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_materials",
-      "column_name": "file_name",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_materials",
-      "column_name": "file_path",
-      "data_type": "text",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_materials",
-      "column_name": "file_size",
-      "data_type": "bigint",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_materials",
-      "column_name": "file_type",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_materials",
-      "column_name": "uploaded_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "course_materials",
-      "column_name": "is_active",
-      "data_type": "boolean",
-      "is_nullable": "YES",
-      "column_default": "true"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "courses",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "courses",
-      "column_name": "title",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "courses",
-      "column_name": "description",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "courses",
-      "column_name": "teacher_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "courses",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "courses",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "courses",
-      "column_name": "is_active",
-      "data_type": "boolean",
-      "is_nullable": "YES",
-      "column_default": "true"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "courses",
-      "column_name": "thumbnail_url",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "courses",
-      "column_name": "metadata",
-      "data_type": "jsonb",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "courses",
-      "column_name": "selected_teacher_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "notes",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "notes",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "notes",
-      "column_name": "course_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "notes",
-      "column_name": "title",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "notes",
-      "column_name": "content",
-      "data_type": "text",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "notes",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "notes",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "notes",
-      "column_name": "is_active",
-      "data_type": "boolean",
-      "is_nullable": "YES",
-      "column_default": "true"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lesson_participants",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lesson_participants",
-      "column_name": "lesson_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lesson_participants",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lesson_participants",
-      "column_name": "joined_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lesson_participants",
-      "column_name": "left_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lesson_participants",
-      "column_name": "role",
-      "data_type": "character varying",
-      "is_nullable": "YES",
-      "column_default": "'student'::character varying"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lessons",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lessons",
-      "column_name": "course_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lessons",
-      "column_name": "teacher_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lessons",
-      "column_name": "room_name",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lessons",
-      "column_name": "status",
-      "data_type": "character varying",
-      "is_nullable": "YES",
-      "column_default": "'scheduled'::character varying"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lessons",
-      "column_name": "start_time",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lessons",
-      "column_name": "end_time",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lessons",
-      "column_name": "max_participants",
-      "data_type": "integer",
-      "is_nullable": "YES",
-      "column_default": "50"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_lessons",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_sessions",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_sessions",
-      "column_name": "course_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_sessions",
-      "column_name": "title",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_sessions",
-      "column_name": "description",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_sessions",
-      "column_name": "scheduled_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_sessions",
-      "column_name": "duration_minutes",
-      "data_type": "integer",
-      "is_nullable": "YES",
-      "column_default": "60"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_sessions",
-      "column_name": "meeting_url",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_sessions",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "online_sessions",
-      "column_name": "is_active",
-      "data_type": "boolean",
-      "is_nullable": "YES",
-      "column_default": "true"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "file_name",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "file_path",
-      "data_type": "text",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "file_size",
-      "data_type": "bigint",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "file_type",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "title",
-      "data_type": "character varying",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "description",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "is_active",
-      "data_type": "boolean",
-      "is_nullable": "YES",
-      "column_default": "true"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "panoramic_images",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "name",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "subject",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "education_level",
-      "data_type": "character varying",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "experience_years",
-      "data_type": "integer",
-      "is_nullable": "YES",
-      "column_default": "0"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "bio",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "avatar_url",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "is_active",
-      "data_type": "boolean",
-      "is_nullable": "YES",
-      "column_default": "true"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "teachers",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "users",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO",
-      "column_default": "uuid_generate_v4()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "users",
-      "column_name": "email",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "users",
-      "column_name": "name",
-      "data_type": "character varying",
-      "is_nullable": "NO",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "users",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "users",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES",
-      "column_default": "now()"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "users",
-      "column_name": "avatar_url",
-      "data_type": "text",
-      "is_nullable": "YES",
-      "column_default": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "users",
-      "column_name": "role",
-      "data_type": "character varying",
-      "is_nullable": "YES",
-      "column_default": "'student'::character varying"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "users",
-      "column_name": "is_active",
-      "data_type": "boolean",
-      "is_nullable": "YES",
-      "column_default": "true"
-    }
-  ]
+  {
+    "schema_metadata": [
+      {
+        "table_name": "users",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "email",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "avatar_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "role",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 50
+          },
+          {
+            "column_name": "is_active",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "avatars",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "file_path",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "file_size",
+            "data_type": "bigint",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "file_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 100
+          },
+          {
+            "column_name": "is_uploaded",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "rpm_avatar_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "thumbnail_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "avatar_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "courses",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "title",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "description",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "teacher_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "is_active",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "thumbnail_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "metadata",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "selected_teacher_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "online_sessions",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "course_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "title",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "description",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "scheduled_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "duration_minutes",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "meeting_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "is_active",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "notes",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "course_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "title",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "content",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "is_active",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "audio_lessons",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "source_file_path",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "extracted_text",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "generated_audio_path",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "status",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "error_message",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "NO",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "ai_teachers",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "subject",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "specialization",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "personality_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 100
+          },
+          {
+            "column_name": "teaching_style",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 100
+          },
+          {
+            "column_name": "education_level",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 100
+          },
+          {
+            "column_name": "experience_level",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "bio",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "avatar_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "system_prompt",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "is_active",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "custom_prompt",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "panoramic_images",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "file_name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "file_path",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "file_size",
+            "data_type": "bigint",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "file_type",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 100
+          },
+          {
+            "column_name": "title",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 255
+          },
+          {
+            "column_name": "description",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "is_active",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "online_lessons",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "course_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "teacher_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "room_name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 50
+          },
+          {
+            "column_name": "start_time",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "end_time",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "max_participants",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "online_lesson_participants",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "lesson_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "joined_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "left_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "role",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 50
+          }
+        ]
+      },
+      {
+        "table_name": "documents",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "file_path",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "page_count",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "status",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "raw_outline",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "outline",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "outline_extracted_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "error_message",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "course_structure",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "course_structure_generated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "visual_prompts",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "visual_prompts_generated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "course_images",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "course_images_generated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "enhanced_content",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "enhanced_content_generated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "teachers",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "subject",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "education_level",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 100
+          },
+          {
+            "column_name": "experience_years",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "bio",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "avatar_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "is_active",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "segments",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "document_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "seg_no",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "title",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "p_start",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "p_end",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "text_status",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "img_status",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "raw_json",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "content",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "extracted_content",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "tasks",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "segment_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "job_type",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "retry_count",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "task_queue",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "document_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "segment_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "task_type",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "status",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "priority",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "started_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "completed_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "retry_count",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "max_retries",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "error_message",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "error_details",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "result_data",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "locked_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "locked_by",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "metadata",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "worker_results",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "task_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "segment_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "worker_type",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "summary",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "questions",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "explanations",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "key_points",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "image_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "image_prompt",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "image_metadata",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "metadata",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "worker_records",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "worker_id",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "worker_type",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "segment_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "status",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "started_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "completed_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "error_count",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "retry_count",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "last_error",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "result_data",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "metadata",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "enhanced_content",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "document_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "content_type",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 50
+          },
+          {
+            "column_name": "content_data",
+            "data_type": "jsonb",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "quality_score",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "version",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "interactive_elements",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "content_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "element_type",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 50
+          },
+          {
+            "column_name": "element_data",
+            "data_type": "jsonb",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "user_gamification",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "points",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "level",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "badges",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "achievements",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "user_progress",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "content_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "progress_percentage",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "time_spent",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "completed_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "assessments",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "content_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "assessment_type",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 50
+          },
+          {
+            "column_name": "questions",
+            "data_type": "jsonb",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "answers",
+            "data_type": "jsonb",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "pipeline_stages",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "pipeline_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "stage_name",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "stage_order",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "status",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "started_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "completed_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "duration_seconds",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "error_message",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "stage_data",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "progress_percentage",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "pipeline_executions",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "document_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "status",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "current_stage",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "progress_percentage",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "started_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "completed_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "error_message",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "result_data",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "metadata",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "rag_context_cache",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "segment_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "context_hash",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 64
+          },
+          {
+            "column_name": "relevant_segments",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "relevant_concepts",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "context_content",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "cache_created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "cache_expires_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "knowledge_base",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "segment_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "content",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "embeddings",
+            "data_type": "USER-DEFINED",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "metadata",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "content_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 50
+          },
+          {
+            "column_name": "relevance_score",
+            "data_type": "double precision",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "concept_embeddings",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "concept_name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "max_length": 255
+          },
+          {
+            "column_name": "concept_description",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "embeddings",
+            "data_type": "USER-DEFINED",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "related_concepts",
+            "data_type": "ARRAY",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "difficulty_level",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "subject_area",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 100
+          },
+          {
+            "column_name": "metadata",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      },
+      {
+        "table_name": "segment_relationships",
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "max_length": null
+          },
+          {
+            "column_name": "source_segment_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "target_segment_id",
+            "data_type": "uuid",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "relationship_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "max_length": 50
+          },
+          {
+            "column_name": "similarity_score",
+            "data_type": "double precision",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "shared_concepts",
+            "data_type": "ARRAY",
+            "is_nullable": "YES",
+            "max_length": null
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp with time zone",
+            "is_nullable": "YES",
+            "max_length": null
+          }
+        ]
+      }
+    ]
+  }
+]

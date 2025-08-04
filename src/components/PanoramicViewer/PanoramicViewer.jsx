@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import CustomButton from '../CustomButton/CustomButton'
 import Avatar3DLoader from '../Avatar3DLoader/Avatar3DLoader'
 import './PanoramicViewer.css'
 
-const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar }) => {
+const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, selectedDers }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [isViewerReady, setIsViewerReady] = useState(false)
   const [imageUrl, setImageUrl] = useState(null)
@@ -76,10 +77,23 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar }) =
       renderer.setSize(viewerRef.current.clientWidth, viewerRef.current.clientHeight)
       renderer.setClearColor(0x000000)
       rendererRef.current = renderer
+      
+      // Kamera referansını sakla
+      rendererRef.current.camera = camera
 
-      // Container'ı temizle ve renderer'ı ekle
+      // CSS3DRenderer: HTML elementleri 3B sahneye gömmek için
+      const cssRenderer = new CSS3DRenderer()
+      cssRenderer.setSize(viewerRef.current.clientWidth, viewerRef.current.clientHeight)
+      cssRenderer.domElement.style.position = 'absolute'
+      cssRenderer.domElement.style.top = '0'
+      cssRenderer.domElement.style.left = '0'
+      cssRenderer.domElement.style.pointerEvents = 'auto'
+      rendererRef.current.cssRenderer = cssRenderer
+
+      // Container'ı temizle ve renderer'ları ekle
       viewerRef.current.innerHTML = ''
       viewerRef.current.appendChild(renderer.domElement)
+      viewerRef.current.appendChild(cssRenderer.domElement)
 
       // Panoramik arka plan oluştur (sphere geometry)
       const sphereGeometry = new THREE.SphereGeometry(500, 60, 40)
@@ -93,12 +107,12 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar }) =
         scene.add(sphere)
       })
 
-      // Dev ekran yüzeyi oluştur (dikdörtgen plane)
+      // Dev ekran yüzeyi oluştur (monitör görünümü)
       const screenGeometry = new THREE.PlaneGeometry(100, 60) // 100x60 birim boyut
       const screenMaterial = new THREE.MeshBasicMaterial({ 
-        color: 0x2c3e50,
+        color: 0x1a1a1a, // Koyu siyah monitör ekranı
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.9,
         side: THREE.DoubleSide
       })
       const devScreen = new THREE.Mesh(screenGeometry, screenMaterial)
@@ -106,12 +120,31 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar }) =
       devScreen.name = 'devScreen'
       scene.add(devScreen)
 
-      // Ekran çerçevesi oluştur
-      const frameGeometry = new THREE.BoxGeometry(102, 62, 2)
-      const frameMaterial = new THREE.MeshBasicMaterial({ color: 0x34495e })
+      // Enhanced content için HTML overlay oluştur
+      if (selectedDers && selectedDers.enhanced_content) {
+        createEnhancedContentOverlay(scene, selectedDers)
+      }
+
+      // Monitör çerçevesi oluştur
+      const frameGeometry = new THREE.BoxGeometry(102, 62, 4)
+      const frameMaterial = new THREE.MeshBasicMaterial({ color: 0x2c2c2c }) // Koyu gri monitör çerçevesi
       const frame = new THREE.Mesh(frameGeometry, frameMaterial)
-      frame.position.set(0, 0, -201)
+      frame.position.set(0, 0, -202)
       scene.add(frame)
+
+      // Monitör arka kısmı oluştur
+      const backGeometry = new THREE.BoxGeometry(104, 64, 8)
+      const backMaterial = new THREE.MeshBasicMaterial({ color: 0x1a1a1a }) // Koyu siyah monitör arkası
+      const back = new THREE.Mesh(backGeometry, backMaterial)
+      back.position.set(0, 0, -206)
+      scene.add(back)
+
+      // Monitör tabanı oluştur
+      const standGeometry = new THREE.BoxGeometry(20, 4, 20)
+      const standMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 }) // Orta gri taban
+      const stand = new THREE.Mesh(standGeometry, standMaterial)
+      stand.position.set(0, -32, -200)
+      scene.add(stand)
 
       // Kullanıcı yolunu oluştur (ekranın altından kullanıcıya doğru uzanan rampa)
       const pathGeometry = new THREE.PlaneGeometry(100, 300) // 100 birim genişlik, 300 birim uzunluk (Z=-200'den Z=100'e)
@@ -160,18 +193,43 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar }) =
       scene.add(directionalLight)
 
       // Orbit controls
-      const controls = new OrbitControls(camera, renderer.domElement)
+      const controls = new OrbitControls(camera, cssRenderer.domElement)
       controls.enableDamping = true
       controls.dampingFactor = 0.05
       controls.minDistance = 50
       controls.maxDistance = 800
+      controls.enabled = true // Başlangıçta etkin
       controlsRef.current = controls
+
+      // Mouse click event handler
+      const raycaster = new THREE.Raycaster()
+      const mouse = new THREE.Vector2()
+
+      const handleMouseClick = (event) => {
+        const rect = renderer.domElement.getBoundingClientRect()
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+
+        raycaster.setFromCamera(mouse, camera)
+        const intersects = raycaster.intersectObjects(scene.children)
+
+        for (const intersect of intersects) {
+          if (intersect.object.name === 'devScreen' && intersect.object.userData.element) {
+            const element = intersect.object.userData.element
+            element.style.display = element.style.display === 'none' ? 'block' : 'none'
+            break
+          }
+        }
+      }
+
+      cssRenderer.domElement.addEventListener('click', handleMouseClick)
 
       // Animation loop
       const animate = () => {
         animationRef.current = requestAnimationFrame(animate)
         controls.update()
         renderer.render(scene, camera)
+        renderer.cssRenderer.render(scene, camera)
       }
       animate()
 
@@ -180,6 +238,7 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar }) =
         camera.aspect = viewerRef.current.clientWidth / viewerRef.current.clientHeight
         camera.updateProjectionMatrix()
         renderer.setSize(viewerRef.current.clientWidth, viewerRef.current.clientHeight)
+        renderer.cssRenderer.setSize(viewerRef.current.clientWidth, viewerRef.current.clientHeight)
       }
       window.addEventListener('resize', handleResize)
 
@@ -196,16 +255,187 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar }) =
 
     try {
       setIsAvatarLoading(true)
-      await avatarLoaderRef.current.loadAvatar(
+      const avatar = await avatarLoaderRef.current.loadAvatar(
         scene, 
         selectedAvatar.avatar_url, 
         { x: 0, y: -30, z: 50 } // Userpath Y pozisyonuna eşitle (-30)
       )
+      
+      // Avatar takip kamerası sistemini başlat
+      if (avatar) {
+        initializeAvatarFollowCamera(avatar, scene)
+      }
     } catch (error) {
       console.error('Avatar yükleme hatası:', error)
     } finally {
       setIsAvatarLoading(false)
     }
+  }
+
+  const initializeAvatarFollowCamera = (avatar, scene) => {
+    // Avatar takip kamerası sistemi
+    const followCamera = () => {
+      if (!avatar || !rendererRef.current?.camera) return
+      
+      const camera = rendererRef.current.camera
+      
+      // Avatar'ın arkasında sabit mesafede takip et
+      const offsetX = 0
+      const offsetY = 20  // Biraz yukarıda
+      const offsetZ = 30  // Arkada
+      
+      // Yeni kamera pozisyonu
+      const newCameraX = avatar.position.x + offsetX
+      const newCameraY = avatar.position.y + offsetY
+      const newCameraZ = avatar.position.z + offsetZ
+      
+      // Kamerayı güncelle
+      camera.position.set(newCameraX, newCameraY, newCameraZ)
+      
+      // Avatar'a bak
+      camera.lookAt(avatar.position)
+      
+      // OrbitControls target'ını da güncelle
+      if (controlsRef.current) {
+        controlsRef.current.target.copy(avatar.position)
+      }
+    }
+    
+    // Her frame'de kamera pozisyonunu güncelle
+    const updateCamera = () => {
+      followCamera()
+      requestAnimationFrame(updateCamera)
+    }
+    
+    // Kamera takip sistemini başlat
+    updateCamera()
+    
+    console.log('Avatar takip kamerası başlatıldı')
+  }
+
+  const createEnhancedContentOverlay = (scene, selectedDers) => {
+    // 1) HTML içeriği barındıracak bir div oluşturun
+    const element = document.createElement('div')
+    element.innerHTML = renderEnhancedContent(selectedDers)
+    Object.assign(element.style, {
+      width: '100px',
+      height: '60px',
+      background: 'white',
+      borderRadius: '2px',
+      boxShadow: 'inset 0 0 5px rgba(0,0,0,0.2)',
+      overflow: 'auto',
+      pointerEvents: 'auto',
+      border: '1px solid #1a1a1a',
+      display: 'none',
+      userSelect: 'none'
+    })
+
+    // 2) Bu div'i CSS3DObject'e sarın
+    const cssObject = new CSS3DObject(element)
+    const devScreen = scene.getObjectByName('devScreen')
+    if (!devScreen) return
+
+    // Monitörün gerçek ölçülerine göre ölçekleyin
+    const [w, h] = [100, 60]  // PlaneGeometry args'ınız
+    element.style.transformOrigin = 'center'
+    cssObject.scale.set(1, 1, 1)  // 1:1 ölçek (100×60px → 100×60 birim)
+    cssObject.position.set(0, 0, -199.5)  // Monitörün tam ön yüzünde
+    cssObject.rotation.copy(devScreen.rotation)
+    scene.add(cssObject)
+
+    // 3) Kapatma butonu artık div'in içinde çalışacak
+    const closeBtn = document.createElement('button')
+    closeBtn.textContent = '×'
+    Object.assign(closeBtn.style, {
+      position: 'absolute', 
+      top: '3px', 
+      right: '3px',
+      background: '#e74c3c', 
+      color: 'white',
+      border: 'none', 
+      borderRadius: '50%',
+      width: '12px', 
+      height: '12px', 
+      cursor: 'pointer',
+      fontSize: '8px',
+      zIndex: '1001'
+    })
+    closeBtn.onclick = (e) => {
+      e.stopPropagation() // Event'in yukarı yayılmasını engelle
+      element.style.display = 'none'
+    }
+    element.appendChild(closeBtn)
+
+    // Dev screen'e tıklama eventi ekle
+    devScreen.userData.cssObject = cssObject
+    devScreen.userData.element = element
+  }
+
+  const renderEnhancedContent = (selectedDers) => {
+    const { enhanced_content } = selectedDers
+    
+    let content = `
+      <div style="padding: 6px; height: 100%; overflow-y: auto; font-size: 0.6rem;">
+        <h2 style="color: #2c3e50; margin-bottom: 8px; border-bottom: 1px solid #3498db; padding-bottom: 4px; font-size: 0.8rem;">
+          ${selectedDers.title || selectedDers.file_name}
+        </h2>
+    `
+
+    if (enhanced_content.chapters) {
+      enhanced_content.chapters.forEach((chapter, chapterIndex) => {
+        content += `
+          <div style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;">
+            <h3 style="color: #2c3e50; font-size: 0.7rem; margin-bottom: 5px;">📖 ${chapter.title}</h3>
+        `
+
+        if (chapter.content && chapter.content.lessons) {
+          chapter.content.lessons.forEach((lesson, lessonIndex) => {
+            content += `
+              <div style="margin-bottom: 8px; padding: 5px; background: #f8f9fa; border-radius: 3px; border-left: 2px solid #3498db;">
+                <h4 style="color: #34495e; font-size: 0.65rem; margin-bottom: 5px;">🎯 ${lesson.title}</h4>
+            `
+
+            if (lesson.content) {
+              if (lesson.content.explanatory_text) {
+                content += `
+                  <div style="margin-bottom: 5px;">
+                    <h5 style="color: #2c3e50; font-size: 0.6rem; margin-bottom: 3px;">📝 Açıklayıcı Metin</h5>
+                    <p style="line-height: 1.2; color: #555; font-size: 0.55rem;">${lesson.content.explanatory_text}</p>
+                  </div>
+                `
+              }
+
+              if (lesson.content.key_points && lesson.content.key_points.length > 0) {
+                content += `
+                  <div style="margin-bottom: 5px;">
+                    <h5 style="color: #2c3e50; font-size: 0.6rem; margin-bottom: 3px;">✅ Anahtar Noktalar</h5>
+                    <ul style="padding-left: 8px;">
+                      ${lesson.content.key_points.map(point => `<li style="margin-bottom: 2px; color: #555; font-size: 0.55rem;">${point}</li>`).join('')}
+                    </ul>
+                  </div>
+                `
+              }
+
+              if (lesson.content.summary) {
+                content += `
+                  <div style="margin-bottom: 5px;">
+                    <h5 style="color: #2c3e50; font-size: 0.6rem; margin-bottom: 3px;">📋 Özet</h5>
+                    <p style="line-height: 1.2; color: #555; font-size: 0.55rem;">${lesson.content.summary}</p>
+                  </div>
+                `
+              }
+            }
+
+            content += `</div>`
+          })
+        }
+
+        content += `</div>`
+      })
+    }
+
+    content += `</div>`
+    return content
   }
 
   const cleanup3DViewer = () => {
@@ -218,19 +448,32 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar }) =
     }
     if (rendererRef.current) {
       rendererRef.current.dispose()
+      if (rendererRef.current.cssRenderer) {
+        rendererRef.current.cssRenderer.domElement.remove()
+        rendererRef.current.cssRenderer = null
+      }
       rendererRef.current = null
     }
     if (sceneRef.current) {
-      sceneRef.current.dispose()
+      // Scene'deki tüm objeleri temizle
+      while(sceneRef.current.children.length > 0) {
+        const child = sceneRef.current.children[0]
+        sceneRef.current.remove(child)
+      }
       sceneRef.current = null
     }
     if (controlsRef.current) {
       controlsRef.current.dispose()
       controlsRef.current = null
     }
-    if (avatarLoaderRef.current) {
+    if (avatarLoaderRef.current && sceneRef.current) {
       avatarLoaderRef.current.removeAvatar(sceneRef.current)
       avatarLoaderRef.current = null
+    }
+    
+    // Kamera referansını temizle
+    if (rendererRef.current) {
+      rendererRef.current.camera = null
     }
   }
 

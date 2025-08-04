@@ -1,351 +1,291 @@
-import React, { useState } from 'react'
-import CustomButton from '../../components/CustomButton/CustomButton'
-import { uploadPDF } from '../../services/pdfService'
+import React, { useState, useRef } from 'react'
+import { masterPipelineService } from '../../services/masterPipelineService'
+import { useAuth } from '../../hooks/useAuth'
 import './CreateCoursePage.css'
 
 const CreateCoursePage = () => {
-  const [courseData, setCourseData] = useState({
-    title: '',
-    description: '',
-    subject: '',
-    grade: '',
-    duration: ''
-  })
+  const { user } = useAuth()
   const [selectedFile, setSelectedFile] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [uploadStatus, setUploadStatus] = useState('')
-  const [errors, setErrors] = useState({})
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [currentStage, setCurrentStage] = useState('')
+  const [error, setError] = useState(null)
+  const [courseCreated, setCourseCreated] = useState(false)
+  const [courseResult, setCourseResult] = useState(null)
+  const fileInputRef = useRef(null)
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setCourseData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-    
-    // Hata mesajını temizle
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }))
-    }
-  }
-
-  const validateForm = () => {
-    const newErrors = {}
-    
-    if (!courseData.title.trim()) {
-      newErrors.title = 'Ders başlığı gereklidir'
-    }
-    
-    if (!courseData.subject) {
-      newErrors.subject = 'Ders konusu seçilmelidir'
-    }
-    
-    if (!courseData.grade) {
-      newErrors.grade = 'Sınıf seviyesi seçilmelidir'
-    }
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      // Dosya boyutu kontrolü (10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        alert('Dosya boyutu 10MB\'dan büyük olamaz!')
-        return
-      }
-      
-      // Dosya tipi kontrolü
-      if (file.type !== 'application/pdf') {
-        alert('Sadece PDF dosyaları desteklenmektedir!')
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0]
+    if (file && file.type === 'application/pdf') {
+      // Dosya boyutu kontrolü (20MB)
+      if (file.size > 20 * 1024 * 1024) {
+        setError('Dosya boyutu 20MB\'dan büyük olamaz!')
         return
       }
       
       setSelectedFile(file)
-      setUploadStatus('')
+      setError(null)
+      setCourseCreated(false)
+    } else {
+      setError('Lütfen geçerli bir PDF dosyası seçin.')
+      setSelectedFile(null)
     }
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
+  const handleFileDrop = (event) => {
+    event.preventDefault()
+    const file = event.dataTransfer.files[0]
+    if (file && file.type === 'application/pdf') {
+      // Dosya boyutu kontrolü (20MB)
+      if (file.size > 20 * 1024 * 1024) {
+        setError('Dosya boyutu 20MB\'dan büyük olamaz!')
+        return
+      }
+      
+      setSelectedFile(file)
+      setError(null)
+      setCourseCreated(false)
+    } else {
+      setError('Lütfen geçerli bir PDF dosyası seçin.')
+    }
+  }
+
+  const handleDragOver = (event) => {
+    event.preventDefault()
+  }
+
+  const startCourseCreation = async () => {
+    if (!selectedFile || !user) {
+      setError('PDF dosyası seçin ve giriş yapın.')
       return
     }
 
-    setIsLoading(true)
-    setUploadStatus('İşlem başlatılıyor...')
+    setIsProcessing(true)
+    setProgress(0)
+    setCurrentStage('Başlatılıyor...')
+    setError(null)
+    setCourseCreated(false)
 
     try {
-      console.log('Ders verisi:', courseData)
+      console.log('🚀 Ders oluşturma başlatılıyor...')
       
-      if (selectedFile) {
-        setUploadStatus('PDF dosyası yükleniyor...')
-        const uploadResult = await uploadPDF(selectedFile)
+      const pipelineResult = await masterPipelineService.runFullPipeline(selectedFile, user.id)
+      
+      if (pipelineResult.success) {
+        setCourseResult(pipelineResult)
+        setProgress(100)
+        setCurrentStage('Tamamlandı!')
+        setCourseCreated(true)
         
-        if (uploadResult.success) {
-          console.log('PDF başarıyla yüklendi:', uploadResult.data)
-          setUploadStatus('PDF başarıyla yüklendi. Ders oluşturuluyor...')
-        } else {
-          throw new Error(uploadResult.error)
-        }
+        console.log('✅ Ders başarıyla oluşturuldu:', pipelineResult)
       } else {
-        setUploadStatus('Ders oluşturuluyor...')
+        setError(pipelineResult.error || 'Ders oluşturma sırasında hata oluştu.')
+        setProgress(pipelineResult.progress || 0)
+        setCurrentStage('Hata!')
       }
-
-      // Simülasyon - gerçek API çağrısı buraya gelecek
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      alert('Ders başarıyla oluşturuldu!')
-      
-      // Formu temizle
-      setCourseData({
-        title: '',
-        description: '',
-        subject: '',
-        grade: '',
-        duration: ''
-      })
-      setSelectedFile(null)
-      setUploadStatus('')
-      setErrors({})
-      
-      // Dosya input'unu temizle
-      const fileInput = document.getElementById('pdf-file')
-      if (fileInput) {
-        fileInput.value = ''
-      }
-      
     } catch (error) {
-      console.error('İşlem hatası:', error)
-      setUploadStatus('Hata: ' + error.message)
-      alert('İşlem sırasında hata oluştu: ' + error.message)
+      console.error('❌ Ders oluşturma hatası:', error)
+      setError(error.message || 'Beklenmeyen bir hata oluştu.')
+      setCurrentStage('Hata!')
     } finally {
-      setIsLoading(false)
+      setIsProcessing(false)
     }
+  }
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
   return (
     <div className="create-course-page">
       <div className="courses-section">
         <div className="section-header">
-          <h1>Derslerim</h1>
-          <p>Çalışma derslerinizi yönetin ve yeni dersler oluşturun</p>
+          <h1>📚 Akıllı Ders Oluşturucu</h1>
+          <p>PDF'inizi yükleyin, AI sizin için mükemmel bir ders hazırlasın!</p>
         </div>
 
-        {/* Ders İstatistikleri */}
-        <div className="course-stats">
-          <div className="stat-item">
-            <div className="stat-icon">📚</div>
-            <div className="stat-info">
-              <span className="stat-number">4</span>
-              <span className="stat-label">Aktif Ders</span>
+        {!courseCreated ? (
+          <div className="course-creation-container">
+            {/* PDF Upload Alanı */}
+            <div className="upload-section">
+              <div 
+                className={`upload-area ${selectedFile ? 'has-file' : ''}`}
+                onDrop={handleFileDrop}
+                onDragOver={handleDragOver}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {selectedFile ? (
+                  <div className="file-selected">
+                    <div className="file-icon">📄</div>
+                    <div className="file-info">
+                      <h3>{selectedFile.name}</h3>
+                      <p>{formatFileSize(selectedFile.size)}</p>
+                    </div>
+                    <button 
+                      className="change-file-btn"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedFile(null)
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = ''
+                        }
+                      }}
+                    >
+                      Değiştir
+                    </button>
+                  </div>
+                ) : (
+                  <div className="upload-placeholder">
+                    <div className="upload-icon">📎</div>
+                    <h3>PDF'inizi buraya sürükleyin veya tıklayın</h3>
+                    <p>Maksimum dosya boyutu: 20MB</p>
+                    <p>Sadece PDF formatı desteklenir</p>
+                  </div>
+                )}
+              </div>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
+
+              {error && (
+                <div className="error-message">
+                  ❌ {error}
+                </div>
+              )}
+            </div>
+
+            {/* Ders Oluştur Butonu */}
+            <div className="create-section">
+              <button
+                className="create-course-btn"
+                onClick={startCourseCreation}
+                disabled={!selectedFile || isProcessing || !user}
+              >
+                {isProcessing ? '🔄 İşleniyor...' : '🚀 Dersimi Oluştur'}
+              </button>
+              <p className="create-note">
+                AI, PDF'inizi analiz edip size özel bir ders hazırlayacak
+              </p>
+            </div>
+
+            {/* Progress Section */}
+            {isProcessing && (
+              <div className="progress-section">
+                <div className="progress-bar-container">
+                  <div className="progress-bar">
+                    <div 
+                      className="progress-fill"
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                  <div className="progress-text">{progress}%</div>
+                </div>
+
+                <div className="current-stage">
+                  <strong>Mevcut Aşama:</strong> {currentStage}
+                </div>
+
+                <div className="processing-stages">
+                  <div className="stage-item">
+                    <span className="stage-icon">📖</span>
+                    <span className="stage-text">PDF analiz ediliyor...</span>
+                  </div>
+                  <div className="stage-item">
+                    <span className="stage-icon">🏗️</span>
+                    <span className="stage-text">Ders yapısı oluşturuluyor...</span>
+                  </div>
+                  <div className="stage-item">
+                    <span className="stage-icon">🎨</span>
+                    <span className="stage-text">Görseller hazırlanıyor...</span>
+                  </div>
+                  <div className="stage-item">
+                    <span className="stage-icon">📚</span>
+                    <span className="stage-text">İçerik zenginleştiriliyor...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Ders Oluşturuldu Sayfası */
+          <div className="course-created-container">
+            <div className="success-message">
+              <div className="success-icon">✅</div>
+              <h2>Dersiniz Başarıyla Oluşturuldu!</h2>
+              <p>AI, PDF'inizi analiz edip size özel bir ders hazırladı.</p>
+            </div>
+
+            {courseResult && (
+              <div className="course-summary">
+                <div className="summary-card">
+                  <h3>📚 Ders Özeti</h3>
+                  <div className="summary-items">
+                    <div className="summary-item">
+                      <span className="item-icon">📖</span>
+                      <span className="item-label">Bölüm Sayısı:</span>
+                      <span className="item-value">
+                        {courseResult.data?.courseStructure?.chapters?.length || 0}
+                      </span>
+                    </div>
+                    <div className="summary-item">
+                      <span className="item-icon">📝</span>
+                      <span className="item-label">Ders Sayısı:</span>
+                      <span className="item-value">
+                        {courseResult.data?.courseStructure?.chapters?.reduce((total, chapter) => 
+                          total + (chapter.lessons?.length || 0), 0) || 0}
+                      </span>
+                    </div>
+                    <div className="summary-item">
+                      <span className="item-icon">🖼️</span>
+                      <span className="item-label">Görsel Materyal:</span>
+                      <span className="item-value">
+                        {courseResult.data?.courseImages?.length || 0}
+                      </span>
+                    </div>
+                    <div className="summary-item">
+                      <span className="item-icon">⏱️</span>
+                      <span className="item-label">Tahmini Süre:</span>
+                      <span className="item-value">
+                        {courseResult.data?.courseStructure?.estimatedDuration || '8-10 saat'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="course-actions">
+              <button className="action-btn primary-btn">
+                🚀 Derse Başla
+              </button>
+              <button className="action-btn secondary-btn">
+                📋 Ders Detayları
+              </button>
+              <button 
+                className="action-btn secondary-btn"
+                onClick={() => {
+                  setCourseCreated(false)
+                  setSelectedFile(null)
+                  setCourseResult(null)
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = ''
+                  }
+                }}
+              >
+                ➕ Yeni Ders Oluştur
+              </button>
             </div>
           </div>
-          <div className="stat-item">
-            <div className="stat-icon">✅</div>
-            <div className="stat-info">
-              <span className="stat-number">8</span>
-              <span className="stat-label">Tamamlanan</span>
-            </div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-icon">⏱️</div>
-            <div className="stat-info">
-              <span className="stat-number">24h</span>
-              <span className="stat-label">Toplam Süre</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Oluşturulmuş Dersler */}
-        <div className="created-courses">
-          <div className="courses-header">
-            <h2>📖 Mevcut Derslerim</h2>
-            <button className="create-new-btn">➕ Yeni Ders Oluştur</button>
-          </div>
-          <div className="courses-grid">
-            <div className="course-card">
-              <div className="course-status active">Aktif</div>
-              <div className="course-content">
-                <h3>efişrenfik</h3>
-                <span className="course-subject">Matematik</span>
-                <div className="course-info">
-                  <span className="info-icon">📚</span>
-                  <span>Eğitim seviyesi: Eğitim gevezeliği</span>
-                </div>
-                <div className="course-info">
-                  <span className="info-icon">🕐</span>
-                  <span>Süre: yakın</span>
-                </div>
-              </div>
-              <div className="course-actions">
-                <button className="action-btn enter-btn">
-                  🚪 Derse Gir
-                </button>
-                <button className="action-btn delete-btn">
-                  🗑️ Sil
-                </button>
-              </div>
-            </div>
-
-            <div className="course-card">
-              <div className="course-status inactive">Pasif</div>
-              <div className="course-content">
-                <h3>aaab</h3>
-                <span className="course-subject">bbb</span>
-                <div className="course-info">
-                  <span className="info-icon">📚</span>
-                  <span>Eğitim seviyesi: Eğitim gevezeliği</span>
-                </div>
-                <div className="course-info">
-                  <span className="info-icon">🕐</span>
-                  <span>Süre: yakın</span>
-                </div>
-              </div>
-              <div className="course-actions">
-                <button className="action-btn enter-btn">
-                  🚪 Derse Gir
-                </button>
-                <button className="action-btn delete-btn">
-                  🗑️ Sil
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Yeni Çalışma Dersi Oluştur */}
-        <div className="create-course-section">
-          <h2>Yeni Çalışma Dersi Oluştur</h2>
-          
-          <div className="form-sections">
-            {/* Çalışma Dersi */}
-            <div className="form-section">
-              <h3>Çalışma Dersi</h3>
-              <div className="form-field">
-                <label>Çalışacağınız konunun kısa açıklamasını yazın</label>
-                <input type="text" placeholder="Çalışacağınız konunun kısa açıklamasını yazın..." className="form-input" />
-              </div>
-            </div>
-
-            {/* Çalışma Profili */}
-            <div className="form-section">
-              <h3>Çalışma Profili</h3>
-              <div className="form-row">
-                <div className="form-field">
-                  <label>Eğitim Seviyesi</label>
-                  <select className="form-select">
-                    <option>Eğitim seviyesi seçin...</option>
-                    <option>İlkokul</option>
-                    <option>Ortaokul</option>
-                    <option>Lise</option>
-                    <option>Üniversite</option>
-                  </select>
-                </div>
-                <div className="form-field">
-                  <label>Bilgi seviyesi seçin</label>
-                  <select className="form-select">
-                    <option>Bilgi seviyesi seçin...</option>
-                    <option>Başlangıç</option>
-                    <option>Orta</option>
-                    <option>İleri</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Bu Konu Hakkında Bilgi */}
-            <div className="form-section">
-              <h3>Bu Konu Hakkında Bilgi</h3>
-              <div className="form-field">
-                <label>Çalışma amacınız nedir?</label>
-                <select className="form-select">
-                  <option>Çalışma amacınızı seçin...</option>
-                  <option>Sınav Hazırlığı</option>
-                  <option>Genel Bilgi</option>
-                  <option>Proje Çalışması</option>
-                  <option>Hobisi Olarak</option>
-                </select>
-              </div>
-            </div>
-
-            {/* AI Öğretmen */}
-            <div className="form-section">
-              <h3>AI Öğretmen Seçimi</h3>
-              <div className="form-field">
-                <label>AI Öğretmen seçin (opsiyonel)</label>
-                <select className="form-select">
-                  <option>Seçiniz...</option>
-                  <option>Prof. Dr. Matematik</option>
-                  <option>Dr. Fizik Uzmanı</option>
-                  <option>Kimya Öğretmeni</option>
-                </select>
-              </div>
-              <div className="ai-note">
-                💡 Seçenek yok öğretmen dersler sonunda çalışma planları ve bunlara eşlik edeceği yönetimciler olacak.
-              </div>
-            </div>
-
-            {/* Özel Notlar */}
-            <div className="form-section">
-              <h3>Özel Notlar</h3>
-              <div className="form-field">
-                <textarea 
-                  placeholder="Konunuzla ilgili özel notlar; detaylarımız, vantajlarımız ödemlendirme kullanarak gösterilebilir"
-                  className="form-textarea"
-                  rows="4"
-                ></textarea>
-              </div>
-            </div>
-
-            {/* Çalışma Materyali */}
-            <div className="form-section material-section">
-              <h3>📚 Çalışma Materyali</h3>
-              <div className="material-upload">
-                <div className="upload-area">
-                  <span className="upload-icon">📎</span>
-                  <p>Çalışma dosyalarınızı buraya sürükleyin</p>
-                  <button type="button" className="upload-btn">
-                    📁 Dosya Seç
-                  </button>
-                </div>
-                <div className="upload-note">
-                  Desteklenen formatlar: TXT, DOCX (PDF desteği gelecektir)
-                </div>
-              </div>
-            </div>
-
-            {/* AI Asistan İle Çalışma */}
-            <div className="form-section ai-section">
-              <h3>✨ AI Asistan İle Çalışma Planı</h3>
-              <div className="ai-features">
-                <div className="feature-item">
-                  <span className="feature-icon">🤖</span>
-                  <span>Merhaba! Ben AI asistanınızım. Size çalışma planı oluşturmakta yardımcı olacağım.</span>
-                </div>
-                <div className="ai-actions">
-                  <button type="button" className="ai-btn">
-                    🎯 Hangi konuyu çalışacağız planını >
-                  </button>
-                </div>
-              </div>
-              <div className="ai-note">
-                AI asistanım çalışma planı ve bununa şifresisz birimi olacak yapılış lama özteli ki,
-                🚀 Hangi konuya özelleştirilecek
-              </div>
-            </div>
-          </div>
-
-          <button className="create-btn">
-            ✨ Çalışma Dersini Oluştur
-          </button>
-        </div>
+        )}
       </div>
     </div>
   )

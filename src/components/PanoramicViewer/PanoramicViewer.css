@@ -219,6 +219,8 @@
   }
 }
 
+/* CSS3DObject Styles - Artık CSS3DObject kullanıyoruz */
+
 @media (max-width: 768px) {
   .panoramic-viewer-container {
     padding: 20px;
@@ -237,4 +239,6 @@
     width: 100%;
     padding: 15px 20px;
   }
+  
+  /* CSS3DObject mobil ayarları artık JavaScript'te yapılıyor */
 } 

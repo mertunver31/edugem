@@ -10,4 +10,8 @@ ALTER TABLE documents ADD COLUMN visual_prompts_generated_at TIMESTAMP WITH TIME
 
 -- Course Images için yeni sütunlar
 ALTER TABLE documents ADD COLUMN course_images JSONB;
-ALTER TABLE documents ADD COLUMN course_images_generated_at TIMESTAMP WITH TIME ZONE; 
+ALTER TABLE documents ADD COLUMN course_images_generated_at TIMESTAMP WITH TIME ZONE;
+
+-- Enhanced Content Generation için yeni sütunlar
+ALTER TABLE documents ADD COLUMN enhanced_content JSONB;
+ALTER TABLE documents ADD COLUMN enhanced_content_generated_at TIMESTAMP WITH TIME ZONE; 

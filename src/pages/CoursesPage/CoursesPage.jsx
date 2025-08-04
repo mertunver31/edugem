@@ -5,9 +5,12 @@ import PanoramicImageList from '../../components/PanoramicImageList/PanoramicIma
 import PanoramicViewer from '../../components/PanoramicViewer/PanoramicViewer'
 import CinemaPanoramicViewer from '../../components/CinemaPanoramicViewer/CinemaPanoramicViewer'
 import AvatarSelector from '../../components/AvatarSelector/AvatarSelector'
+import DersSecimi from '../../components/DersSecimi/DersSecimi'
+import SinifSecimi from '../../components/SinifSecimi/SinifSecimi'
 import CustomButton from '../../components/CustomButton/CustomButton'
 import { getUserPanoramicImages, savePanoramicImage, uploadPanoramicFile, deletePanoramicImage } from '../../services/panoramicImageService'
 import { getCurrentUser } from '../../services/authService'
+import { supabase } from '../../config/supabase'
 import './CoursesPage.css'
 
 const CoursesPage = () => {
@@ -22,9 +25,22 @@ const CoursesPage = () => {
   const [cinemaImage, setCinemaImage] = useState(null)
   const [selectedAvatar, setSelectedAvatar] = useState(null)
   const [showAvatarSelector, setShowAvatarSelector] = useState(false)
+  
+  // Enhanced Content için state'ler
+  const [documents, setDocuments] = useState([])
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true)
+  const [selectedDocument, setSelectedDocument] = useState(null)
+  const [showDocumentDetail, setShowDocumentDetail] = useState(false)
+  
+  // Ders ve Sınıf Seçimi için state'ler
+  const [showDersSecimi, setShowDersSecimi] = useState(false)
+  const [showSinifSecimi, setShowSinifSecimi] = useState(false)
+  const [selectedDers, setSelectedDers] = useState(null)
+  const [selectedSinif, setSelectedSinif] = useState(null)
 
   useEffect(() => {
     loadImages()
+    loadDocuments()
   }, [])
 
   const loadImages = async () => {
@@ -40,6 +56,32 @@ const CoursesPage = () => {
       console.error('Görüntü yükleme hatası:', error)
     } finally {
       setIsLoadingImages(false)
+    }
+  }
+
+  const loadDocuments = async () => {
+    setIsLoadingDocuments(true)
+    try {
+      const userResult = await getCurrentUser()
+      if (!userResult.success) {
+        throw new Error('Kullanıcı bilgileri alınamadı')
+      }
+
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_id', userResult.user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw new Error(`Dökümanlar alınamadı: ${error.message}`)
+      }
+
+      setDocuments(data || [])
+    } catch (error) {
+      console.error('Döküman yükleme hatası:', error)
+    } finally {
+      setIsLoadingDocuments(false)
     }
   }
 
@@ -151,6 +193,50 @@ const CoursesPage = () => {
     setShowAvatarSelector(true)
   }
 
+  const handleDocumentClick = (document) => {
+    setSelectedDocument(document)
+    setShowDocumentDetail(true)
+  }
+
+  const handleCloseDocumentDetail = () => {
+    setShowDocumentDetail(false)
+    setSelectedDocument(null)
+  }
+
+  // Ders seçimi handlers
+  const handleDersSecimiBaslat = () => {
+    setShowDersSecimi(true)
+  }
+
+  const handleDersSec = (ders) => {
+    setSelectedDers(ders)
+    setShowDersSecimi(false)
+    setShowSinifSecimi(true)
+  }
+
+  const handleDersSecimiIptal = () => {
+    setShowDersSecimi(false)
+    setSelectedDers(null)
+  }
+
+  // Sınıf seçimi handlers
+  const handleSinifSec = (sinif) => {
+    setSelectedSinif(sinif)
+    setShowSinifSecimi(false)
+    // Panoramik sınıfa yönlendir
+    setCinemaImage(sinif)
+  }
+
+  const handleSinifSecimiIptal = () => {
+    setShowSinifSecimi(false)
+    setSelectedSinif(null)
+  }
+
+  const handleSinifSecimiGeriDon = () => {
+    setShowSinifSecimi(false)
+    setShowDersSecimi(true)
+  }
+
   return (
     <div className="courses-page">
       <div className="main-dashboard">
@@ -163,7 +249,7 @@ const CoursesPage = () => {
             <div className="stat-icon">📚</div>
             <div className="stat-content">
               <h3>Toplam Dersler</h3>
-              <div className="stat-number">9</div>
+              <div className="stat-number">{documents.length}</div>
             </div>
           </div>
           
@@ -178,20 +264,69 @@ const CoursesPage = () => {
           <div className="stat-card red">
             <div className="stat-icon">💻</div>
             <div className="stat-content">
-              <h3>Online Dersler</h3>
-              <div className="stat-number">0</div>
+              <h3>Enhanced Content</h3>
+              <div className="stat-number">{documents.filter(doc => doc.enhanced_content).length}</div>
             </div>
           </div>
         </div>
       </div>
       
-      <div className="courses-section" style={{display: 'none'}}>
+      <div className="courses-section">
         <div className="section-header">
-          <h2>Panoramik Görüntüler</h2>
-          <p>360° panoramik görüntülerinizi yükleyin ve yönetin</p>
+          <h2>Derslerim</h2>
+          <p>Yüklediğiniz PDF'lerden oluşturulan enhanced content'leri görüntüleyin</p>
+          <div className="header-actions">
+            <CustomButton
+              text="📚 Panoramik Sınıfta Çalış"
+              onClick={handleDersSecimiBaslat}
+              variant="primary"
+              className="panoramic-study-button"
+            />
+          </div>
         </div>
 
-        <div className="upload-section">
+        {/* Enhanced Content Dökümanları */}
+        <div className="documents-section">
+          {isLoadingDocuments ? (
+            <div className="loading-state">
+              <div className="loading-spinner"></div>
+              <p>Dersler yükleniyor...</p>
+            </div>
+          ) : documents.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">📚</div>
+              <h3>Henüz ders yok</h3>
+              <p>PDF yükleyerek enhanced content oluşturabilirsiniz</p>
+            </div>
+          ) : (
+            <div className="documents-grid">
+              {documents.map((document) => (
+                <div 
+                  key={document.id} 
+                  className="document-card"
+                  onClick={() => handleDocumentClick(document)}
+                >
+                  <div className="document-icon">📄</div>
+                  <div className="document-info">
+                    <h3>{document.title || document.file_name}</h3>
+                    <p className="document-date">
+                      {new Date(document.created_at).toLocaleDateString('tr-TR')}
+                    </p>
+                    <div className="document-status">
+                      {document.enhanced_content ? (
+                        <span className="status-badge success">✅ Enhanced Content Hazır</span>
+                      ) : (
+                        <span className="status-badge pending">⏳ İşleniyor...</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="upload-section" style={{display: 'none'}}>
           <PanoramicUploader onFileSelect={handleFileSelect} />
           {selectedFile && (
             <PanoramicUploadForm
@@ -255,7 +390,137 @@ const CoursesPage = () => {
           imageFile={cinemaImage}
           onClose={handleCloseCinema}
           selectedAvatar={selectedAvatar}
+          selectedDers={selectedDers}
         />
+      )}
+
+      {/* Ders Seçimi Modal */}
+      {showDersSecimi && (
+        <DersSecimi
+          onDersSec={handleDersSec}
+          onClose={handleDersSecimiIptal}
+        />
+      )}
+
+      {/* Sınıf Seçimi Modal */}
+      {showSinifSecimi && (
+        <SinifSecimi
+          selectedDers={selectedDers}
+          onSinifSec={handleSinifSec}
+          onClose={handleSinifSecimiIptal}
+          onGeriDon={handleSinifSecimiGeriDon}
+        />
+      )}
+
+      {/* Enhanced Content Detay Modal */}
+      {showDocumentDetail && selectedDocument && (
+        <div className="document-detail-modal">
+          <div className="modal-overlay" onClick={handleCloseDocumentDetail}></div>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>{selectedDocument.title || selectedDocument.file_name}</h2>
+              <button className="close-button" onClick={handleCloseDocumentDetail}>×</button>
+            </div>
+            <div className="modal-body">
+              {selectedDocument.enhanced_content ? (
+                <div className="enhanced-content">
+                  {selectedDocument.enhanced_content.chapters?.map((chapter, chapterIndex) => (
+                    <div key={chapterIndex} className="chapter-section">
+                      <h3 className="chapter-title">📖 {chapter.title}</h3>
+                      {chapter.content?.lessons?.map((lesson, lessonIndex) => (
+                        <div key={lessonIndex} className="lesson-section">
+                          <h4 className="lesson-title">🎯 {lesson.title}</h4>
+                          <div className="lesson-content">
+                            {lesson.content?.explanatory_text && (
+                              <div className="content-section">
+                                <h5>📝 Açıklayıcı Metin</h5>
+                                <p>{lesson.content.explanatory_text}</p>
+                              </div>
+                            )}
+                            {lesson.content?.key_points?.length > 0 && (
+                              <div className="content-section">
+                                <h5>✅ Anahtar Noktalar</h5>
+                                <ul>
+                                  {lesson.content.key_points.map((point, pointIndex) => (
+                                    <li key={pointIndex}>{point}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {lesson.content?.tables?.length > 0 && (
+                              <div className="content-section">
+                                <h5>📊 Tablolar</h5>
+                                {lesson.content.tables.map((table, tableIndex) => (
+                                  <div key={tableIndex} className="table-container">
+                                    <h6>{table.title}</h6>
+                                    <table>
+                                      {table.headers && (
+                                        <thead>
+                                          <tr>
+                                            {table.headers.map((header, headerIndex) => (
+                                              <th key={headerIndex}>{header}</th>
+                                            ))}
+                                          </tr>
+                                        </thead>
+                                      )}
+                                      <tbody>
+                                        {table.rows?.map((row, rowIndex) => (
+                                          <tr key={rowIndex}>
+                                            {row.map((cell, cellIndex) => (
+                                              <td key={cellIndex}>{cell}</td>
+                                            ))}
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {lesson.content?.code_examples?.length > 0 && (
+                              <div className="content-section">
+                                <h5>💻 Kod Örnekleri</h5>
+                                {lesson.content.code_examples.map((example, exampleIndex) => (
+                                  <div key={exampleIndex} className="code-example">
+                                    <h6>{example.title}</h6>
+                                    <pre><code className={`language-${example.language}`}>{example.code}</code></pre>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {lesson.content?.practical_examples?.length > 0 && (
+                              <div className="content-section">
+                                <h5>🔍 Pratik Örnekler</h5>
+                                {lesson.content.practical_examples.map((example, exampleIndex) => (
+                                  <div key={exampleIndex} className="practical-example">
+                                    <h6>{example.title}</h6>
+                                    <p>{example.description}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {lesson.content?.summary && (
+                              <div className="content-section">
+                                <h5>📋 Özet</h5>
+                                <p>{lesson.content.summary}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-content">
+                  <div className="no-content-icon">⏳</div>
+                  <h3>Enhanced Content Henüz Hazır Değil</h3>
+                  <p>PDF işleniyor ve enhanced content oluşturuluyor. Lütfen biraz bekleyin.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Avatar Seçici Modal */}

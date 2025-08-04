@@ -68,6 +68,13 @@ const DashboardNavigation = ({ activeTab, setActiveTab, devMode, setDevMode }) =
             <div className="dev-separator">🔬 Development Tools</div>
             
             <button
+              className={`nav-tab ${activeTab === 'full-pipeline' ? 'active' : ''}`}
+              onClick={() => setActiveTab('full-pipeline')}
+            >
+              🚀 Full Pipeline
+            </button>
+            
+            <button
               className={`nav-tab ${activeTab === 'pdf-test' ? 'active' : ''}`}
               onClick={() => setActiveTab('pdf-test')}
             >
@@ -143,6 +150,34 @@ const DashboardNavigation = ({ activeTab, setActiveTab, devMode, setDevMode }) =
             >
               🎨 Course Visual Integration
             </button>
+            
+            <button
+              className={`nav-tab ${activeTab === 'enhanced-content' ? 'active' : ''}`}
+              onClick={() => setActiveTab('enhanced-content')}
+            >
+              🤖 Enhanced Content
+            </button>
+            
+            <button
+              className={`nav-tab ${activeTab === 'pdf-extraction' ? 'active' : ''}`}
+              onClick={() => setActiveTab('pdf-extraction')}
+            >
+              🔍 PDF Extraction
+            </button>
+            
+                           <button
+                 className={`nav-tab ${activeTab === 'gemini-embedding-test' ? 'active' : ''}`}
+                 onClick={() => setActiveTab('gemini-embedding-test')}
+               >
+                 🔧 Gemini Embedding Test
+               </button>
+               
+               <button
+                 className={`nav-tab ${activeTab === 'retrieval-test' ? 'active' : ''}`}
+                 onClick={() => setActiveTab('retrieval-test')}
+               >
+                 🔍 Retrieval Test
+               </button>
           </>
         )}
       </div>
