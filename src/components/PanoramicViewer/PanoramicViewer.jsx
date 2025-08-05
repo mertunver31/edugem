@@ -15,12 +15,19 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   const [isAvatarLoading, setIsAvatarLoading] = useState(false)
   const [mindMapData, setMindMapData] = useState(null)
   const [learningPathData, setLearningPathData] = useState(null)
+  const [cameraMode, setCameraMode] = useState('avatar') // 'avatar' veya 'free'
+  const cameraModeRef = useRef('avatar') // Ref ile takip et
   const viewerRef = useRef(null)
   const sceneRef = useRef(null)
   const rendererRef = useRef(null)
   const controlsRef = useRef(null)
   const animationRef = useRef(null)
   const avatarLoaderRef = useRef(null)
+  const avatarRef = useRef(null)
+  const freeCameraPositionRef = useRef({ x: 0, y: 0, z: 100 })
+  const keysPressedRef = useRef(new Set())
+  const freeCameraRef = useRef({ x: 0, y: 0, z: 100, rotationX: 0, rotationY: 0 })
+  const initialAvatarCameraPosition = useRef({ x: 0, y: 20, z: 30 }) // İlk avatar kamera pozisyonu
 
   useEffect(() => {
     if (imageFile) {
@@ -44,6 +51,55 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       cleanup3DViewer()
     }
   }, [isViewerActive])
+
+  // Mouse kontrolleri için event listener'lar
+  useEffect(() => {
+    let isMouseDown = false
+    let lastMouseX = 0
+    let lastMouseY = 0
+
+    const handleMouseDown = (event) => {
+      if (cameraModeRef.current === 'free') {
+        isMouseDown = true
+        lastMouseX = event.clientX
+        lastMouseY = event.clientY
+      }
+    }
+
+    const handleMouseMove = (event) => {
+      if (cameraModeRef.current === 'free' && isMouseDown) {
+        const deltaX = event.clientX - lastMouseX
+        const deltaY = event.clientY - lastMouseY
+        
+        // Mouse hareketi ile kamera rotasyonu
+        freeCameraRef.current.rotationY -= deltaX * 0.01
+        freeCameraRef.current.rotationX -= deltaY * 0.01
+        
+        // Rotasyon sınırları
+        freeCameraRef.current.rotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, freeCameraRef.current.rotationX))
+        
+        lastMouseX = event.clientX
+        lastMouseY = event.clientY
+        
+        // DEBUG LOG
+        console.log('Mouse move:', { deltaX, deltaY, rotationX: freeCameraRef.current.rotationX, rotationY: freeCameraRef.current.rotationY })
+      }
+    }
+
+    const handleMouseUp = () => {
+      isMouseDown = false
+    }
+
+    window.addEventListener('mousedown', handleMouseDown)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [cameraMode])
 
   const prepareImage = async () => {
     setIsLoading(true)
@@ -258,8 +314,22 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       controls.dampingFactor = 0.05
       controls.minDistance = 50
       controls.maxDistance = 800
-      controls.enabled = true // Başlangıçta etkin
+      controls.enabled = cameraMode === 'free' // Sadece serbest modda etkin
       controlsRef.current = controls
+
+      // Serbest kamera pozisyonunu sakla
+      freeCameraPositionRef.current = { x: camera.position.x, y: camera.position.y, z: camera.position.z }
+
+      // OrbitControls değişiklik event listener'ı
+      controls.addEventListener('change', () => {
+        if (cameraMode === 'free' && camera) {
+          freeCameraPositionRef.current = {
+            x: camera.position.x,
+            y: camera.position.y,
+            z: camera.position.z
+          }
+        }
+      })
 
       // Mouse click event handler
       const raycaster = new THREE.Raycaster()
@@ -287,7 +357,10 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       // Animation loop
       const animate = () => {
         animationRef.current = requestAnimationFrame(animate)
-        controls.update()
+        
+        // Her zaman updateFreeCamera çağır, içinde kontrol yap
+        updateFreeCamera()
+        
         renderer.render(scene, camera)
         renderer.cssRenderer.render(scene, camera)
       }
@@ -333,9 +406,19 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   }
 
   const initializeAvatarFollowCamera = (avatar, scene) => {
-    // Avatar takip kamerası sistemi
-    const followCamera = () => {
-      if (!avatar || !rendererRef.current?.camera) return
+    // Avatar referansını sakla
+    avatarRef.current = avatar
+    
+    // İlk avatar kamera pozisyonunu sakla
+    initialAvatarCameraPosition.current = {
+      x: avatar.position.x,
+      y: avatar.position.y + 20,
+      z: avatar.position.z + 30
+    }
+    
+         // Avatar takip kamerası sistemi
+     const followCamera = () => {
+       if (!avatar || !rendererRef.current?.camera || cameraModeRef.current !== 'avatar') return
       
       const camera = rendererRef.current.camera
       
@@ -358,6 +441,7 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       // OrbitControls target'ını da güncelle
       if (controlsRef.current) {
         controlsRef.current.target.copy(avatar.position)
+        controlsRef.current.enabled = false // Avatar modunda controls devre dışı
       }
     }
     
@@ -825,6 +909,87 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       (B < 255 ? B < 1 ? 0 : B : 255)
   }
 
+  const switchToAvatarCamera = () => {
+    setCameraMode('avatar')
+    cameraModeRef.current = 'avatar' // Ref'i de güncelle
+    if (controlsRef.current) {
+      controlsRef.current.enabled = false
+    }
+    // Avatar kamerasına geçerken ilk pozisyona dön
+    if (rendererRef.current?.camera && avatarRef.current) {
+      const camera = rendererRef.current.camera
+      const avatar = avatarRef.current
+      
+      // İlk avatar kamera pozisyonuna dön
+      camera.position.set(
+        avatar.position.x + initialAvatarCameraPosition.current.x,
+        avatar.position.y + initialAvatarCameraPosition.current.y,
+        avatar.position.z + initialAvatarCameraPosition.current.z
+      )
+      
+      // Avatar'a bak
+      camera.lookAt(avatar.position)
+    }
+    console.log('Avatar kamerasına geçildi - İlk pozisyona döndü')
+  }
+
+  const switchToFreeCamera = () => {
+    setCameraMode('free')
+    cameraModeRef.current = 'free' // Ref'i de güncelle
+    if (controlsRef.current) {
+      controlsRef.current.enabled = false // OrbitControls'ı devre dışı bırak
+    }
+    // Serbest kameraya geçerken mevcut pozisyonu kullan
+    if (rendererRef.current?.camera) {
+      const camera = rendererRef.current.camera
+      freeCameraRef.current = {
+        x: camera.position.x,
+        y: camera.position.y,
+        z: camera.position.z,
+        rotationX: 0,
+        rotationY: 0
+      }
+    }
+    console.log('Serbest kameraya geçildi - Mouse ile bakış açısı değiştirebilirsiniz')
+  }
+
+  const updateFreeCamera = () => {
+    if (cameraModeRef.current !== 'free' || !rendererRef.current?.camera) return
+
+    const camera = rendererRef.current.camera
+
+    // Mouse ile rotasyon kontrolü
+    const rotationX = freeCameraRef.current.rotationX
+    const rotationY = freeCameraRef.current.rotationY
+
+    // DEBUG LOG - sadece serbest modda log ver
+    if (cameraModeRef.current === 'free') {
+      console.log('updateFreeCamera', { rotationX, rotationY, cameraMode: cameraModeRef.current })
+    }
+
+    // Kamera pozisyonunu güncelle
+    camera.position.set(
+      freeCameraRef.current.x,
+      freeCameraRef.current.y,
+      freeCameraRef.current.z
+    )
+
+    // Rotasyon matrisini hesapla
+    const matrix = new THREE.Matrix4()
+    matrix.makeRotationFromEuler(new THREE.Euler(rotationX, rotationY, 0, 'YXZ'))
+    
+    // Kameranın bakış yönünü hesapla
+    const direction = new THREE.Vector3(0, 0, -1)
+    direction.applyMatrix4(matrix)
+    
+    // Kameranın hedef noktasını hesapla
+    const target = new THREE.Vector3()
+    target.copy(camera.position).add(direction)
+    
+    // Kamerayı hedefe yönlendir
+    camera.lookAt(target)
+  }
+
   const handleViewImage = () => {
     if (!isViewerReady) return
     setIsViewerActive(true)
@@ -893,6 +1058,42 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
             className={`panoramic-viewer${isCinemaMode ? ' cinema-viewer' : ''}`}
           ></div>
           
+          {/* Kamera Kontrol Butonları */}
+          {selectedAvatar && (
+            <div className="camera-controls">
+              <CustomButton
+                text="👤 Avatar Kamerası"
+                onClick={switchToAvatarCamera}
+                variant={cameraMode === 'avatar' ? 'primary' : 'secondary'}
+                className={`camera-button ${cameraMode === 'avatar' ? 'active' : ''}`}
+              />
+              <CustomButton
+                text="🌍 Serbest Kamera"
+                onClick={switchToFreeCamera}
+                variant={cameraMode === 'free' ? 'primary' : 'secondary'}
+                className={`camera-button ${cameraMode === 'free' ? 'active' : ''}`}
+              />
+              
+                                            {/* Serbest Kamera Kontrolleri Bilgisi */}
+                {cameraMode === 'free' && (
+                  <div className="free-camera-info">
+                    <h5>🎮 Serbest Kamera Kontrolleri</h5>
+                    <div className="controls-grid">
+                      <div className="control-item">
+                        <span className="key">🖱️</span>
+                        <span className="action">Mouse ile bakış açısı</span>
+                      </div>
+                      <div className="control-item">
+                        <span className="key">👆</span>
+                        <span className="action">Sol tık + sürükle</span>
+                      </div>
+                    </div>
+                    <p className="camera-hint">💡 Mouse ile 360° bakış açısı değiştirebilirsiniz</p>
+                  </div>
+                )}
+            </div>
+          )}
+
           {/* 3D Mind Map ve Learning Path Bilgi Paneli */}
           {(mindMapData || learningPathData) && (
             <div className="info-panel">

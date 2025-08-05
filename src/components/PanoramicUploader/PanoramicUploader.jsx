@@ -8,6 +8,8 @@ const PanoramicUploader = ({ onFileSelect }) => {
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef(null)
 
+  console.log('PanoramicUploader render edildi')
+
   const handleDrag = (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -23,18 +25,22 @@ const PanoramicUploader = ({ onFileSelect }) => {
     e.stopPropagation()
     setDragActive(false)
     
+    console.log('Drop event triggered')
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFile(e.dataTransfer.files[0])
     }
   }
 
   const handleFileInput = (e) => {
+    console.log('File input changed:', e.target.files)
     if (e.target.files && e.target.files[0]) {
       handleFile(e.target.files[0])
     }
   }
 
   const handleFile = (file) => {
+    console.log('File selected:', file)
+    
     // Dosya tipini kontrol et
     if (!file.type.startsWith('image/')) {
       alert('Lütfen sadece resim dosyası yükleyin!')
@@ -80,7 +86,19 @@ const PanoramicUploader = ({ onFileSelect }) => {
   }
 
   const handleBrowseClick = () => {
-    fileInputRef.current?.click()
+    console.log('Browse button clicked')
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    } else {
+      console.error('File input ref not found')
+    }
+  }
+
+  const handleUploadAreaClick = () => {
+    alert('Upload area tıklandı!')
+    if (!selectedFile) {
+      handleBrowseClick()
+    }
   }
 
   const removeFile = () => {
@@ -98,6 +116,8 @@ const PanoramicUploader = ({ onFileSelect }) => {
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
+        onClick={handleUploadAreaClick}
+        style={{ cursor: 'pointer' }}
       >
         <input
           ref={fileInputRef}
@@ -105,6 +125,7 @@ const PanoramicUploader = ({ onFileSelect }) => {
           accept="image/*"
           onChange={handleFileInput}
           className="file-input"
+          style={{ display: 'none' }}
         />
         
         {!selectedFile ? (
@@ -119,6 +140,23 @@ const PanoramicUploader = ({ onFileSelect }) => {
               variant="secondary"
               className="browse-button"
             />
+            <button 
+              onClick={() => {
+                console.log('Test button clicked')
+                alert('Test button çalışıyor!')
+              }}
+              style={{ 
+                marginTop: '10px', 
+                padding: '8px 16px', 
+                backgroundColor: '#ff6b6b', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Test Butonu
+            </button>
           </div>
         ) : (
           <div className="file-preview">

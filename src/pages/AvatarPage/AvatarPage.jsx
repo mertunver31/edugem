@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import CustomButton from '../../components/CustomButton/CustomButton'
 import AvatarCreatorComponent from '../../components/AvatarCreator/AvatarCreator'
-import AvatarSaveForm from '../../components/AvatarSaveForm/AvatarSaveForm'
 import AvatarPreview from '../../components/AvatarPreview/AvatarPreview'
-import { saveAvatar, uploadAvatarFile } from '../../services/avatarService'
+import { getUserAvatars, deleteAvatar } from '../../services/avatarService'
 import { getCurrentUser } from '../../services/authService'
 import './AvatarPage.css'
 
@@ -11,62 +10,60 @@ const AvatarPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [showCreator, setShowCreator] = useState(false)
   const [createdAvatarUrl, setCreatedAvatarUrl] = useState(null)
-  const [showSaveForm, setShowSaveForm] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const [avatars, setAvatars] = useState([])
+  const [loadingAvatars, setLoadingAvatars] = useState(true)
+
+  // Mevcut avatarları yükle
+  useEffect(() => {
+    loadAvatars()
+  }, [])
+
+  const loadAvatars = async () => {
+    try {
+      setLoadingAvatars(true)
+      const avatarsData = await getUserAvatars()
+      setAvatars(avatarsData)
+    } catch (error) {
+      console.error('Avatarlar yüklenirken hata:', error)
+    } finally {
+      setLoadingAvatars(false)
+    }
+  }
 
   const handleCreateAvatar = () => {
     setShowCreator(true)
   }
 
-  const handleAvatarCreated = (avatarUrl) => {
+  const handleAvatarCreated = async (avatarUrl) => {
     setCreatedAvatarUrl(avatarUrl)
     console.log('Avatar oluşturuldu:', avatarUrl)
+    // Yeni avatar oluşturulduktan sonra listeyi yenile
+    await loadAvatars()
   }
 
-  const handleSaveAvatar = async (formData) => {
-    if (!createdAvatarUrl) return
-
-    setIsSaving(true)
-    try {
-      // Kullanıcı bilgilerini al
-      const userResult = await getCurrentUser()
-      if (!userResult.success) {
-        throw new Error('Kullanıcı bilgileri alınamadı')
+  const handleDeleteAvatar = async (avatarId) => {
+    if (window.confirm('Bu avatarı silmek istediğinizden emin misiniz?')) {
+      try {
+        const result = await deleteAvatar(avatarId)
+        if (result.success) {
+          await loadAvatars() // Listeyi yenile
+          alert('Avatar başarıyla silindi!')
+        } else {
+          alert('Avatar silinirken hata oluştu: ' + result.error)
+        }
+      } catch (error) {
+        console.error('Avatar silme hatası:', error)
+        alert('Avatar silinirken hata oluştu: ' + error.message)
       }
-
-      // Avatar verilerini hazırla
-      const avatarData = {
-        user_id: userResult.user.id,
-        name: formData.name,
-        avatar_url: createdAvatarUrl,
-        file_size: 0, // Ready Player Me URL kullandığımız için dosya boyutu 0
-        file_type: 'model/gltf-binary',
-        is_uploaded: false, // Dosya yüklemedik, URL kullandık
-        rpm_avatar_url: createdAvatarUrl
-      }
-
-      // Database'e kaydet
-      const saveResult = await saveAvatar(avatarData)
-      if (saveResult.success) {
-        setShowSaveForm(false)
-        alert('Avatar başarıyla kaydedildi!')
-      } else {
-        throw new Error(saveResult.error)
-      }
-    } catch (error) {
-      console.error('Avatar kaydetme hatası:', error)
-      alert('Avatar kaydedilirken hata oluştu: ' + error.message)
-    } finally {
-      setIsSaving(false)
     }
-  }
-
-  const handleSaveFormCancel = () => {
-    setShowSaveForm(false)
   }
 
   const handleCloseCreator = () => {
     setShowCreator(false)
+  }
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('tr-TR')
   }
 
   return (
@@ -131,7 +128,7 @@ const AvatarPage = () => {
         {createdAvatarUrl && (
           <div className="avatar-result-section">
             <div className="result-card">
-              <h3>✅ Avatar Başarıyla Oluşturuldu!</h3>
+              <h3>✅ Avatar Başarıyla Oluşturuldu ve Kaydedildi!</h3>
               <div className="avatar-info">
                 <div className="avatar-url-display">
                   <label>Avatar URL:</label>
@@ -158,13 +155,6 @@ const AvatarPage = () => {
                   >
                     📥 Avatar Dosyasını İndir
                   </button>
-                  <button 
-                    className="save-btn"
-                    onClick={() => setShowSaveForm(true)}
-                    disabled={isSaving}
-                  >
-                    💾 Avatarı Kaydet
-                  </button>
                 </div>
               </div>
             </div>
@@ -182,44 +172,61 @@ const AvatarPage = () => {
               ➕ Yeni Avatar Oluştur
             </button>
           </div>
-          <div className="saved-avatars-grid">
-            <div className="saved-avatar-card">
-              <div className="avatar-thumbnail">
-                <span className="avatar-icon">🎭</span>
-              </div>
-              <div className="avatar-details">
-                <h4>Avatar 1</h4>
-                <p>Oluşturulma: 15.01.2024</p>
-                <span className="avatar-status active">Aktif</span>
-              </div>
-              <div className="avatar-card-actions">
-                <button className="use-btn">Kullan</button>
-                <button className="edit-btn">Düzenle</button>
-                <button className="delete-btn">Sil</button>
+          
+          {loadingAvatars ? (
+            <div className="loading-avatars">
+              <div className="loading-spinner">⏳</div>
+              <p>Avatarlar yükleniyor...</p>
+            </div>
+          ) : (
+            <div className="saved-avatars-grid">
+              {avatars.length > 0 ? (
+                avatars.map((avatar) => (
+                  <div key={avatar.id} className="saved-avatar-card">
+                    <div className="avatar-thumbnail">
+                      <span className="avatar-icon">🎭</span>
+                    </div>
+                    <div className="avatar-details">
+                      <h4>{avatar.name}</h4>
+                      <p>Oluşturulma: {formatDate(avatar.created_at)}</p>
+                      <span className="avatar-status active">Aktif</span>
+                    </div>
+                    <div className="avatar-card-actions">
+                      <button 
+                        className="use-btn"
+                        onClick={() => window.open(avatar.avatar_url, '_blank')}
+                      >
+                        Görüntüle
+                      </button>
+                      <button 
+                        className="edit-btn"
+                        onClick={() => window.open(avatar.avatar_url, '_blank')}
+                      >
+                        Düzenle
+                      </button>
+                      <button 
+                        className="delete-btn"
+                        onClick={() => handleDeleteAvatar(avatar.id)}
+                      >
+                        Sil
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="no-avatars-message">
+                  <span className="no-avatars-icon">🎭</span>
+                  <h4>Henüz avatar oluşturmadınız</h4>
+                  <p>İlk avatarınızı oluşturmak için yukarıdaki butona tıklayın.</p>
+                </div>
+              )}
+              
+              <div className="empty-avatar-slot" onClick={() => setShowCreator(true)}>
+                <span className="plus-icon">+</span>
+                <p>Yeni Avatar Oluştur</p>
               </div>
             </div>
-
-            <div className="saved-avatar-card">
-              <div className="avatar-thumbnail">
-                <span className="avatar-icon">👨‍💼</span>
-              </div>
-              <div className="avatar-details">
-                <h4>İş Avatarım</h4>
-                <p>Oluşturulma: 10.01.2024</p>
-                <span className="avatar-status">Pasif</span>
-              </div>
-              <div className="avatar-card-actions">
-                <button className="use-btn">Kullan</button>
-                <button className="edit-btn">Düzenle</button>
-                <button className="delete-btn">Sil</button>
-              </div>
-            </div>
-            
-            <div className="empty-avatar-slot" onClick={() => setShowCreator(true)}>
-              <span className="plus-icon">+</span>
-              <p>Yeni Avatar Oluştur</p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -228,17 +235,6 @@ const AvatarPage = () => {
           onAvatarCreated={handleAvatarCreated}
           onClose={handleCloseCreator}
         />
-      )}
-
-      {showSaveForm && createdAvatarUrl && (
-        <div className="modal-overlay">
-          <AvatarSaveForm
-            avatarUrl={createdAvatarUrl}
-            onSubmit={handleSaveAvatar}
-            onCancel={handleSaveFormCancel}
-            isLoading={isSaving}
-          />
-        </div>
       )}
     </div>
   )
