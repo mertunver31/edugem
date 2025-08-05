@@ -49,6 +49,45 @@ export const estimateTokens = (text) => {
   return Math.ceil(text.length / 4)
 }
 
+// PDF'den text çıkarma
+export const extractTextFromPDF = async (base64PDF) => {
+  try {
+    console.log('📄 PDF\'den text çıkarılıyor...')
+    
+    // PDF.js kullanarak text çıkar
+    const pdfjsLib = window.pdfjsLib || window['pdfjs-dist/build/pdf']
+    if (!pdfjsLib) {
+      throw new Error('PDF.js kütüphanesi yüklenmedi')
+    }
+    
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+    
+    // Base64'ten ArrayBuffer'a çevir
+    const binaryString = atob(base64PDF)
+    const bytes = new Uint8Array(binaryString.length)
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i)
+    }
+    
+    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise
+    
+    let fullText = ''
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i)
+      const textContent = await page.getTextContent()
+      const pageText = textContent.items.map(item => item.str).join(' ')
+      fullText += pageText + '\n'
+    }
+    
+    console.log('✅ PDF text çıkarıldı, uzunluk:', fullText.length)
+    return fullText
+    
+  } catch (error) {
+    console.error('❌ PDF text çıkarma hatası:', error)
+    throw error
+  }
+}
+
 // Gemini Document Understanding
 export const extractDocumentOutline = async (fileUrl) => {
   try {
@@ -244,16 +283,95 @@ export const generateContent = async (prompt, options = {}) => {
       temperature: options.temperature || 0.7
     }
     
-    const result = await model.generateContent(prompt, { generationConfig })
-    const response = await result.response
-    const text = response.text()
-    
-    console.log('✅ Gemini generateContent başarılı')
-    
-    return {
-      success: true,
-      data: text,
-      tokens: estimateTokens(text)
+    // PDF içeriği varsa PDF ile birlikte gönder
+    if (options.pdfContent) {
+      console.log('📄 PDF içeriği ile generateContent çağrılıyor...')
+      
+      // PDF boyutunu kontrol et (20MB limit)
+      const pdfSizeInBytes = Math.ceil((options.pdfContent.length * 3) / 4)
+      const pdfSizeInMB = pdfSizeInBytes / (1024 * 1024)
+      
+      console.log(`📊 PDF boyutu: ${pdfSizeInMB.toFixed(2)} MB`)
+      
+      if (pdfSizeInMB > 20) {
+        console.warn('⚠️ PDF çok büyük, text-only mode\'a geçiliyor...')
+        throw new Error('PDF boyutu çok büyük')
+      }
+      
+      try {
+        // PDF zaten base64 formatında, direkt kullan
+        const result = await model.generateContent([
+          {
+            text: prompt
+          },
+          {
+            inlineData: {
+              mimeType: 'application/pdf',
+              data: options.pdfContent
+            }
+          }
+        ], { generationConfig })
+        
+        const response = await result.response
+        const text = response.text()
+        
+        console.log('✅ Gemini generateContent (PDF ile) başarılı')
+        
+        return {
+          success: true,
+          data: text,
+          tokens: estimateTokens(text)
+        }
+      } catch (pdfError) {
+        console.error('❌ PDF işleme hatası:', pdfError)
+        // PDF işleme başarısız olursa normal text generation'a geç
+        console.log('🔄 PDF olmadan normal text generation deneniyor...')
+        
+        // PDF'den text çıkarmaya çalış
+        try {
+          const pdfText = await extractTextFromPDF(options.pdfContent)
+          const enhancedPrompt = `${prompt}\n\nPDF İÇERİĞİ:\n${pdfText}`
+          
+          const result = await model.generateContent(enhancedPrompt, { generationConfig })
+          const response = await result.response
+          const text = response.text()
+          
+          console.log('✅ Gemini generateContent (PDF text ile) başarılı')
+          
+          return {
+            success: true,
+            data: text,
+            tokens: estimateTokens(text)
+          }
+        } catch (textError) {
+          console.error('❌ PDF text çıkarma hatası:', textError)
+          // Son çare: sadece prompt ile
+          const result = await model.generateContent(prompt, { generationConfig })
+          const response = await result.response
+          const text = response.text()
+          
+          console.log('✅ Gemini generateContent (text only) başarılı')
+          
+          return {
+            success: true,
+            data: text,
+            tokens: estimateTokens(text)
+          }
+        }
+      }
+    } else {
+      // Normal text generation
+      const result = await model.generateContent(prompt, { generationConfig })
+      const response = await result.response
+      const text = response.text()
+      
+      console.log('✅ Gemini generateContent başarılı')
+      
+      return {
+        success: true,
+        data: text,
+        tokens: estimateTokens(text)
+      }
     }
     
   } catch (error) {

@@ -548,6 +548,20 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     try {
       console.log('🧠 Mind Map 3D objeleri oluşturuluyor...')
       
+      // Veri doğrulama ve temizleme
+      const centralTopic = (mindMapData.centralTopic || mindMapData.central_topic || 'Merkez Konu')
+        .toString()
+        .substring(0, 20)
+        .replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s]/g, '')
+        .trim()
+      
+      const branches = mindMapData.content || mindMapData.branches || []
+      
+      if (!Array.isArray(branches) || branches.length === 0) {
+        console.warn('⚠️ Mind Map branches verisi bulunamadı veya geçersiz')
+        return
+      }
+      
       // Merkez gezegen (ana konu)
       const centralGeometry = new THREE.SphereGeometry(8, 32, 32)
       const centralMaterial = new THREE.MeshLambertMaterial({ 
@@ -561,14 +575,25 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       scene.add(centralPlanet)
 
       // Merkez gezegen etiketi
-      const centralLabel = create3DLabel(mindMapData.centralTopic || mindMapData.central_topic || 'Merkez Konu', 0xff6b6b)
+      const centralLabel = create3DLabel(centralTopic, 0xff6b6b)
       centralLabel.position.set(-150, 70, -100)
       scene.add(centralLabel)
 
       // Ana dal gezegenleri
-      const branches = mindMapData.content || mindMapData.branches
       if (branches && Array.isArray(branches)) {
         branches.forEach((branch, index) => {
+          // Branch veri doğrulama
+          if (!branch || typeof branch !== 'object') {
+            console.warn(`⚠️ Branch ${index} geçersiz veri formatı`)
+            return
+          }
+          
+          const topic = (branch.topic || `Dal ${index + 1}`)
+            .toString()
+            .substring(0, 15)
+            .replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s]/g, '')
+            .trim()
+          
           const angle = (index / branches.length) * Math.PI * 2
           const radius = 40
           const x = -150 + Math.cos(angle) * radius
@@ -597,13 +622,20 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
           scene.add(connection)
 
           // Ana dal etiketi
-          const branchLabel = create3DLabel(branch.topic || `Dal ${index + 1}`, getBranchColor(index))
+          const branchLabel = create3DLabel(topic, getBranchColor(index))
           branchLabel.position.set(x, y + 8, z)
           scene.add(branchLabel)
 
           // Alt konu gezegenleri
           if (branch.subtopics && Array.isArray(branch.subtopics)) {
             branch.subtopics.forEach((subtopic, subIndex) => {
+              // Subtopic veri doğrulama
+              const subtopicText = (typeof subtopic === 'string' ? subtopic : `Alt ${subIndex + 1}`)
+                .toString()
+                .substring(0, 12)
+                .replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s]/g, '')
+                .trim()
+              
               const subAngle = (subIndex / branch.subtopics.length) * Math.PI * 2
               const subRadius = 15
               const subX = x + Math.cos(subAngle) * subRadius
@@ -647,6 +679,14 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     try {
       console.log('🛤️ Learning Path 3D objeleri oluşturuluyor...')
       
+      // Veri doğrulama
+      const steps = learningPathData.steps || []
+      
+      if (!Array.isArray(steps) || steps.length === 0) {
+        console.warn('⚠️ Learning Path steps verisi bulunamadı veya geçersiz')
+        return
+      }
+      
       // Başlangıç gezegeni
       const startGeometry = new THREE.SphereGeometry(6, 32, 32)
       const startMaterial = new THREE.MeshLambertMaterial({ 
@@ -665,9 +705,20 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       scene.add(startLabel)
 
       // Adım gezegenleri
-      if (learningPathData.steps && Array.isArray(learningPathData.steps)) {
-        learningPathData.steps.forEach((step, index) => {
-          const angle = (index / learningPathData.steps.length) * Math.PI * 2
+              steps.forEach((step, index) => {
+          // Step veri doğrulama
+          if (!step || typeof step !== 'object') {
+            console.warn(`⚠️ Step ${index} geçersiz veri formatı`)
+            return
+          }
+          
+          const stepTitle = (step.title || `Adım ${index + 1}`)
+            .toString()
+            .substring(0, 15)
+            .replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s]/g, '')
+            .trim()
+          
+          const angle = (index / steps.length) * Math.PI * 2
           const radius = 35
           const x = 150 + Math.cos(angle) * radius
           const y = 50 + Math.sin(angle) * radius * 0.5
@@ -676,8 +727,8 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
           // Adım gezegeni
           const stepGeometry = new THREE.SphereGeometry(3, 24, 24)
           const stepMaterial = new THREE.MeshLambertMaterial({ 
-            color: getStepColor(index, learningPathData.steps.length),
-            emissive: getStepColor(index, learningPathData.steps.length),
+            color: getStepColor(index, steps.length),
+            emissive: getStepColor(index, steps.length),
             emissiveIntensity: 0.1
           })
           const stepPlanet = new THREE.Mesh(stepGeometry, stepMaterial)
@@ -686,9 +737,9 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
           scene.add(stepPlanet)
 
           // Önceki adım ile bağlantı
-          const prevX = index === 0 ? 150 : 150 + Math.cos((index - 1) / learningPathData.steps.length * Math.PI * 2) * radius
-          const prevY = index === 0 ? 50 : 50 + Math.sin((index - 1) / learningPathData.steps.length * Math.PI * 2) * radius * 0.5
-          const prevZ = index === 0 ? -100 : -100 + Math.sin((index - 1) / learningPathData.steps.length * Math.PI * 2) * radius * 0.3
+          const prevX = index === 0 ? 150 : 150 + Math.cos((index - 1) / steps.length * Math.PI * 2) * radius
+          const prevY = index === 0 ? 50 : 50 + Math.sin((index - 1) / steps.length * Math.PI * 2) * radius * 0.5
+          const prevZ = index === 0 ? -100 : -100 + Math.sin((index - 1) / steps.length * Math.PI * 2) * radius * 0.3
 
           const connectionGeometry = new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(prevX, prevY, prevZ),
@@ -699,7 +750,7 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
           scene.add(connection)
 
           // Adım etiketi
-          const stepLabel = create3DLabel(step.title || `Adım ${index + 1}`, getStepColor(index, learningPathData.steps.length))
+          const stepLabel = create3DLabel(stepTitle, getStepColor(index, steps.length))
           stepLabel.position.set(x, y + 6, z)
           scene.add(stepLabel)
         })

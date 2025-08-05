@@ -12,7 +12,7 @@ class MindMapGeneratorService {
   }
 
   /**
-   * Mind map oluştur
+   * Mind map oluştur (mevcut sistem için)
    * @param {Object} options - Generation seçenekleri
    * @returns {Object} Generation sonucu
    */
@@ -76,7 +76,137 @@ class MindMapGeneratorService {
   }
 
   /**
-   * Mind map prompt'u oluştur
+   * PDF'den direkt mind map oluştur (yeni sistem için)
+   * @param {Object} options - Generation seçenekleri
+   * @returns {Object} Generation sonucu
+   */
+  async generateMindMapFromPDF(options) {
+    try {
+      console.log('🧠 PDF\'den mind map generation başlatılıyor:', options.courseTitle)
+
+      const startTime = Date.now()
+
+      // 1. Prompt hazırla
+      const prompt = this.buildMindMapPromptFromPDF(options)
+      console.log('📝 PDF mind map prompt hazırlandı')
+
+      // 2. Gemini API çağrısı (PDF ile)
+      const generationResult = await this.callGeminiAPIWithPDF(prompt, options)
+      if (!generationResult.success) {
+        throw new Error(generationResult.error)
+      }
+
+      // 3. Response parse et
+      const parsedMindMap = this.parseMindMapResponse(generationResult.data)
+      if (!parsedMindMap.success) {
+        throw new Error(parsedMindMap.error)
+      }
+
+      // 4. Database'e kaydet (documentId olmadan)
+      const saveResult = await mindMapService.createMindMap({
+        documentId: null, // PDF'den direkt oluşturulduğu için null
+        type: options.type || 'course_mindmap',
+        title: parsedMindMap.data.title,
+        centralTopic: parsedMindMap.data.central_topic,
+        content: parsedMindMap.data.branches,
+        modelUsed: this.model,
+        metadata: {
+          generationTime: Date.now() - startTime,
+          modelUsed: this.model,
+          source: 'gemini_api_pdf',
+          courseTitle: options.courseTitle,
+          options: options
+        }
+      })
+
+      if (!saveResult.success) {
+        throw new Error(saveResult.error)
+      }
+
+      console.log('✅ PDF\'den mind map generation tamamlandı:', saveResult.mindMapId)
+      return {
+        success: true,
+        mindMapId: saveResult.mindMapId,
+        data: parsedMindMap.data,
+        generationTime: Date.now() - startTime
+      }
+
+    } catch (error) {
+      console.error('❌ PDF\'den mind map generation hatası:', error)
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+  }
+
+  /**
+   * Mind map prompt'u oluştur (PDF için)
+   * @param {Object} options - Generation seçenekleri
+   * @returns {string} Prompt
+   */
+  buildMindMapPromptFromPDF(options) {
+    const {
+      courseTitle,
+      type = 'course_mindmap',
+      maxBranches = 6,
+      maxSubtopics = 3
+    } = options
+
+    const prompt = `
+Sen bir eğitim uzmanısın. Verilen PDF dosyasını analiz ederek etkili bir mind map oluşturman gerekiyor.
+
+KURS BİLGİLERİ:
+- Başlık: ${courseTitle}
+- Tür: ${type}
+- Maksimum Ana Dal: ${maxBranches}
+- Maksimum Alt Konu: ${maxSubtopics}
+
+GÖREV:
+PDF dosyasını analiz et ve aşağıdaki formatta bir mind map oluştur:
+
+{
+  "title": "Kurs Başlığı",
+  "central_topic": "Merkezi Konu",
+  "branches": [
+    {
+      "topic": "Ana Konu 1",
+      "importance": 0.9,
+      "subtopics": ["Alt Konu 1.1", "Alt Konu 1.2", "Alt Konu 1.3"],
+      "connections": ["Ana Konu 2", "Ana Konu 3"]
+    },
+    {
+      "topic": "Ana Konu 2", 
+      "importance": 0.8,
+      "subtopics": ["Alt Konu 2.1", "Alt Konu 2.2"],
+      "connections": ["Ana Konu 1"]
+    }
+  ]
+}
+
+3D GÖRSELLEŞTİRME İÇİN ÖNEMLİ:
+- central_topic: Merkez gezegen için kısa ve net başlık (max 20 karakter)
+- topic: Ana dal gezegenleri için kısa başlık (max 15 karakter)
+- subtopics: Alt konu gezegenleri için kısa başlıklar (max 12 karakter)
+- Tüm metinler Türkçe olmalı
+- Özel karakterler kullanma (sadece harf, rakam, boşluk)
+
+KURALLAR:
+1. Merkezi konu, PDF'nin ana temasını yansıtmalı
+2. Ana dallar, PDF'deki önemli bölümleri temsil etmeli
+3. Alt konular, ana dalların detaylarını içermeli
+4. Bağlantılar, konular arası ilişkileri gösterir
+5. Önem değeri 0.1 ile 1.0 arasında olmalı
+6. Sadece JSON formatında yanıt ver, başka açıklama ekleme
+
+PDF dosyasını analiz et ve mind map'i oluştur.
+`
+
+    return prompt
+  }
+
+  /**
+   * Mind map prompt'u oluştur (mevcut sistem için)
    * @param {Object} options - Generation seçenekleri
    * @returns {string} Prompt
    */
@@ -154,6 +284,52 @@ Yanıtını sadece JSON olarak ver, başka açıklama ekleme.`
    * @param {Object} options - Seçenekler
    * @returns {Object} API sonucu
    */
+  async callGeminiAPIWithPDF(prompt, options) {
+    try {
+      console.log('🤖 Gemini API çağrısı yapılıyor (PDF ile)...')
+
+      // Ana model ile dene (PDF desteği ile)
+      let result = await generateContent(prompt, {
+        model: this.model,
+        maxTokens: 4000,
+        temperature: 0.7,
+        pdfContent: options.pdfContent // PDF base64 içeriği
+      })
+
+      if (result.success) {
+        console.log('✅ Ana model başarılı (PDF ile):', this.model)
+        return result
+      }
+
+      // Fallback modeller ile dene
+      for (const fallbackModel of this.fallbackModels) {
+        console.log(`🔄 Fallback model deneniyor (PDF ile): ${fallbackModel}`)
+        
+        result = await generateContent(prompt, {
+          model: fallbackModel,
+          maxTokens: 4000,
+          temperature: 0.7,
+          pdfContent: options.pdfContent
+        })
+
+        if (result.success) {
+          console.log('✅ Fallback model başarılı (PDF ile):', fallbackModel)
+          this.model = fallbackModel // Başarılı modeli güncelle
+          return result
+        }
+      }
+
+      throw new Error('Tüm modeller başarısız oldu (PDF ile)')
+
+    } catch (error) {
+      console.error('❌ Gemini API hatası (PDF ile):', error)
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+  }
+
   async callGeminiAPI(prompt, options) {
     try {
       console.log('🤖 Gemini API çağrısı yapılıyor...')
