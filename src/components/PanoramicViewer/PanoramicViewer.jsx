@@ -344,15 +344,64 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
         const intersects = raycaster.intersectObjects(scene.children)
 
         for (const intersect of intersects) {
+          // Dev screen kontrolü
           if (intersect.object.name === 'devScreen' && intersect.object.userData.element) {
             const element = intersect.object.userData.element
             element.style.display = element.style.display === 'none' ? 'block' : 'none'
+            break
+          }
+          
+          // Mind Map küreleri kontrolü
+          if (intersect.object.name === 'mindMapCentral' || intersect.object.name.startsWith('mindMapBranch_')) {
+            console.log('🧠 Mind Map küresine tıklandı:', intersect.object.name)
+            showMindMapDetails(intersect.object)
+            break
+          }
+          
+          // Learning Path küreleri kontrolü
+          if (intersect.object.name === 'learningPathStart' || 
+              intersect.object.name === 'learningPathEnd' ||
+              intersect.object.name.startsWith('learningPathStep_')) {
+            console.log('🛤️ Learning Path küresine tıklandı:', intersect.object.name)
+            showLearningPathDetails(intersect.object)
             break
           }
         }
       }
 
       cssRenderer.domElement.addEventListener('click', handleMouseClick)
+
+      // Mouse move handler for hover effects
+      const handleMouseMove = (event) => {
+        const rect = renderer.domElement.getBoundingClientRect()
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+
+        raycaster.setFromCamera(mouse, camera)
+        const intersects = raycaster.intersectObjects(scene.children)
+
+        // Tüm küreleri normal boyuta getir
+        scene.children.forEach(child => {
+          if (child.name && (child.name.startsWith('mindMap') || child.name.startsWith('learningPath'))) {
+            child.scale.set(1, 1, 1)
+          }
+        })
+
+        // Hover edilen küreyi büyüt
+        for (const intersect of intersects) {
+          if (intersect.object.name && 
+              (intersect.object.name.startsWith('mindMap') || intersect.object.name.startsWith('learningPath'))) {
+            intersect.object.scale.set(1.2, 1.2, 1.2)
+            break
+          }
+        }
+      }
+
+      renderer.domElement.addEventListener('mousemove', handleMouseMove)
+
+      // Event listener referanslarını sakla
+      renderer.handleMouseClick = handleMouseClick
+      renderer.handleMouseMove = handleMouseMove
 
       // Animation loop
       const animate = () => {
@@ -585,38 +634,22 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   const cleanup3DViewer = () => {
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current)
-      animationRef.current = null
     }
+
     if (viewerRef.current && viewerRef.current.handleResize) {
       window.removeEventListener('resize', viewerRef.current.handleResize)
     }
+
     if (rendererRef.current) {
+      // Event listener'ları temizle
+      if (rendererRef.current.handleMouseClick) {
+        rendererRef.current.domElement.removeEventListener('click', rendererRef.current.handleMouseClick)
+      }
+      if (rendererRef.current.handleMouseMove) {
+        rendererRef.current.domElement.removeEventListener('mousemove', rendererRef.current.handleMouseMove)
+      }
+      
       rendererRef.current.dispose()
-      if (rendererRef.current.cssRenderer) {
-        rendererRef.current.cssRenderer.domElement.remove()
-        rendererRef.current.cssRenderer = null
-      }
-      rendererRef.current = null
-    }
-    if (sceneRef.current) {
-      // Scene'deki tüm objeleri temizle
-      while(sceneRef.current.children.length > 0) {
-        const child = sceneRef.current.children[0]
-        sceneRef.current.remove(child)
-      }
-      sceneRef.current = null
-    }
-    if (controlsRef.current) {
-      controlsRef.current.dispose()
-      controlsRef.current = null
-    }
-    if (avatarLoaderRef.current && sceneRef.current) {
-      avatarLoaderRef.current.removeAvatar(sceneRef.current)
-      avatarLoaderRef.current = null
-    }
-    
-    // Kamera referansını temizle
-    if (rendererRef.current) {
       rendererRef.current.camera = null
     }
 
@@ -1000,6 +1033,115 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       URL.revokeObjectURL(imageUrl)
     }
     onClose()
+  }
+
+  const showMindMapDetails = (clickedObject) => {
+    if (!mindMapData) return
+    
+    console.log('🧠 Mind Map detayları gösteriliyor:', clickedObject.name)
+    
+    // Tıklanan objenin bilgilerini al
+    let details = ''
+    let title = ''
+    
+    if (clickedObject.name === 'mindMapCentral') {
+      title = 'Merkez Konu'
+      details = mindMapData.centralTopic || mindMapData.central_topic || 'Merkez konu bilgisi'
+    } else if (clickedObject.name.startsWith('mindMapBranch_')) {
+      const branchIndex = parseInt(clickedObject.name.split('_')[1])
+      const branch = mindMapData.content?.[branchIndex] || mindMapData.branches?.[branchIndex]
+      
+      if (branch) {
+        title = branch.topic || `Dal ${branchIndex + 1}`
+        details = branch.subtopics ? branch.subtopics.join('\n• ') : 'Alt konular'
+      }
+    }
+    
+    // Modal veya overlay ile detayları göster
+    showDetailsModal(title, details, 'mindmap')
+  }
+
+  const showLearningPathDetails = (clickedObject) => {
+    if (!learningPathData) return
+    
+    console.log('🛤️ Learning Path detayları gösteriliyor:', clickedObject.name)
+    
+    // Tıklanan objenin bilgilerini al
+    let details = ''
+    let title = ''
+    
+    if (clickedObject.name === 'learningPathStart') {
+      title = 'Başlangıç'
+      details = 'Öğrenme yolculuğunuzun başlangıç noktası'
+    } else if (clickedObject.name === 'learningPathEnd') {
+      title = 'Hedef'
+      details = 'Öğrenme yolculuğunuzun hedef noktası'
+    } else if (clickedObject.name.startsWith('learningPathStep_')) {
+      const stepIndex = parseInt(clickedObject.name.split('_')[2])
+      const step = learningPathData.steps?.[stepIndex]
+      
+      if (step) {
+        title = `Adım ${stepIndex + 1}`
+        details = step.description || step.content || `Adım ${stepIndex + 1} açıklaması`
+      }
+    }
+    
+    // Modal veya overlay ile detayları göster
+    showDetailsModal(title, details, 'learningpath')
+  }
+
+  const showDetailsModal = (title, details, type) => {
+    // Mevcut modal varsa kaldır
+    const existingModal = document.getElementById('details-modal')
+    if (existingModal) {
+      existingModal.remove()
+    }
+    
+    // Yeni modal oluştur
+    const modal = document.createElement('div')
+    modal.id = 'details-modal'
+    modal.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      z-index: 10000;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      font-family: Arial, sans-serif;
+    `
+    
+    const icon = type === 'mindmap' ? '🧠' : '🛤️'
+    const color = type === 'mindmap' ? '#ff6b6b' : '#4ecdc4'
+    
+    modal.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: ${color}; font-size: 1.5rem;">
+          ${icon} ${title}
+        </h2>
+        <button onclick="this.parentElement.parentElement.remove()" 
+                style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">
+          ×
+        </button>
+      </div>
+      <div style="color: #333; line-height: 1.6; white-space: pre-wrap;">
+        ${details}
+      </div>
+    `
+    
+    document.body.appendChild(modal)
+    
+    // 3 saniye sonra otomatik kapat
+    setTimeout(() => {
+      if (modal.parentElement) {
+        modal.remove()
+      }
+    }, 10000)
   }
 
   return (
