@@ -763,28 +763,65 @@ const CreateCoursePage = () => {
                           <h3>🧠 {mindMap.title}</h3>
                           <p className="mindmap-central-topic">Merkezi Konu: {mindMap.central_topic}</p>
                           
-                          <div className="mindmap-branches">
-                            {mindMap.branches?.map((branch, index) => (
-                              <div key={index} className="mindmap-branch">
-                                <div className="branch-header">
-                                  <h4>{branch.topic}</h4>
-                                  <span className="importance-badge">Önem: {Math.round(branch.importance * 100)}%</span>
-                                </div>
-                                <div className="branch-subtopics">
-                                  {branch.subtopics?.map((subtopic, subIndex) => (
-                                    <div key={subIndex} className="subtopic-item">
-                                      • {subtopic}
-                                    </div>
-                                  ))}
-                                </div>
-                                {branch.connections?.length > 0 && (
-                                  <div className="branch-connections">
-                                    <small>Bağlantılar: {branch.connections.join(', ')}</small>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
+                          {/* JSON Content Display */}
+                          <div className="json-content-section">
+                            <h4>📋 Mind Map JSON Yapısı</h4>
+                            <div className="json-display">
+                              <pre className="json-code">
+                                {JSON.stringify(mindMap.content, null, 2)}
+                              </pre>
+                            </div>
                           </div>
+                          
+                          {/* Parsed Content Display */}
+                          <div className="parsed-content-section">
+                            <h4>🌳 Mind Map Ağacı</h4>
+                            <div className="mindmap-branches">
+                              {mindMap.content?.branches?.map((branch, index) => (
+                                <div key={index} className="mindmap-branch">
+                                  <div className="branch-header">
+                                    <h4>{branch.topic}</h4>
+                                    {branch.importance && (
+                                      <span className="importance-badge">Önem: {Math.round(branch.importance * 100)}%</span>
+                                    )}
+                                  </div>
+                                  <div className="branch-subtopics">
+                                    {branch.subtopics?.map((subtopic, subIndex) => (
+                                      <div key={subIndex} className="subtopic-item">
+                                        • {subtopic}
+                                      </div>
+                                    ))}
+                                  </div>
+                                  {branch.connections?.length > 0 && (
+                                    <div className="branch-connections">
+                                      <small>Bağlantılar: {branch.connections.join(', ')}</small>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          {/* Metadata Display */}
+                          {mindMap.content?.metadata && (
+                            <div className="metadata-section">
+                              <h4>📊 Meta Veriler</h4>
+                              <div className="metadata-grid">
+                                <div className="metadata-item">
+                                  <strong>Toplam Dal:</strong> {mindMap.content.metadata.total_branches}
+                                </div>
+                                <div className="metadata-item">
+                                  <strong>Toplam Alt Konu:</strong> {mindMap.content.metadata.total_subtopics}
+                                </div>
+                                <div className="metadata-item">
+                                  <strong>Oluşturulma Tarihi:</strong> {new Date(mindMap.content.metadata.generated_at).toLocaleString('tr-TR')}
+                                </div>
+                                <div className="metadata-item">
+                                  <strong>Model:</strong> {mindMap.content.metadata.model_used}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="no-content">
@@ -809,58 +846,114 @@ const CreateCoursePage = () => {
                           <h3>🛤️ {learningPath.title}</h3>
                           <p className="learningpath-description">{learningPath.description}</p>
                           
-                          <div className="learningpath-info">
-                            <div className="info-item">
-                              <strong>Zorluk Seviyesi:</strong> {learningPath.difficulty_level}
+                          {/* JSON Content Display */}
+                          <div className="json-content-section">
+                            <h4>📋 Learning Path JSON Yapısı</h4>
+                            <div className="json-display">
+                              <pre className="json-code">
+                                {JSON.stringify(learningPath.steps, null, 2)}
+                              </pre>
                             </div>
-                            <div className="info-item">
-                              <strong>Tahmini Süre:</strong> {learningPath.estimated_duration}
-                            </div>
-                            {learningPath.prerequisites?.length > 0 && (
-                              <div className="info-item">
-                                <strong>Ön Koşullar:</strong>
-                                <ul>
-                                  {learningPath.prerequisites.map((prereq, index) => (
-                                    <li key={index}>{prereq}</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
                           </div>
                           
-                          <div className="learningpath-steps">
-                            <h4>Öğrenme Adımları</h4>
-                            {learningPath.steps?.map((step, index) => (
-                              <div key={index} className="learning-step">
-                                <div className="step-header">
-                                  <h5>Adım {step.step}: {step.title}</h5>
-                                  <span className="step-duration">{step.duration}</span>
+                          {/* Parsed Content Display */}
+                          <div className="parsed-content-section">
+                            <h4>🛤️ Öğrenme Yolu</h4>
+                            
+                            <div className="learningpath-info">
+                              <div className="info-item">
+                                <strong>Zorluk Seviyesi:</strong> {learningPath.difficulty_level}
+                              </div>
+                              <div className="info-item">
+                                <strong>Tahmini Süre:</strong> {learningPath.estimated_duration}
+                              </div>
+                              {learningPath.prerequisites?.length > 0 && (
+                                <div className="info-item">
+                                  <strong>Ön Koşullar:</strong>
+                                  <ul>
+                                    {learningPath.prerequisites.map((prereq, index) => (
+                                      <li key={index}>{prereq}</li>
+                                    ))}
+                                  </ul>
                                 </div>
-                                <div className="step-content">
-                                  {step.objectives?.length > 0 && (
-                                    <div className="step-objectives">
-                                      <strong>Hedefler:</strong>
-                                      <ul>
-                                        {step.objectives.map((objective, objIndex) => (
-                                          <li key={objIndex}>{objective}</li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-                                  {step.activities?.length > 0 && (
-                                    <div className="step-activities">
-                                      <strong>Aktiviteler:</strong>
-                                      <ul>
-                                        {step.activities.map((activity, actIndex) => (
-                                          <li key={actIndex}>{activity}</li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
+                              )}
+                            </div>
+                            
+                            <div className="learningpath-steps">
+                              <h4>Öğrenme Adımları</h4>
+                              {learningPath.steps?.map((step, index) => (
+                                <div key={index} className="learning-step">
+                                  <div className="step-header">
+                                    <h5>Adım {step.step}: {step.title}</h5>
+                                    <span className="step-duration">{step.duration}</span>
+                                  </div>
+                                  <div className="step-content">
+                                    {step.chapters?.length > 0 && (
+                                      <div className="step-chapters">
+                                        <strong>Bölümler:</strong>
+                                        <ul>
+                                          {step.chapters.map((chapter, chapIndex) => (
+                                            <li key={chapIndex}>{chapter}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {step.prerequisites?.length > 0 && (
+                                      <div className="step-prerequisites">
+                                        <strong>Ön Koşullar:</strong>
+                                        <ul>
+                                          {step.prerequisites.map((prereq, prereqIndex) => (
+                                            <li key={prereqIndex}>{prereq}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {step.objectives?.length > 0 && (
+                                      <div className="step-objectives">
+                                        <strong>Hedefler:</strong>
+                                        <ul>
+                                          {step.objectives.map((objective, objIndex) => (
+                                            <li key={objIndex}>{objective}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {step.activities?.length > 0 && (
+                                      <div className="step-activities">
+                                        <strong>Aktiviteler:</strong>
+                                        <ul>
+                                          {step.activities.map((activity, actIndex) => (
+                                            <li key={actIndex}>{activity}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          {/* Metadata Display */}
+                          {learningPath.metadata && (
+                            <div className="metadata-section">
+                              <h4>📊 Meta Veriler</h4>
+                              <div className="metadata-grid">
+                                <div className="metadata-item">
+                                  <strong>Toplam Adım:</strong> {learningPath.metadata.total_steps}
+                                </div>
+                                <div className="metadata-item">
+                                  <strong>Toplam Süre (Saat):</strong> {learningPath.metadata.total_duration_hours}
+                                </div>
+                                <div className="metadata-item">
+                                  <strong>Oluşturulma Tarihi:</strong> {new Date(learningPath.metadata.generated_at).toLocaleString('tr-TR')}
+                                </div>
+                                <div className="metadata-item">
+                                  <strong>Model:</strong> {learningPath.metadata.model_used}
                                 </div>
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="no-content">

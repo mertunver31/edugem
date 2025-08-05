@@ -789,56 +789,55 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       scene.add(startLabel)
 
       // Adım gezegenleri
-              steps.forEach((step, index) => {
-          // Step veri doğrulama
-          if (!step || typeof step !== 'object') {
-            console.warn(`⚠️ Step ${index} geçersiz veri formatı`)
-            return
-          }
-          
-          const stepTitle = (step.title || `Adım ${index + 1}`)
-            .toString()
-            .substring(0, 15)
-            .replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s]/g, '')
-            .trim()
-          
-          const angle = (index / steps.length) * Math.PI * 2
-          const radius = 35
-          const x = 150 + Math.cos(angle) * radius
-          const y = 50 + Math.sin(angle) * radius * 0.5
-          const z = -100 + Math.sin(angle) * radius * 0.3
+      steps.forEach((step, index) => {
+        // Step veri doğrulama
+        if (!step || typeof step !== 'object') {
+          console.warn(`⚠️ Step ${index} geçersiz veri formatı`)
+          return
+        }
+        
+        const stepTitle = (step.title || `Adım ${index + 1}`)
+          .toString()
+          .substring(0, 15)
+          .replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s]/g, '')
+          .trim()
+        
+        const angle = (index / steps.length) * Math.PI * 2
+        const radius = 35
+        const x = 150 + Math.cos(angle) * radius
+        const y = 50 + Math.sin(angle) * radius * 0.5
+        const z = -100 + Math.sin(angle) * radius * 0.3
 
-          // Adım gezegeni
-          const stepGeometry = new THREE.SphereGeometry(3, 24, 24)
-          const stepMaterial = new THREE.MeshLambertMaterial({ 
-            color: getStepColor(index, steps.length),
-            emissive: getStepColor(index, steps.length),
-            emissiveIntensity: 0.1
-          })
-          const stepPlanet = new THREE.Mesh(stepGeometry, stepMaterial)
-          stepPlanet.position.set(x, y, z)
-          stepPlanet.name = `learningPathStep_${index}`
-          scene.add(stepPlanet)
-
-          // Önceki adım ile bağlantı
-          const prevX = index === 0 ? 150 : 150 + Math.cos((index - 1) / steps.length * Math.PI * 2) * radius
-          const prevY = index === 0 ? 50 : 50 + Math.sin((index - 1) / steps.length * Math.PI * 2) * radius * 0.5
-          const prevZ = index === 0 ? -100 : -100 + Math.sin((index - 1) / steps.length * Math.PI * 2) * radius * 0.3
-
-          const connectionGeometry = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(prevX, prevY, prevZ),
-            new THREE.Vector3(x, y, z)
-          ])
-          const connectionMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.6, transparent: true })
-          const connection = new THREE.Line(connectionGeometry, connectionMaterial)
-          scene.add(connection)
-
-          // Adım etiketi
-          const stepLabel = create3DLabel(stepTitle, getStepColor(index, steps.length))
-          stepLabel.position.set(x, y + 6, z)
-          scene.add(stepLabel)
+        // Adım gezegeni
+        const stepGeometry = new THREE.SphereGeometry(3, 24, 24)
+        const stepMaterial = new THREE.MeshLambertMaterial({ 
+          color: getStepColor(index, steps.length),
+          emissive: getStepColor(index, steps.length),
+          emissiveIntensity: 0.1
         })
-      }
+        const stepPlanet = new THREE.Mesh(stepGeometry, stepMaterial)
+        stepPlanet.position.set(x, y, z)
+        stepPlanet.name = `learningPathStep_${index}`
+        scene.add(stepPlanet)
+
+        // Önceki adım ile bağlantı
+        const prevX = index === 0 ? 150 : 150 + Math.cos((index - 1) / steps.length * Math.PI * 2) * radius
+        const prevY = index === 0 ? 50 : 50 + Math.sin((index - 1) / steps.length * Math.PI * 2) * radius * 0.5
+        const prevZ = index === 0 ? -100 : -100 + Math.sin((index - 1) / steps.length * Math.PI * 2) * radius * 0.3
+
+        const connectionGeometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(prevX, prevY, prevZ),
+          new THREE.Vector3(x, y, z)
+        ])
+        const connectionMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.6, transparent: true })
+        const connection = new THREE.Line(connectionGeometry, connectionMaterial)
+        scene.add(connection)
+
+        // Adım etiketi
+        const stepLabel = create3DLabel(stepTitle, getStepColor(index, steps.length))
+        stepLabel.position.set(x, y + 6, z)
+        scene.add(stepLabel)
+      })
 
       // Hedef gezegeni
       const endGeometry = new THREE.SphereGeometry(6, 32, 32)
