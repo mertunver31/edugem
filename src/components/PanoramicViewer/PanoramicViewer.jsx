@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import CustomButton from '../CustomButton/CustomButton'
 import Avatar3DLoader from '../Avatar3DLoader/Avatar3DLoader'
+import forceGraph3DService from '../../services/forceGraph3DService'
 import './PanoramicViewer.css'
 
 const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, selectedDers }) => {
@@ -12,6 +13,8 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   const [imageUrl, setImageUrl] = useState(null)
   const [isViewerActive, setIsViewerActive] = useState(false)
   const [isAvatarLoading, setIsAvatarLoading] = useState(false)
+  const [mindMapData, setMindMapData] = useState(null)
+  const [learningPathData, setLearningPathData] = useState(null)
   const viewerRef = useRef(null)
   const sceneRef = useRef(null)
   const rendererRef = useRef(null)
@@ -24,6 +27,14 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       prepareImage()
     }
   }, [imageFile])
+
+  useEffect(() => {
+    if (selectedDers && selectedDers.id) {
+      loadMindMapAndLearningPath(selectedDers.id)
+    }
+  }, [selectedDers])
+
+
 
   useEffect(() => {
     if (isViewerActive && viewerRef.current) {
@@ -55,10 +66,51 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     }
   }
 
+  const loadMindMapAndLearningPath = async (documentId) => {
+    try {
+      console.log('🧠 Mind map ve learning path yükleniyor:', documentId)
+      
+      // Mind map ve learning path servislerini import et
+      const mindMapService = (await import('../../services/mindMapService')).default
+      const learningPathService = (await import('../../services/learningPathService')).default
+      
+      // Mind map verilerini yükle
+      const mindMapResult = await mindMapService.getAllMindMaps(documentId)
+      if (mindMapResult.success && mindMapResult.data.length > 0) {
+        const latestMindMap = mindMapResult.data[0] // En son oluşturulan
+        setMindMapData({
+          centralTopic: latestMindMap.central_topic,
+          content: latestMindMap.content
+        })
+        console.log('✅ Mind map verisi yüklendi:', latestMindMap)
+      }
+      
+      // Learning path verilerini yükle
+      const learningPathResult = await learningPathService.getAllLearningPaths(documentId)
+      if (learningPathResult.success && learningPathResult.data.length > 0) {
+        const latestLearningPath = learningPathResult.data[0] // En son oluşturulan
+        setLearningPathData({
+          title: latestLearningPath.title,
+          description: latestLearningPath.description,
+          steps: latestLearningPath.steps,
+          estimatedDuration: latestLearningPath.estimated_duration,
+          difficultyLevel: latestLearningPath.difficulty_level
+        })
+        console.log('✅ Learning path verisi yüklendi:', latestLearningPath)
+      }
+      
+    } catch (error) {
+      console.error('❌ Mind map ve learning path yükleme hatası:', error)
+    }
+  }
+
   const initialize3DViewer = () => {
     if (!viewerRef.current || !imageUrl) return
 
     try {
+      // Three.js'i global olarak erişilebilir yap
+      window.THREE = THREE
+      
       // Scene oluştur
       const scene = new THREE.Scene()
       sceneRef.current = scene
@@ -123,6 +175,14 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       // Enhanced content için HTML overlay oluştur
       if (selectedDers && selectedDers.enhanced_content) {
         createEnhancedContentOverlay(scene, selectedDers)
+      }
+
+      // Mind Map ve Learning Path 3D objelerini oluştur
+      if (mindMapData) {
+        createMindMap3DObjects(scene)
+      }
+      if (learningPathData) {
+        createLearningPath3DObjects(scene)
       }
 
       // Monitör çerçevesi oluştur
@@ -475,6 +535,243 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     if (rendererRef.current) {
       rendererRef.current.camera = null
     }
+
+    // 3D Force Graph'ları temizle
+    forceGraph3DService.cleanup()
+
+    console.log('3D viewer temizlendi')
+  }
+
+  const createMindMap3DObjects = (scene) => {
+    if (!mindMapData) return
+
+    try {
+      console.log('🧠 Mind Map 3D objeleri oluşturuluyor...')
+      
+      // Merkez gezegen (ana konu)
+      const centralGeometry = new THREE.SphereGeometry(8, 32, 32)
+      const centralMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0xff6b6b,
+        emissive: 0x330000,
+        emissiveIntensity: 0.2
+      })
+      const centralPlanet = new THREE.Mesh(centralGeometry, centralMaterial)
+      centralPlanet.position.set(-150, 50, -100)
+      centralPlanet.name = 'mindMapCentral'
+      scene.add(centralPlanet)
+
+      // Merkez gezegen etiketi
+      const centralLabel = create3DLabel(mindMapData.centralTopic || mindMapData.central_topic || 'Merkez Konu', 0xff6b6b)
+      centralLabel.position.set(-150, 70, -100)
+      scene.add(centralLabel)
+
+      // Ana dal gezegenleri
+      const branches = mindMapData.content || mindMapData.branches
+      if (branches && Array.isArray(branches)) {
+        branches.forEach((branch, index) => {
+          const angle = (index / branches.length) * Math.PI * 2
+          const radius = 40
+          const x = -150 + Math.cos(angle) * radius
+          const y = 50 + Math.sin(angle) * radius * 0.5
+          const z = -100 + Math.sin(angle) * radius * 0.3
+
+          // Ana dal gezegeni
+          const branchGeometry = new THREE.SphereGeometry(4, 24, 24)
+          const branchMaterial = new THREE.MeshLambertMaterial({ 
+            color: getBranchColor(index),
+            emissive: getBranchColor(index),
+            emissiveIntensity: 0.1
+          })
+          const branchPlanet = new THREE.Mesh(branchGeometry, branchMaterial)
+          branchPlanet.position.set(x, y, z)
+          branchPlanet.name = `mindMapBranch_${index}`
+          scene.add(branchPlanet)
+
+          // Merkez ile bağlantı
+          const connectionGeometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-150, 50, -100),
+            new THREE.Vector3(x, y, z)
+          ])
+          const connectionMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.6, transparent: true })
+          const connection = new THREE.Line(connectionGeometry, connectionMaterial)
+          scene.add(connection)
+
+          // Ana dal etiketi
+          const branchLabel = create3DLabel(branch.topic || `Dal ${index + 1}`, getBranchColor(index))
+          branchLabel.position.set(x, y + 8, z)
+          scene.add(branchLabel)
+
+          // Alt konu gezegenleri
+          if (branch.subtopics && Array.isArray(branch.subtopics)) {
+            branch.subtopics.forEach((subtopic, subIndex) => {
+              const subAngle = (subIndex / branch.subtopics.length) * Math.PI * 2
+              const subRadius = 15
+              const subX = x + Math.cos(subAngle) * subRadius
+              const subY = y + Math.sin(subAngle) * subRadius * 0.5
+              const subZ = z + Math.sin(subAngle) * subRadius * 0.3
+
+              // Alt konu gezegeni
+              const subtopicGeometry = new THREE.SphereGeometry(2, 16, 16)
+              const subtopicMaterial = new THREE.MeshLambertMaterial({ 
+                color: lightenColor(getBranchColor(index), 0.3),
+                emissive: lightenColor(getBranchColor(index), 0.3),
+                emissiveIntensity: 0.1
+              })
+              const subtopicPlanet = new THREE.Mesh(subtopicGeometry, subtopicMaterial)
+              subtopicPlanet.position.set(subX, subY, subZ)
+              subtopicPlanet.name = `mindMapSubtopic_${index}_${subIndex}`
+              scene.add(subtopicPlanet)
+
+              // Ana dal ile bağlantı
+              const subConnectionGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(x, y, z),
+                new THREE.Vector3(subX, subY, subZ)
+              ])
+              const subConnectionMaterial = new THREE.LineBasicMaterial({ color: 0xcccccc, opacity: 0.4, transparent: true })
+              const subConnection = new THREE.Line(subConnectionGeometry, subConnectionMaterial)
+              scene.add(subConnection)
+            })
+          }
+        })
+      }
+
+      console.log('✅ Mind Map 3D objeleri oluşturuldu')
+    } catch (error) {
+      console.error('❌ Mind Map 3D objeleri oluşturma hatası:', error)
+    }
+  }
+
+  const createLearningPath3DObjects = (scene) => {
+    if (!learningPathData) return
+
+    try {
+      console.log('🛤️ Learning Path 3D objeleri oluşturuluyor...')
+      
+      // Başlangıç gezegeni
+      const startGeometry = new THREE.SphereGeometry(6, 32, 32)
+      const startMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0x4ecdc4,
+        emissive: 0x004d4d,
+        emissiveIntensity: 0.2
+      })
+      const startPlanet = new THREE.Mesh(startGeometry, startMaterial)
+      startPlanet.position.set(150, 50, -100)
+      startPlanet.name = 'learningPathStart'
+      scene.add(startPlanet)
+
+      // Başlangıç etiketi
+      const startLabel = create3DLabel('Başlangıç', 0x4ecdc4)
+      startLabel.position.set(150, 70, -100)
+      scene.add(startLabel)
+
+      // Adım gezegenleri
+      if (learningPathData.steps && Array.isArray(learningPathData.steps)) {
+        learningPathData.steps.forEach((step, index) => {
+          const angle = (index / learningPathData.steps.length) * Math.PI * 2
+          const radius = 35
+          const x = 150 + Math.cos(angle) * radius
+          const y = 50 + Math.sin(angle) * radius * 0.5
+          const z = -100 + Math.sin(angle) * radius * 0.3
+
+          // Adım gezegeni
+          const stepGeometry = new THREE.SphereGeometry(3, 24, 24)
+          const stepMaterial = new THREE.MeshLambertMaterial({ 
+            color: getStepColor(index, learningPathData.steps.length),
+            emissive: getStepColor(index, learningPathData.steps.length),
+            emissiveIntensity: 0.1
+          })
+          const stepPlanet = new THREE.Mesh(stepGeometry, stepMaterial)
+          stepPlanet.position.set(x, y, z)
+          stepPlanet.name = `learningPathStep_${index}`
+          scene.add(stepPlanet)
+
+          // Önceki adım ile bağlantı
+          const prevX = index === 0 ? 150 : 150 + Math.cos((index - 1) / learningPathData.steps.length * Math.PI * 2) * radius
+          const prevY = index === 0 ? 50 : 50 + Math.sin((index - 1) / learningPathData.steps.length * Math.PI * 2) * radius * 0.5
+          const prevZ = index === 0 ? -100 : -100 + Math.sin((index - 1) / learningPathData.steps.length * Math.PI * 2) * radius * 0.3
+
+          const connectionGeometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(prevX, prevY, prevZ),
+            new THREE.Vector3(x, y, z)
+          ])
+          const connectionMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.6, transparent: true })
+          const connection = new THREE.Line(connectionGeometry, connectionMaterial)
+          scene.add(connection)
+
+          // Adım etiketi
+          const stepLabel = create3DLabel(step.title || `Adım ${index + 1}`, getStepColor(index, learningPathData.steps.length))
+          stepLabel.position.set(x, y + 6, z)
+          scene.add(stepLabel)
+        })
+      }
+
+      // Hedef gezegeni
+      const endGeometry = new THREE.SphereGeometry(6, 32, 32)
+      const endMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0xff6b6b,
+        emissive: 0x4d0000,
+        emissiveIntensity: 0.2
+      })
+      const endPlanet = new THREE.Mesh(endGeometry, endMaterial)
+      endPlanet.position.set(150, 50, -100)
+      endPlanet.name = 'learningPathEnd'
+      scene.add(endPlanet)
+
+      // Hedef etiketi
+      const endLabel = create3DLabel('Hedef', 0xff6b6b)
+      endLabel.position.set(150, 70, -100)
+      scene.add(endLabel)
+
+      console.log('✅ Learning Path 3D objeleri oluşturuldu')
+    } catch (error) {
+      console.error('❌ Learning Path 3D objeleri oluşturma hatası:', error)
+    }
+  }
+
+  const create3DLabel = (text, color) => {
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+    canvas.width = 256
+    canvas.height = 64
+
+    context.fillStyle = '#ffffff'
+    context.font = 'bold 14px Arial'
+    context.textAlign = 'center'
+    context.textBaseline = 'middle'
+    context.fillText(text, canvas.width / 2, canvas.height / 2)
+
+    const texture = new THREE.CanvasTexture(canvas)
+    const spriteMaterial = new THREE.SpriteMaterial({ 
+      map: texture,
+      color: color
+    })
+    const sprite = new THREE.Sprite(spriteMaterial)
+    sprite.scale.set(8, 2, 1)
+    
+    return sprite
+  }
+
+  const getBranchColor = (index) => {
+    const colors = [0x4ecdc4, 0x45b7d1, 0x96ceb4, 0xffeaa7, 0xdda0dd, 0x98d8c8]
+    return colors[index % colors.length]
+  }
+
+  const getStepColor = (stepIndex, totalSteps) => {
+    const progress = stepIndex / (totalSteps - 1)
+    const colors = [0x4ecdc4, 0x45b7d1, 0x96ceb4, 0xffeaa7, 0xff6b6b]
+    const colorIndex = Math.floor(progress * (colors.length - 1))
+    return colors[colorIndex]
+  }
+
+  const lightenColor = (hex, percent) => {
+    const num = parseInt(hex.toString(16), 16)
+    const amt = Math.round(2.55 * percent * 100)
+    const R = (num >> 16) + amt
+    const G = (num >> 8 & 0x00FF) + amt
+    const B = (num & 0x0000FF) + amt
+    return 0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+      (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+      (B < 255 ? B < 1 ? 0 : B : 255)
   }
 
   const handleViewImage = () => {
@@ -539,10 +836,36 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
 
       {/* 3D Panoramik görüntüleyici alanı */}
       {isViewerActive && (
-        <div 
-          ref={viewerRef} 
-          className={`panoramic-viewer${isCinemaMode ? ' cinema-viewer' : ''}`}
-        ></div>
+        <>
+          <div 
+            ref={viewerRef} 
+            className={`panoramic-viewer${isCinemaMode ? ' cinema-viewer' : ''}`}
+          ></div>
+          
+          {/* 3D Mind Map ve Learning Path Bilgi Paneli */}
+          {(mindMapData || learningPathData) && (
+            <div className="info-panel">
+              <div className="info-content">
+                <h4>🌌 Evren Bilgileri</h4>
+                {mindMapData && (
+                  <div className="info-item">
+                    <span className="info-icon">🧠</span>
+                    <span className="info-text">Mind Map Sistemi Aktif</span>
+                  </div>
+                )}
+                {learningPathData && (
+                  <div className="info-item">
+                    <span className="info-icon">🛤️</span>
+                    <span className="info-text">Learning Path Sistemi Aktif</span>
+                  </div>
+                )}
+                <p className="info-hint">
+                  Gezegenleri keşfetmek için fare ile döndürün ve yakınlaştırın
+                </p>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

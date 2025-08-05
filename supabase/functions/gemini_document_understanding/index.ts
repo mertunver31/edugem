@@ -160,39 +160,78 @@ serve(async (req)=>{
     5. content_type sadece "text", "image", "table", "mixed" değerlerinden biri olsun.
     `;
     console.log('Gemini generateContent API\'ye gönderiliyor...');
-    // Model olarak 'gemini-1.5-pro' kullanıyoruz, çünkü bu model dosya girişini destekler.
-    const genUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
-    // Payload yapısı, dosya referansını 'fileData' olarak içerir.
-    const payload = {
-      contents: [
-        {
-          role: 'user',
-          parts: [
+    
+    // Yedek model sistemi - eğer bir model overload olursa diğerini dene
+    const models = [
+      'gemini-1.5-flash',
+      'gemini-1.5-pro'
+    ];
+    
+    let genResponse;
+    let lastError;
+    
+    for (const model of models) {
+      try {
+        console.log(`Model deneniyor: ${model}`);
+        const genUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
+        
+        // Payload yapısı, dosya referansını 'fileData' olarak içerir.
+        const payload = {
+          contents: [
             {
-              text: prompt
-            },
-            {
-              fileData: {
-                fileUri: geminiFileUri,
-                mimeType: 'application/pdf'
-              }
+              role: 'user',
+              parts: [
+                {
+                  text: prompt
+                },
+                {
+                  fileData: {
+                    fileUri: geminiFileUri,
+                    mimeType: 'application/pdf'
+                  }
+                }
+              ]
             }
           ]
+        };
+        
+        console.log(`HTTP payload hazır, ${model} modeline gönderiliyor...`);
+        genResponse = await fetch(genUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        if (genResponse.ok) {
+          console.log(`✅ ${model} modeli başarılı!`);
+          break; // Başarılı olursa döngüden çık
+        } else {
+          const errorText = await genResponse.text();
+          console.warn(`${model} modeli hatası:`, genResponse.status, errorText);
+          lastError = `Model ${model} failed: ${genResponse.status} - ${errorText}`;
+          
+          // Eğer overload hatası değilse diğer modelleri deneme
+          if (genResponse.status !== 503) {
+            throw new Error(lastError);
+          }
         }
-      ]
-    };
-    console.log('HTTP payload hazır, gönderiliyor...');
-    const genResponse = await fetch(genUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-    if (!genResponse.ok) {
-      const errorText = await genResponse.text();
-      console.error('Gemini generateContent hatası:', genResponse.status, errorText);
-      throw new Error(`GenerateContent failed: ${genResponse.status} - ${errorText}`);
+      } catch (error) {
+        console.warn(`${model} modeli exception:`, error.message);
+        lastError = error.message;
+        
+        // Eğer overload hatası değilse diğer modelleri deneme
+        if (!error.message.includes('503') && !error.message.includes('overload')) {
+          throw error;
+        }
+      }
+    }
+    
+    // Tüm modeller başarısız olduysa
+    if (!genResponse || !genResponse.ok) {
+      console.error('Tüm modeller başarısız oldu:', lastError);
+      throw new Error(`All models failed. Last error: ${lastError}`);
     }
     const genResult = await genResponse.json();
     // Gemini'den gelen yanıtın yapısını kontrol edin ve metni alın.

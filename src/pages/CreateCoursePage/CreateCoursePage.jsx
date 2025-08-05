@@ -6,6 +6,7 @@ import './CreateCoursePage.css'
 const CreateCoursePage = () => {
   const { user } = useAuth()
   const [selectedFile, setSelectedFile] = useState(null)
+  const [courseTitle, setCourseTitle] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [currentStage, setCurrentStage] = useState('')
@@ -53,10 +54,15 @@ const CreateCoursePage = () => {
   const handleDragOver = (event) => {
     event.preventDefault()
   }
-
+    
   const startCourseCreation = async () => {
     if (!selectedFile || !user) {
       setError('PDF dosyası seçin ve giriş yapın.')
+      return
+    }
+
+    if (!courseTitle.trim()) {
+      setError('Lütfen dersin adını girin.')
       return
     }
 
@@ -69,7 +75,7 @@ const CreateCoursePage = () => {
     try {
       console.log('🚀 Ders oluşturma başlatılıyor...')
       
-      const pipelineResult = await masterPipelineService.runFullPipeline(selectedFile, user.id)
+      const pipelineResult = await masterPipelineService.runFullPipeline(selectedFile, user.id, courseTitle.trim())
       
       if (pipelineResult.success) {
         setCourseResult(pipelineResult)
@@ -124,7 +130,7 @@ const CreateCoursePage = () => {
                     <div className="file-info">
                       <h3>{selectedFile.name}</h3>
                       <p>{formatFileSize(selectedFile.size)}</p>
-                    </div>
+            </div>
                     <button 
                       className="change-file-btn"
                       onClick={(e) => {
@@ -137,17 +143,17 @@ const CreateCoursePage = () => {
                     >
                       Değiştir
                     </button>
-                  </div>
+          </div>
                 ) : (
                   <div className="upload-placeholder">
                     <div className="upload-icon">📎</div>
                     <h3>PDF'inizi buraya sürükleyin veya tıklayın</h3>
                     <p>Maksimum dosya boyutu: 20MB</p>
                     <p>Sadece PDF formatı desteklenir</p>
-                  </div>
+            </div>
                 )}
-              </div>
-              
+        </div>
+
               <input
                 ref={fileInputRef}
                 type="file"
@@ -161,6 +167,27 @@ const CreateCoursePage = () => {
                   ❌ {error}
                 </div>
               )}
+                </div>
+
+            {/* Ders Adı Giriş Alanı */}
+            <div className="course-title-section">
+              <div className="input-group">
+                <label htmlFor="courseTitle" className="input-label">
+                  📚 Dersin Adı
+                </label>
+                <input
+                  id="courseTitle"
+                  type="text"
+                  className="course-title-input"
+                  placeholder="Örn: Matematik 101, Fizik Temelleri, Kimya Laboratuvarı..."
+                  value={courseTitle}
+                  onChange={(e) => setCourseTitle(e.target.value)}
+                  maxLength={255}
+                />
+                <p className="input-help">
+                  Bu isim Supabase'de dersinizi tanımlamak için kullanılacak
+                </p>
+              </div>
             </div>
 
             {/* Ders Oluştur Butonu */}
@@ -168,10 +195,10 @@ const CreateCoursePage = () => {
               <button
                 className="create-course-btn"
                 onClick={startCourseCreation}
-                disabled={!selectedFile || isProcessing || !user}
+                disabled={!selectedFile || !courseTitle.trim() || isProcessing || !user}
               >
                 {isProcessing ? '🔄 İşleniyor...' : '🚀 Dersimi Oluştur'}
-              </button>
+                </button>
               <p className="create-note">
                 AI, PDF'inizi analiz edip size özel bir ders hazırlayacak
               </p>
@@ -198,23 +225,23 @@ const CreateCoursePage = () => {
                   <div className="stage-item">
                     <span className="stage-icon">📖</span>
                     <span className="stage-text">PDF analiz ediliyor...</span>
-                  </div>
+              </div>
                   <div className="stage-item">
                     <span className="stage-icon">🏗️</span>
                     <span className="stage-text">Ders yapısı oluşturuluyor...</span>
-                  </div>
+              </div>
                   <div className="stage-item">
                     <span className="stage-icon">🎨</span>
                     <span className="stage-text">Görseller hazırlanıyor...</span>
-                  </div>
+            </div>
                   <div className="stage-item">
                     <span className="stage-icon">📚</span>
                     <span className="stage-text">İçerik zenginleştiriliyor...</span>
-                  </div>
+                </div>
                 </div>
               </div>
             )}
-          </div>
+            </div>
         ) : (
           /* Ders Oluşturuldu Sayfası */
           <div className="course-created-container">
@@ -235,7 +262,7 @@ const CreateCoursePage = () => {
                       <span className="item-value">
                         {courseResult.data?.courseStructure?.chapters?.length || 0}
                       </span>
-                    </div>
+              </div>
                     <div className="summary-item">
                       <span className="item-icon">📝</span>
                       <span className="item-label">Ders Sayısı:</span>
@@ -243,22 +270,22 @@ const CreateCoursePage = () => {
                         {courseResult.data?.courseStructure?.chapters?.reduce((total, chapter) => 
                           total + (chapter.lessons?.length || 0), 0) || 0}
                       </span>
-                    </div>
+              </div>
                     <div className="summary-item">
                       <span className="item-icon">🖼️</span>
                       <span className="item-label">Görsel Materyal:</span>
                       <span className="item-value">
                         {courseResult.data?.courseImages?.length || 0}
                       </span>
-                    </div>
+            </div>
                     <div className="summary-item">
                       <span className="item-icon">⏱️</span>
                       <span className="item-label">Tahmini Süre:</span>
                       <span className="item-value">
                         {courseResult.data?.courseStructure?.estimatedDuration || '8-10 saat'}
                       </span>
-                    </div>
-                  </div>
+              </div>
+            </div>
                 </div>
               </div>
             )}
@@ -275,6 +302,7 @@ const CreateCoursePage = () => {
                 onClick={() => {
                   setCourseCreated(false)
                   setSelectedFile(null)
+                  setCourseTitle('')
                   setCourseResult(null)
                   if (fileInputRef.current) {
                     fileInputRef.current.value = ''
@@ -282,7 +310,7 @@ const CreateCoursePage = () => {
                 }}
               >
                 ➕ Yeni Ders Oluştur
-              </button>
+                  </button>
             </div>
           </div>
         )}

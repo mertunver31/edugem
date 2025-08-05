@@ -11,6 +11,8 @@ import CustomButton from '../../components/CustomButton/CustomButton'
 import { getUserPanoramicImages, savePanoramicImage, uploadPanoramicFile, deletePanoramicImage } from '../../services/panoramicImageService'
 import { getCurrentUser } from '../../services/authService'
 import { supabase } from '../../config/supabase'
+import mindMapService from '../../services/mindMapService'
+import learningPathService from '../../services/learningPathService'
 import './CoursesPage.css'
 
 const CoursesPage = () => {
@@ -37,6 +39,13 @@ const CoursesPage = () => {
   const [showSinifSecimi, setShowSinifSecimi] = useState(false)
   const [selectedDers, setSelectedDers] = useState(null)
   const [selectedSinif, setSelectedSinif] = useState(null)
+  
+  // Mind Map ve Learning Path için state'ler
+  const [mindMap, setMindMap] = useState(null)
+  const [learningPath, setLearningPath] = useState(null)
+  const [isLoadingMindMap, setIsLoadingMindMap] = useState(false)
+  const [isLoadingLearningPath, setIsLoadingLearningPath] = useState(false)
+  const [activeTab, setActiveTab] = useState('content')
 
   useEffect(() => {
     loadImages()
@@ -193,14 +202,86 @@ const CoursesPage = () => {
     setShowAvatarSelector(true)
   }
 
-  const handleDocumentClick = (document) => {
+  const handleDocumentClick = async (document) => {
     setSelectedDocument(document)
     setShowDocumentDetail(true)
+    
+    // Mind Map ve Learning Path'i yükle
+    await loadMindMapAndLearningPath(document.id)
+  }
+
+  const loadMindMapAndLearningPath = async (documentId) => {
+    console.log('🔍 Mind Map ve Learning Path yükleniyor... Document ID:', documentId)
+    
+    try {
+      // Mind Map yükle
+      setIsLoadingMindMap(true)
+      console.log('🧠 Mind Map service çağrılıyor...')
+      const mindMapResult = await mindMapService.getMindMap(documentId)
+      console.log('🧠 Mind Map sonucu:', mindMapResult)
+      
+      if (mindMapResult.success) {
+        setMindMap(mindMapResult.data)
+        console.log('✅ Mind Map yüklendi:', mindMapResult.data)
+      } else {
+        setMindMap(null)
+        console.log('❌ Mind Map bulunamadı:', mindMapResult.error)
+      }
+    } catch (error) {
+      console.error('❌ Mind map yükleme hatası:', error)
+      setMindMap(null)
+    } finally {
+      setIsLoadingMindMap(false)
+    }
+
+    try {
+      // Learning Path yükle
+      setIsLoadingLearningPath(true)
+      console.log('🛤️ Learning Path service çağrılıyor...')
+      const learningPathResult = await learningPathService.getLearningPath(documentId)
+      console.log('🛤️ Learning Path sonucu:', learningPathResult)
+      
+      if (learningPathResult.success) {
+        setLearningPath(learningPathResult.data)
+        console.log('✅ Learning Path yüklendi:', learningPathResult.data)
+      } else {
+        setLearningPath(null)
+        console.log('❌ Learning Path bulunamadı:', learningPathResult.error)
+      }
+    } catch (error) {
+      console.error('❌ Learning path yükleme hatası:', error)
+      setLearningPath(null)
+    } finally {
+      setIsLoadingLearningPath(false)
+    }
   }
 
   const handleCloseDocumentDetail = () => {
     setShowDocumentDetail(false)
     setSelectedDocument(null)
+    setMindMap(null)
+    setLearningPath(null)
+    setActiveTab('content')
+  }
+
+  const debugMindMapAndLearningPath = async () => {
+    if (!selectedDocument) {
+      console.log('❌ Seçili document yok')
+      return
+    }
+    
+    console.log('🔍 Debug: Seçili document:', selectedDocument)
+    console.log('🔍 Debug: Document ID:', selectedDocument.id)
+    
+    // Test mind map service
+    console.log('🧠 Debug: Mind Map service test...')
+    const mindMapTest = await mindMapService.getMindMap(selectedDocument.id)
+    console.log('🧠 Debug: Mind Map test sonucu:', mindMapTest)
+    
+    // Test learning path service
+    console.log('🛤️ Debug: Learning Path service test...')
+    const learningPathTest = await learningPathService.getLearningPath(selectedDocument.id)
+    console.log('🛤️ Debug: Learning Path test sonucu:', learningPathTest)
   }
 
   // Ders seçimi handlers
@@ -419,105 +500,257 @@ const CoursesPage = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h2>{selectedDocument.title || selectedDocument.file_name}</h2>
-              <button className="close-button" onClick={handleCloseDocumentDetail}>×</button>
+              <div className="modal-actions">
+                <button 
+                  className="debug-button" 
+                  onClick={debugMindMapAndLearningPath}
+                  title="Debug Mind Map ve Learning Path"
+                >
+                  🐛 Debug
+                </button>
+                <button className="close-button" onClick={handleCloseDocumentDetail}>×</button>
+              </div>
             </div>
             <div className="modal-body">
-              {selectedDocument.enhanced_content ? (
-                <div className="enhanced-content">
-                  {selectedDocument.enhanced_content.chapters?.map((chapter, chapterIndex) => (
-                    <div key={chapterIndex} className="chapter-section">
-                      <h3 className="chapter-title">📖 {chapter.title}</h3>
-                      {chapter.content?.lessons?.map((lesson, lessonIndex) => (
-                        <div key={lessonIndex} className="lesson-section">
-                          <h4 className="lesson-title">🎯 {lesson.title}</h4>
-                          <div className="lesson-content">
-                            {lesson.content?.explanatory_text && (
-                              <div className="content-section">
-                                <h5>📝 Açıklayıcı Metin</h5>
-                                <p>{lesson.content.explanatory_text}</p>
+              <div className="modal-tabs">
+                <div className="tab-buttons">
+                  <button className="tab-button active" onClick={() => setActiveTab('content')}>
+                    📚 Enhanced Content
+                  </button>
+                  <button className="tab-button" onClick={() => setActiveTab('mindmap')}>
+                    🧠 Mind Map
+                  </button>
+                  <button className="tab-button" onClick={() => setActiveTab('learningpath')}>
+                    🛤️ Learning Path
+                  </button>
+                </div>
+                
+                <div className="tab-content">
+                  {/* Enhanced Content Tab */}
+                  {activeTab === 'content' && (
+                    <div className="content-tab">
+                      {selectedDocument.enhanced_content ? (
+                        <div className="enhanced-content">
+                          {selectedDocument.enhanced_content.chapters?.map((chapter, chapterIndex) => (
+                            <div key={chapterIndex} className="chapter-section">
+                              <h3 className="chapter-title">📖 {chapter.title}</h3>
+                              {chapter.content?.lessons?.map((lesson, lessonIndex) => (
+                                <div key={lessonIndex} className="lesson-section">
+                                  <h4 className="lesson-title">🎯 {lesson.title}</h4>
+                                  <div className="lesson-content">
+                                    {lesson.content?.explanatory_text && (
+                                      <div className="content-section">
+                                        <h5>📝 Açıklayıcı Metin</h5>
+                                        <p>{lesson.content.explanatory_text}</p>
+                                      </div>
+                                    )}
+                                    {lesson.content?.key_points?.length > 0 && (
+                                      <div className="content-section">
+                                        <h5>✅ Anahtar Noktalar</h5>
+                                        <ul>
+                                          {lesson.content.key_points.map((point, pointIndex) => (
+                                            <li key={pointIndex}>{point}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {lesson.content?.tables?.length > 0 && (
+                                      <div className="content-section">
+                                        <h5>📊 Tablolar</h5>
+                                        {lesson.content.tables.map((table, tableIndex) => (
+                                          <div key={tableIndex} className="table-container">
+                                            <h6>{table.title}</h6>
+                                            <table>
+                                              {table.headers && (
+                                                <thead>
+                                                  <tr>
+                                                    {table.headers.map((header, headerIndex) => (
+                                                      <th key={headerIndex}>{header}</th>
+                                                    ))}
+                                                  </tr>
+                                                </thead>
+                                              )}
+                                              <tbody>
+                                                {table.rows?.map((row, rowIndex) => (
+                                                  <tr key={rowIndex}>
+                                                    {row.map((cell, cellIndex) => (
+                                                      <td key={cellIndex}>{cell}</td>
+                                                    ))}
+                                                  </tr>
+                                                ))}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {lesson.content?.code_examples?.length > 0 && (
+                                      <div className="content-section">
+                                        <h5>💻 Kod Örnekleri</h5>
+                                        {lesson.content.code_examples.map((example, exampleIndex) => (
+                                          <div key={exampleIndex} className="code-example">
+                                            <h6>{example.title}</h6>
+                                            <pre><code className={`language-${example.language}`}>{example.code}</code></pre>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {lesson.content?.practical_examples?.length > 0 && (
+                                      <div className="content-section">
+                                        <h5>🔍 Pratik Örnekler</h5>
+                                        {lesson.content.practical_examples.map((example, exampleIndex) => (
+                                          <div key={exampleIndex} className="practical-example">
+                                            <h6>{example.title}</h6>
+                                            <p>{example.description}</p>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {lesson.content?.summary && (
+                                      <div className="content-section">
+                                        <h5>📋 Özet</h5>
+                                        <p>{lesson.content.summary}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="no-content">
+                          <div className="no-content-icon">⏳</div>
+                          <h3>Enhanced Content Henüz Hazır Değil</h3>
+                          <p>PDF işleniyor ve enhanced content oluşturuluyor. Lütfen biraz bekleyin.</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Mind Map Tab */}
+                  {activeTab === 'mindmap' && (
+                    <div className="mindmap-tab">
+                      {isLoadingMindMap ? (
+                        <div className="loading-state">
+                          <div className="loading-spinner"></div>
+                          <p>Mind Map yükleniyor...</p>
+                        </div>
+                      ) : mindMap ? (
+                        <div className="mindmap-content">
+                          <h3>🧠 {mindMap.title}</h3>
+                          <p className="mindmap-central-topic">Merkezi Konu: {mindMap.central_topic}</p>
+                          
+                          <div className="mindmap-branches">
+                            {mindMap.branches?.map((branch, index) => (
+                              <div key={index} className="mindmap-branch">
+                                <div className="branch-header">
+                                  <h4>{branch.topic}</h4>
+                                  <span className="importance-badge">Önem: {Math.round(branch.importance * 100)}%</span>
+                                </div>
+                                <div className="branch-subtopics">
+                                  {branch.subtopics?.map((subtopic, subIndex) => (
+                                    <div key={subIndex} className="subtopic-item">
+                                      • {subtopic}
+                                    </div>
+                                  ))}
+                                </div>
+                                {branch.connections?.length > 0 && (
+                                  <div className="branch-connections">
+                                    <small>Bağlantılar: {branch.connections.join(', ')}</small>
+                                  </div>
+                                )}
                               </div>
-                            )}
-                            {lesson.content?.key_points?.length > 0 && (
-                              <div className="content-section">
-                                <h5>✅ Anahtar Noktalar</h5>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="no-content">
+                          <div className="no-content-icon">🧠</div>
+                          <h3>Mind Map Henüz Oluşturulmadı</h3>
+                          <p>Bu ders için henüz mind map oluşturulmamış.</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Learning Path Tab */}
+                  {activeTab === 'learningpath' && (
+                    <div className="learningpath-tab">
+                      {isLoadingLearningPath ? (
+                        <div className="loading-state">
+                          <div className="loading-spinner"></div>
+                          <p>Learning Path yükleniyor...</p>
+                        </div>
+                      ) : learningPath ? (
+                        <div className="learningpath-content">
+                          <h3>🛤️ {learningPath.title}</h3>
+                          <p className="learningpath-description">{learningPath.description}</p>
+                          
+                          <div className="learningpath-info">
+                            <div className="info-item">
+                              <strong>Zorluk Seviyesi:</strong> {learningPath.difficulty_level}
+                            </div>
+                            <div className="info-item">
+                              <strong>Tahmini Süre:</strong> {learningPath.estimated_duration}
+                            </div>
+                            {learningPath.prerequisites?.length > 0 && (
+                              <div className="info-item">
+                                <strong>Ön Koşullar:</strong>
                                 <ul>
-                                  {lesson.content.key_points.map((point, pointIndex) => (
-                                    <li key={pointIndex}>{point}</li>
+                                  {learningPath.prerequisites.map((prereq, index) => (
+                                    <li key={index}>{prereq}</li>
                                   ))}
                                 </ul>
                               </div>
                             )}
-                            {lesson.content?.tables?.length > 0 && (
-                              <div className="content-section">
-                                <h5>📊 Tablolar</h5>
-                                {lesson.content.tables.map((table, tableIndex) => (
-                                  <div key={tableIndex} className="table-container">
-                                    <h6>{table.title}</h6>
-                                    <table>
-                                      {table.headers && (
-                                        <thead>
-                                          <tr>
-                                            {table.headers.map((header, headerIndex) => (
-                                              <th key={headerIndex}>{header}</th>
-                                            ))}
-                                          </tr>
-                                        </thead>
-                                      )}
-                                      <tbody>
-                                        {table.rows?.map((row, rowIndex) => (
-                                          <tr key={rowIndex}>
-                                            {row.map((cell, cellIndex) => (
-                                              <td key={cellIndex}>{cell}</td>
-                                            ))}
-                                          </tr>
+                          </div>
+                          
+                          <div className="learningpath-steps">
+                            <h4>Öğrenme Adımları</h4>
+                            {learningPath.steps?.map((step, index) => (
+                              <div key={index} className="learning-step">
+                                <div className="step-header">
+                                  <h5>Adım {step.step}: {step.title}</h5>
+                                  <span className="step-duration">{step.duration}</span>
+                                </div>
+                                <div className="step-content">
+                                  {step.objectives?.length > 0 && (
+                                    <div className="step-objectives">
+                                      <strong>Hedefler:</strong>
+                                      <ul>
+                                        {step.objectives.map((objective, objIndex) => (
+                                          <li key={objIndex}>{objective}</li>
                                         ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  {step.activities?.length > 0 && (
+                                    <div className="step-activities">
+                                      <strong>Aktiviteler:</strong>
+                                      <ul>
+                                        {step.activities.map((activity, actIndex) => (
+                                          <li key={actIndex}>{activity}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            )}
-                            {lesson.content?.code_examples?.length > 0 && (
-                              <div className="content-section">
-                                <h5>💻 Kod Örnekleri</h5>
-                                {lesson.content.code_examples.map((example, exampleIndex) => (
-                                  <div key={exampleIndex} className="code-example">
-                                    <h6>{example.title}</h6>
-                                    <pre><code className={`language-${example.language}`}>{example.code}</code></pre>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {lesson.content?.practical_examples?.length > 0 && (
-                              <div className="content-section">
-                                <h5>🔍 Pratik Örnekler</h5>
-                                {lesson.content.practical_examples.map((example, exampleIndex) => (
-                                  <div key={exampleIndex} className="practical-example">
-                                    <h6>{example.title}</h6>
-                                    <p>{example.description}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {lesson.content?.summary && (
-                              <div className="content-section">
-                                <h5>📋 Özet</h5>
-                                <p>{lesson.content.summary}</p>
-                              </div>
-                            )}
+                            ))}
                           </div>
                         </div>
-                      ))}
+                      ) : (
+                        <div className="no-content">
+                          <div className="no-content-icon">🛤️</div>
+                          <h3>Learning Path Henüz Oluşturulmadı</h3>
+                          <p>Bu ders için henüz learning path oluşturulmamış.</p>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  )}
                 </div>
-              ) : (
-                <div className="no-content">
-                  <div className="no-content-icon">⏳</div>
-                  <h3>Enhanced Content Henüz Hazır Değil</h3>
-                  <p>PDF işleniyor ve enhanced content oluşturuluyor. Lütfen biraz bekleyin.</p>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </div>

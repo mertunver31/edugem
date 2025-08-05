@@ -22,6 +22,9 @@
 - **Cinema Mode**: Tam ekran panoramik görüntüleme
 - **3D Environment**: Dev ekranı ve kullanıcı yolu entegrasyonu
 - **Avatar Integration**: 3D karakterlerle etkileşimli deneyim
+- **🌌 3D Mind Map & Learning Path Visualization**: Panoramik dünya içinde gezegen sistemi olarak mind map ve learning path görselleştirmesi
+- **Evren Teması**: Mind map ve learning path verileri evrenin içindeki gezegen sistemleri olarak görünür
+- **Entegre Deneyim**: Ayrı modal pencereler yerine panoramik dünyanın bir parçası
 
 ### 🔐 **Güvenlik & Kullanıcı Yönetimi**
 - **Supabase Authentication**: Güvenli kullanıcı girişi
@@ -94,6 +97,9 @@ VITE_HUGGINGFACE_API_KEY=your_huggingface_api_key
 - ✅ Panoramik görüntüleme
 - ✅ Cinema mode
 - ✅ 3D environment
+- ✅ **🌌 3D Mind Map & Learning Path Visualization** - Panoramik dünya içinde gezegen sistemi
+- ✅ **Evren Teması** - Mind map ve learning path verileri evrenin içindeki gezegen sistemleri
+- ✅ **Entegre Deneyim** - Ayrı modal pencereler yerine panoramik dünyanın bir parçası
 
 ### 🔄 **Geliştirme Aşamasında**
 
@@ -335,6 +341,21 @@ const progressTracking = {
 - 🔄 **Personalized Content** - Kullanıcı tercihlerine göre kişiselleştirme
 - 🔄 **Advanced Prompt Engineering** - RAG tabanlı gelişmiş prompt'lar
 
+#### **GÜN 14: 3D Mind Map & Learning Path Visualization** ✅ **TAMAMLANDI**
+- ✅ **🌌 3D Mind Map & Learning Path Visualization** - Panoramik dünya içinde gezegen sistemi
+- ✅ **Evren Teması** - Mind map ve learning path verileri evrenin içindeki gezegen sistemleri
+- ✅ **Entegre Deneyim** - Ayrı modal pencereler yerine panoramik dünyanın bir parçası
+- ✅ **Three.js Integration** - Custom Three.js implementation ile 3D görselleştirme
+- ✅ **Real-time Rendering** - Gerçek zamanlı 3D scene rendering
+- ✅ **Interactive Navigation** - Fare ile döndürme ve yakınlaştırma
+- ✅ **Dynamic Content** - Mind map ve learning path verilerine göre dinamik gezegen oluşturma
+- ✅ **Mind Map Generator Service** - Gemini AI ile mind map üretimi
+- ✅ **Learning Path Generator Service** - Gemini AI ile learning path üretimi
+- ✅ **3D Force Graph Service** - Custom Three.js ile 3D görselleştirme
+- ✅ **Database Integration** - Mind maps ve learning_paths tabloları
+- ✅ **Test Component** - MindMapLearningPathTest bileşeni
+- ✅ **PanoramicViewer Integration** - Panoramik dünyaya entegrasyon
+
 **🎯 RAG Sistemi Aşamaları:**
 1. **Vector Database Kurulumu** ✅ **TAMAMLANDI** - pgvector extension ve tablolar
 2. **Gemini Embedding Service** ✅ **TAMAMLANDI** - text-embedding-004 entegrasyonu
@@ -398,9 +419,10 @@ src/
 │   ├── FullPipelineTest/ # Master Pipeline test ✅
 │   ├── GeminiEmbeddingTest/ # Gemini Embedding test ✅
 │   ├── RetrievalTest/ # Retrieval Service test (Mevcut yapıya entegre) ✅
+│   ├── MindMapLearningPathTest/ # Mind Map & Learning Path test ✅
 │   ├── DevelopmentModeIndicator/ # Development mode göstergesi
 │   ├── AvatarPage/            # Avatar oluşturma
-│   └── PanoramicViewer/       # 360° görüntüleyici
+│   └── PanoramicViewer/       # 360° görüntüleyici (3D Mind Map & Learning Path entegreli)
 ├── pages/                     # Sayfa bileşenleri
 │   ├── LoginPage/             # Giriş sayfası
 │   ├── DashboardPage/         # Ana dashboard
@@ -425,6 +447,11 @@ src/
 │   ├── knowledgeBaseService.js # Knowledge Base servisi ✅
 │   ├── retrievalService.js # Retrieval Service (Mevcut yapıya entegre) ✅
 │   ├── masterPipelineService.js # Master Pipeline servisi ✅
+│   ├── mindMapService.js # Mind Map servisi ✅
+│   ├── learningPathService.js # Learning Path servisi ✅
+│   ├── mindMapGeneratorService.js # Mind Map Generator servisi ✅
+│   ├── learningPathGeneratorService.js # Learning Path Generator servisi ✅
+│   ├── forceGraph3DService.js # 3D Force Graph servisi ✅
 │   └── supabaseService.js     # Supabase bağlantısı
 ├── config/                    # Konfigürasyon
 │   ├── supabase.js           # Supabase client
@@ -961,6 +988,287 @@ const toggleDevMode = () => {
 };
 ```
 
+### **14. 3D Mind Map & Learning Path Visualization System**
+```
+Course Data → Mind Map Generation → Learning Path Generation → 3D Scene Integration → Panoramic Experience
+```
+
+**3D Mind Map & Learning Path Özellikleri:**
+- **🌌 Evren Teması**: Mind map ve learning path verileri evrenin içindeki gezegen sistemleri olarak görünür
+- **Entegre Deneyim**: Ayrı modal pencereler yerine panoramik dünyanın bir parçası
+- **Three.js Integration**: Custom Three.js implementation ile 3D görselleştirme
+- **Real-time Rendering**: Gerçek zamanlı 3D scene rendering
+- **Interactive Navigation**: Fare ile döndürme ve yakınlaştırma
+- **Dynamic Content**: Mind map ve learning path verilerine göre dinamik gezegen oluşturma
+
+**Mind Map Gezegen Sistemi:**
+```javascript
+// Merkez gezegen (ana konu)
+const centralPlanet = new THREE.Mesh(
+  new THREE.SphereGeometry(8, 32, 32),
+  new THREE.MeshLambertMaterial({ 
+    color: 0xff6b6b,
+    emissive: 0x330000,
+    emissiveIntensity: 0.2
+  })
+);
+centralPlanet.position.set(-150, 50, -100);
+
+// Ana dal gezegenleri
+branches.forEach((branch, index) => {
+  const angle = (index / branches.length) * Math.PI * 2;
+  const radius = 40;
+  const x = -150 + Math.cos(angle) * radius;
+  const y = 50 + Math.sin(angle) * radius * 0.5;
+  const z = -100 + Math.sin(angle) * radius * 0.3;
+  
+  // Ana dal gezegeni oluştur
+  const branchPlanet = createBranchPlanet(branch, index, x, y, z);
+  
+  // Merkez ile bağlantı
+  const connection = createConnection(-150, 50, -100, x, y, z);
+  
+  // Alt konu gezegenleri
+  branch.subtopics.forEach((subtopic, subIndex) => {
+    const subtopicPlanet = createSubtopicPlanet(subtopic, index, subIndex);
+  });
+});
+```
+
+**Learning Path Gezegen Sistemi:**
+```javascript
+// Başlangıç gezegeni
+const startPlanet = new THREE.Mesh(
+  new THREE.SphereGeometry(6, 32, 32),
+  new THREE.MeshLambertMaterial({ 
+    color: 0x4ecdc4,
+    emissive: 0x004d4d,
+    emissiveIntensity: 0.2
+  })
+);
+startPlanet.position.set(150, 50, -100);
+
+// Adım gezegenleri
+learningPathData.steps.forEach((step, index) => {
+  const angle = (index / learningPathData.steps.length) * Math.PI * 2;
+  const radius = 35;
+  const x = 150 + Math.cos(angle) * radius;
+  const y = 50 + Math.sin(angle) * radius * 0.5;
+  const z = -100 + Math.sin(angle) * radius * 0.3;
+  
+  // Adım gezegeni oluştur
+  const stepPlanet = createStepPlanet(step, index, x, y, z);
+  
+  // Önceki adım ile bağlantı
+  const connection = createStepConnection(prevStep, currentStep);
+});
+```
+
+**3D Label System:**
+```javascript
+const create3DLabel = (text, color) => {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  canvas.width = 256;
+  canvas.height = 64;
+
+  context.fillStyle = '#ffffff';
+  context.font = 'bold 14px Arial';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const spriteMaterial = new THREE.SpriteMaterial({ 
+    map: texture,
+    color: color
+  });
+  const sprite = new THREE.Sprite(spriteMaterial);
+  sprite.scale.set(8, 2, 1);
+  
+  return sprite;
+};
+```
+
+**Mind Map Generator Service:**
+```javascript
+class MindMapGeneratorService {
+  async generateMindMap(options) {
+    const { documentId, segmentIds, enhancedContent, courseStructure } = options;
+    
+    // Segment içeriklerini birleştir
+    const combinedContent = await this.combineSegmentContent(segmentIds);
+    
+    // Enhanced content'i ekle
+    const enrichedContent = this.enrichWithEnhancedContent(combinedContent, enhancedContent);
+    
+    // Course structure bilgilerini ekle
+    const contextWithStructure = this.addCourseStructureContext(enrichedContent, courseStructure);
+    
+    // Gemini AI ile mind map oluştur
+    const mindMapResponse = await this.model.generateContent(this.createMindMapPrompt(contextWithStructure));
+    
+    // Response'u parse et
+    const parsedMindMap = this.parseMindMapResponse(mindMapResponse);
+    
+    // Database'e kaydet
+    const saveResult = await mindMapService.createMindMap({
+      documentId: options.documentId,
+      type: options.type || 'course_mindmap',
+      title: parsedMindMap.data.title,
+      centralTopic: parsedMindMap.data.central_topic,
+      content: parsedMindMap.data.branches,
+      modelUsed: this.model,
+      metadata: {
+        generationTime: Date.now() - startTime,
+        modelUsed: this.model,
+        source: 'gemini_api',
+        options: options
+      }
+    });
+    
+    return saveResult;
+  }
+}
+```
+
+**Learning Path Generator Service:**
+```javascript
+class LearningPathGeneratorService {
+  async generateLearningPath(options) {
+    const { documentId, segmentIds, enhancedContent, courseStructure } = options;
+    
+    // Segment içeriklerini birleştir
+    const combinedContent = await this.combineSegmentContent(segmentIds);
+    
+    // Enhanced content'i ekle
+    const enrichedContent = this.enrichWithEnhancedContent(combinedContent, enhancedContent);
+    
+    // Course structure bilgilerini ekle
+    const contextWithStructure = this.addCourseStructureContext(enrichedContent, courseStructure);
+    
+    // Gemini AI ile learning path oluştur
+    const learningPathResponse = await this.model.generateContent(this.createLearningPathPrompt(contextWithStructure));
+    
+    // Response'u parse et
+    const parsedLearningPath = this.parseLearningPathResponse(learningPathResponse);
+    
+    // Database'e kaydet
+    const saveResult = await learningPathService.createLearningPath({
+      documentId: options.documentId,
+      type: options.type || 'course_learning_path',
+      title: parsedLearningPath.data.title,
+      description: parsedLearningPath.data.description,
+      steps: parsedLearningPath.data.steps,
+      modelUsed: this.model,
+      metadata: {
+        generationTime: Date.now() - startTime,
+        modelUsed: this.model,
+        source: 'gemini_api',
+        options: options
+      }
+    });
+    
+    return saveResult;
+  }
+}
+```
+
+**PanoramicViewer Integration:**
+```javascript
+// Mind Map ve Learning Path 3D objelerini oluştur
+if (mindMapData) {
+  createMindMap3DObjects(scene);
+}
+if (learningPathData) {
+  createLearningPath3DObjects(scene);
+}
+
+// Bilgi paneli
+{(mindMapData || learningPathData) && (
+  <div className="info-panel">
+    <div className="info-content">
+      <h4>🌌 Evren Bilgileri</h4>
+      {mindMapData && (
+        <div className="info-item">
+          <span className="info-icon">🧠</span>
+          <span className="info-text">Mind Map Sistemi Aktif</span>
+        </div>
+      )}
+      {learningPathData && (
+        <div className="info-item">
+          <span className="info-icon">🛤️</span>
+          <span className="info-text">Learning Path Sistemi Aktif</span>
+        </div>
+      )}
+      <p className="info-hint">
+        Gezegenleri keşfetmek için fare ile döndürün ve yakınlaştırın
+      </p>
+    </div>
+  </div>
+)}
+```
+
+**Database Schema:**
+```sql
+-- Mind Maps tablosu
+CREATE TABLE mind_maps (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  document_id UUID REFERENCES documents(id),
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  central_topic TEXT NOT NULL,
+  content JSONB NOT NULL,
+  model_used TEXT,
+  metadata JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Learning Paths tablosu
+CREATE TABLE learning_paths (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  document_id UUID REFERENCES documents(id),
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  steps JSONB NOT NULL,
+  model_used TEXT,
+  metadata JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+**Test Component:**
+```javascript
+// MindMapLearningPathTest.jsx
+const MindMapLearningPathTest = () => {
+  const [documents, setDocuments] = useState([]);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [mindMapData, setMindMapData] = useState(null);
+  const [learningPathData, setLearningPathData] = useState(null);
+  
+  const generateMindMap = async () => {
+    const result = await mindMapGeneratorService.generateMindMap({
+      documentId: selectedDocument.id,
+      segmentIds: selectedDocument.segments.map(s => s.id),
+      enhancedContent: selectedDocument.enhanced_content,
+      courseStructure: selectedDocument.course_structure
+    });
+    setMindMapData(result.data);
+  };
+  
+  const generateLearningPath = async () => {
+    const result = await learningPathGeneratorService.generateLearningPath({
+      documentId: selectedDocument.id,
+      segmentIds: selectedDocument.segments.map(s => s.id),
+      enhancedContent: selectedDocument.enhanced_content,
+      courseStructure: selectedDocument.course_structure
+    });
+    setLearningPathData(result.data);
+  };
+};
+```
+
 ### **Concurrency Control System**
 - **Concurrency Manager**: Worker kayıt, durum takibi, rate limiting
 - **Queue Manager**: Task prioritization, retry logic, event emission
@@ -1169,6 +1477,77 @@ await knowledgeBaseService.addContent({
 
 // Semantic search
 const results = await knowledgeBaseService.searchSimilar(query, limit);
+```
+
+### **Mind Map & Learning Path Services**
+```javascript
+// Mind Map Service
+const mindMapService = new MindMapService();
+
+// Mind map oluşturma
+const mindMap = await mindMapService.createMindMap({
+  documentId: 'uuid',
+  type: 'course_mindmap',
+  title: 'Mind Map Başlığı',
+  centralTopic: 'Merkez Konu',
+  content: [{ topic: 'Ana Dal', subtopics: ['Alt Konu 1', 'Alt Konu 2'] }],
+  modelUsed: 'gemini-1.5-flash',
+  metadata: { generationTime: 5000 }
+});
+
+// Mind map'leri getirme
+const mindMaps = await mindMapService.getAllMindMaps(documentId);
+
+// Learning Path Service
+const learningPathService = new LearningPathService();
+
+// Learning path oluşturma
+const learningPath = await learningPathService.createLearningPath({
+  documentId: 'uuid',
+  type: 'course_learning_path',
+  title: 'Learning Path Başlığı',
+  description: 'Açıklama',
+  steps: [{ title: 'Adım 1', description: 'Açıklama' }],
+  modelUsed: 'gemini-1.5-flash',
+  metadata: { generationTime: 3000 }
+});
+
+// Learning path'leri getirme
+const learningPaths = await learningPathService.getAllLearningPaths(documentId);
+
+// Mind Map Generator Service
+const mindMapGeneratorService = new MindMapGeneratorService();
+
+// Mind map üretimi
+const mindMapResult = await mindMapGeneratorService.generateMindMap({
+  documentId: 'uuid',
+  segmentIds: ['segment-1', 'segment-2'],
+  enhancedContent: enhancedContentData,
+  courseStructure: courseStructureData
+});
+
+// Learning Path Generator Service
+const learningPathGeneratorService = new LearningPathGeneratorService();
+
+// Learning path üretimi
+const learningPathResult = await learningPathGeneratorService.generateLearningPath({
+  documentId: 'uuid',
+  segmentIds: ['segment-1', 'segment-2'],
+  enhancedContent: enhancedContentData,
+  courseStructure: courseStructureData
+});
+
+// 3D Force Graph Service
+const forceGraph3DService = new ForceGraph3DService();
+
+// 3D mind map oluşturma
+forceGraph3DService.createMindMap3D(mindMapData, containerElement);
+
+// 3D learning path oluşturma
+forceGraph3DService.createLearningPath3D(learningPathData, containerElement);
+
+// 3D scene temizleme
+forceGraph3DService.cleanup();
 ```
 
 ### **PDF Text Extraction Service**

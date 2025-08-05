@@ -119,7 +119,7 @@ export const getPDFPageCount = async (file) => {
   }
 }
 
-export const uploadPDF = async (file) => {
+export const uploadPDF = async (file, courseTitle = null) => {
   try {
     const userResult = await getCurrentUser()
     if (!userResult.success || !userResult.user) {
@@ -207,7 +207,8 @@ export const uploadPDF = async (file) => {
         file_path: filePath,
         page_count: pageCount || 0,
         status: 'UPLOADED',
-        raw_outline: null
+        raw_outline: null,
+        course_title: courseTitle || null
       })
       .select()
       .single()

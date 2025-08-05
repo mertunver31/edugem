@@ -6,6 +6,8 @@ import { pdfTextExtractionService } from './pdfTextExtractionService'
 import { courseStructureService } from './courseStructureService'
 import { courseVisualService } from './courseVisualService'
 import { enhancedContentService } from './enhancedContentService'
+import mindMapGeneratorService from './mindMapGeneratorService'
+import learningPathGeneratorService from './learningPathGeneratorService'
 
 /**
  * Master Pipeline Service
@@ -17,10 +19,12 @@ class MasterPipelineService {
       { name: 'PDF Upload & Validation', weight: 5 },
       { name: 'Document Understanding', weight: 15 },
       { name: 'Segment Planning', weight: 10 },
-      { name: 'PDF Text Extraction', weight: 25 },
+      { name: 'PDF Text Extraction', weight: 20 },
       { name: 'Course Structure Generation', weight: 15 },
-      { name: 'Course Visual Generation', weight: 20 },
-      { name: 'Enhanced Content Generation', weight: 10 }
+      { name: 'Course Visual Generation', weight: 15 },
+      { name: 'Enhanced Content Generation', weight: 10 },
+      { name: 'Mind Map Generation', weight: 10 },
+      { name: 'Learning Path Generation', weight: 10 }
     ]
   }
 
@@ -28,9 +32,10 @@ class MasterPipelineService {
    * Tam pipeline'ı çalıştır
    * @param {File} pdfFile - PDF dosyası
    * @param {string} userId - Kullanıcı ID
+   * @param {string} courseTitle - Dersin adı
    * @returns {Object} Pipeline sonucu
    */
-  async runFullPipeline(pdfFile, userId) {
+  async runFullPipeline(pdfFile, userId, courseTitle) {
     const pipelineId = crypto.randomUUID()
     let currentProgress = 0
     let documentId = null
@@ -46,7 +51,7 @@ class MasterPipelineService {
       console.log('📁 Aşama 1: PDF Upload & Validation')
       await this.updatePipelineProgress(pipelineId, 'PDF Upload & Validation', 0)
       
-      const uploadResult = await pdfService.uploadPDF(pdfFile, userId)
+      const uploadResult = await pdfService.uploadPDF(pdfFile, courseTitle)
       if (!uploadResult.success) {
         throw new Error(`PDF upload hatası: ${uploadResult.error}`)
       }
@@ -149,6 +154,38 @@ class MasterPipelineService {
       currentProgress += this.stages[6].weight
       await this.updatePipelineProgress(pipelineId, 'Enhanced Content Generation', 100)
       console.log('✅ Enhanced Content Generation tamamlandı')
+
+      // AŞAMA 8: Mind Map Generation
+      console.log('🧠 Aşama 8: Mind Map Generation')
+      await this.updatePipelineProgress(pipelineId, 'Mind Map Generation', 0)
+      
+      const mindMapResult = await this.generateMindMapForCourse(documentId, pipelineData)
+      if (!mindMapResult.success) {
+        console.warn(`Mind Map Generation uyarısı: ${mindMapResult.error}`)
+        // Mind map başarısız olsa bile devam et
+      } else {
+        pipelineData.mindMap = mindMapResult.mindMap
+      }
+      
+      currentProgress += this.stages[7].weight
+      await this.updatePipelineProgress(pipelineId, 'Mind Map Generation', 100)
+      console.log('✅ Mind Map Generation tamamlandı')
+
+      // AŞAMA 9: Learning Path Generation
+      console.log('🛤️ Aşama 9: Learning Path Generation')
+      await this.updatePipelineProgress(pipelineId, 'Learning Path Generation', 0)
+      
+      const learningPathResult = await this.generateLearningPathForCourse(documentId, pipelineData)
+      if (!learningPathResult.success) {
+        console.warn(`Learning Path Generation uyarısı: ${learningPathResult.error}`)
+        // Learning path başarısız olsa bile devam et
+      } else {
+        pipelineData.learningPath = learningPathResult.learningPath
+      }
+      
+      currentProgress += this.stages[8].weight
+      await this.updatePipelineProgress(pipelineId, 'Learning Path Generation', 100)
+      console.log('✅ Learning Path Generation tamamlandı')
 
       // Pipeline tamamlandı
       await this.completePipeline(pipelineId, 'COMPLETED', pipelineData)
@@ -352,6 +389,197 @@ class MasterPipelineService {
         error: error.message
       }
     }
+  }
+
+  /**
+   * Kurs için mind map oluştur
+   * @param {string} documentId - Document ID
+   * @param {Object} pipelineData - Pipeline verileri
+   * @returns {Object} Mind map generation sonucu
+   */
+  async generateMindMapForCourse(documentId, pipelineData) {
+    try {
+      console.log('🧠 Kurs için mind map oluşturuluyor:', documentId)
+
+      // Kurs verilerini hazırla
+      const courseTitle = pipelineData.courseStructure?.title || 'Kurs'
+      const courseContent = this.buildCourseContent(pipelineData)
+      const courseOutline = this.buildCourseOutline(pipelineData)
+
+      const mindMapOptions = {
+        documentId: documentId,
+        courseTitle: courseTitle,
+        courseContent: courseContent,
+        courseOutline: courseOutline,
+        type: 'course_mindmap',
+        maxBranches: 6,
+        maxSubtopics: 3
+      }
+
+      const result = await mindMapGeneratorService.generateMindMap(mindMapOptions)
+      
+      if (result.success) {
+        console.log('✅ Mind map oluşturuldu:', result.mindMapId)
+        return {
+          success: true,
+          mindMap: result.data,
+          mindMapId: result.mindMapId
+        }
+      } else {
+        throw new Error(result.error)
+      }
+
+    } catch (error) {
+      console.error('❌ Mind map generation hatası:', error)
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+  }
+
+  /**
+   * Kurs için learning path oluştur
+   * @param {string} documentId - Document ID
+   * @param {Object} pipelineData - Pipeline verileri
+   * @returns {Object} Learning path generation sonucu
+   */
+  async generateLearningPathForCourse(documentId, pipelineData) {
+    try {
+      console.log('🛤️ Kurs için learning path oluşturuluyor:', documentId)
+
+      // Kurs verilerini hazırla
+      const courseTitle = pipelineData.courseStructure?.title || 'Kurs'
+      const courseContent = this.buildCourseContent(pipelineData)
+      const courseOutline = this.buildCourseOutline(pipelineData)
+
+      const learningPathOptions = {
+        documentId: documentId,
+        courseTitle: courseTitle,
+        courseContent: courseContent,
+        courseOutline: courseOutline,
+        maxSteps: 6,
+        difficultyLevel: 'intermediate',
+        targetAudience: 'genel'
+      }
+
+      const result = await learningPathGeneratorService.generateLearningPath(learningPathOptions)
+      
+      if (result.success) {
+        console.log('✅ Learning path oluşturuldu:', result.learningPathId)
+        return {
+          success: true,
+          learningPath: result.data,
+          learningPathId: result.learningPathId
+        }
+      } else {
+        throw new Error(result.error)
+      }
+
+    } catch (error) {
+      console.error('❌ Learning path generation hatası:', error)
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+  }
+
+  /**
+   * Kurs içeriğini oluştur
+   * @param {Object} pipelineData - Pipeline verileri
+   * @returns {string} Kurs içeriği
+   */
+  buildCourseContent(pipelineData) {
+    console.log('🔍 buildCourseContent çağrıldı, pipelineData:', pipelineData)
+    let content = ''
+
+    // Enhanced content varsa onu kullan
+    if (pipelineData.enhancedContent) {
+      console.log('📚 Enhanced content mevcut:', pipelineData.enhancedContent)
+      content += 'GELİŞTİRİLMİŞ İÇERİK:\n'
+      Object.keys(pipelineData.enhancedContent).forEach(chapterKey => {
+        const chapter = pipelineData.enhancedContent[chapterKey]
+        console.log('📖 Chapter:', chapter)
+        if (chapter && chapter.title) {
+          content += `\n${chapter.title}:\n`
+          if (chapter.content) {
+            content += chapter.content + '\n'
+          }
+        }
+      })
+    } else {
+      console.log('❌ Enhanced content yok')
+    }
+
+    // Extracted content varsa ekle
+    if (pipelineData.extractedContent) {
+      console.log('📄 Extracted content mevcut:', pipelineData.extractedContent)
+      content += '\nORİJİNAL İÇERİK:\n'
+      Object.keys(pipelineData.extractedContent).forEach(segmentKey => {
+        const segment = pipelineData.extractedContent[segmentKey]
+        console.log('📋 Segment:', segment)
+        if (segment && segment.title) {
+          content += `\n${segment.title}:\n`
+          if (segment.content) {
+            content += segment.content + '\n'
+          }
+        }
+      })
+    } else {
+      console.log('❌ Extracted content yok')
+    }
+
+    console.log('📝 Oluşturulan content uzunluğu:', content.length)
+    return content
+  }
+
+  /**
+   * Kurs yapısını oluştur
+   * @param {Object} pipelineData - Pipeline verileri
+   * @returns {string} Kurs yapısı
+   */
+  buildCourseOutline(pipelineData) {
+    let outline = ''
+
+    // Course structure varsa onu kullan
+    if (pipelineData.courseStructure) {
+      outline += 'KURS YAPISI:\n'
+      if (pipelineData.courseStructure.title) {
+        outline += `Başlık: ${pipelineData.courseStructure.title}\n`
+      }
+      if (pipelineData.courseStructure.description) {
+        outline += `Açıklama: ${pipelineData.courseStructure.description}\n\n`
+      }
+      
+      if (pipelineData.courseStructure.chapters && Array.isArray(pipelineData.courseStructure.chapters)) {
+        outline += 'BÖLÜMLER:\n'
+        pipelineData.courseStructure.chapters.forEach((chapter, index) => {
+          if (chapter && chapter.title) {
+            outline += `${index + 1}. ${chapter.title}\n`
+            if (chapter.lessons && Array.isArray(chapter.lessons)) {
+              chapter.lessons.forEach((lesson, lessonIndex) => {
+                if (lesson && lesson.title) {
+                  outline += `   ${index + 1}.${lessonIndex + 1}. ${lesson.title}\n`
+                }
+              })
+            }
+          }
+        })
+      }
+    }
+
+    // Segments varsa ekle
+    if (pipelineData.segments && Array.isArray(pipelineData.segments)) {
+      outline += '\nSEGMENTLER:\n'
+      pipelineData.segments.forEach((segment, index) => {
+        if (segment && segment.title) {
+          outline += `${index + 1}. ${segment.title}\n`
+        }
+      })
+    }
+
+    return outline
   }
 
   /**

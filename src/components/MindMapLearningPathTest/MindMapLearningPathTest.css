@@ -1,0 +1,405 @@
+.mind-map-learning-path-test {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.test-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.test-header h1 {
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  font-weight: 700;
+}
+
+.test-header p {
+  font-size: 1.1rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.test-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  padding: 30px;
+}
+
+/* Doküman Seçimi */
+.document-selection {
+  margin-bottom: 40px;
+}
+
+.document-selection h2 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 10px;
+}
+
+.documents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.document-card {
+  background: #f8f9fa;
+  border: 2px solid #e1e5e9;
+  border-radius: 15px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.document-card:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+}
+
+.document-card.selected {
+  border-color: #667eea;
+  background: #f0f2ff;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.document-icon {
+  font-size: 2.5rem;
+  color: #667eea;
+}
+
+.document-info h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.document-info p {
+  margin: 4px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Test İşlemleri */
+.test-actions {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.test-actions h2 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  padding: 15px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  min-width: 200px;
+  transition: all 0.3s ease;
+}
+
+.mind-map-btn {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  color: white;
+  border: none;
+}
+
+.mind-map-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+}
+
+.learning-path-btn {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: white;
+  border: none;
+}
+
+.learning-path-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+}
+
+/* Loading ve Error */
+.loading-section {
+  text-align: center;
+  padding: 40px 20px;
+  margin: 20px 0;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #e1e5e9;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-section p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 15px 20px;
+  border-radius: 10px;
+  border: 1px solid #fcc;
+  margin: 20px 0;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Sonuçlar */
+.results-section {
+  display: grid;
+  gap: 30px;
+}
+
+.result-card {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 25px;
+  border: 2px solid #e1e5e9;
+}
+
+.mind-map-result {
+  border-color: #4ecdc4;
+}
+
+.learning-path-result {
+  border-color: #ff6b6b;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.result-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.view-3d-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  background: #667eea;
+  color: white;
+  border: none;
+}
+
+.view-3d-btn:hover {
+  background: #5a6fd8;
+  transform: scale(1.05);
+}
+
+.result-content h4 {
+  color: #333;
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+}
+
+.result-content p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+/* Mind Map İçeriği */
+.mind-map-content {
+  display: grid;
+  gap: 20px;
+}
+
+.branch {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  border-left: 4px solid #4ecdc4;
+}
+
+.branch h5 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.branch ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.branch li {
+  color: #666;
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+/* Learning Path İçeriği */
+.learning-steps {
+  display: grid;
+  gap: 20px;
+}
+
+.step {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  border-left: 4px solid #ff6b6b;
+}
+
+.step h5 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.step p {
+  margin: 5px 0;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* 3D Graph Container */
+.graph-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80vw;
+  height: 80vh;
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+}
+
+.mind-map-3d {
+  border-color: #4ecdc4;
+}
+
+.learning-path-3d {
+  border-color: #ff6b6b;
+}
+
+.graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px 15px 0 0;
+}
+
+.graph-header h3 {
+  color: white;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.graph-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 0 15px 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mind-map-learning-path-test {
+    padding: 10px;
+  }
+
+  .test-header h1 {
+    font-size: 2rem;
+  }
+
+  .test-content {
+    padding: 20px;
+  }
+
+  .documents-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .action-button {
+    min-width: 250px;
+  }
+
+  .result-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .graph-container {
+    width: 95vw;
+    height: 90vh;
+  }
+} 

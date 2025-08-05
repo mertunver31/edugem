@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // Gemini API Konfigürasyonu
-const GEMINI_API_KEY = 'AIzaSyA07yA0F0aNqHQ0KOMFD0Ls2QKGVtfqQWc'
+const GEMINI_API_KEY = 'AIzaSyCR4LeqshlDhCoMGCPfmJyLgEkdpzqdTVU'
 
 // Gemini client oluştur
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
@@ -227,6 +227,41 @@ export const testGeminiConnection = async () => {
   } catch (error) {
     console.error('❌ Gemini API test hatası:', error)
     return false
+  }
+}
+
+// Default export için generateContent fonksiyonu
+export const generateContent = async (prompt, options = {}) => {
+  try {
+    console.log('Gemini generateContent çağrılıyor...')
+    
+    const model = genAI.getGenerativeModel({ 
+      model: options.model || MODELS.TEXT_GENERATION 
+    })
+    
+    const generationConfig = {
+      maxOutputTokens: options.maxTokens || 4000,
+      temperature: options.temperature || 0.7
+    }
+    
+    const result = await model.generateContent(prompt, { generationConfig })
+    const response = await result.response
+    const text = response.text()
+    
+    console.log('✅ Gemini generateContent başarılı')
+    
+    return {
+      success: true,
+      data: text,
+      tokens: estimateTokens(text)
+    }
+    
+  } catch (error) {
+    console.error('❌ Gemini generateContent hatası:', error)
+    return {
+      success: false,
+      error: error.message
+    }
   }
 }
 

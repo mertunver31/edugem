@@ -178,6 +178,13 @@ const DashboardNavigation = ({ activeTab, setActiveTab, devMode, setDevMode }) =
                >
                  🔍 Retrieval Test
                </button>
+               
+               <button
+                 className={`nav-tab ${activeTab === 'mind-map-learning-path-test' ? 'active' : ''}`}
+                 onClick={() => setActiveTab('mind-map-learning-path-test')}
+               >
+                 🧠 Mind Map & Learning Path Test
+               </button>
           </>
         )}
       </div>

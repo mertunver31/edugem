@@ -12,7 +12,8 @@ CREATE EXTENSION IF NOT EXISTS vector;
 -- Main knowledge base table for storing segment content with embeddings
 CREATE TABLE IF NOT EXISTS knowledge_base (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    segment_id UUID REFERENCES segments(id) ON DELETE CASCADE,
+    segment_id VARCHAR(255), -- Changed from UUID to VARCHAR for lesson IDs
+    document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
     embeddings vector(768), -- text-embedding-004 (768 dimensions, Supabase compatible)
     metadata JSONB DEFAULT '{}',
@@ -40,6 +41,22 @@ CREATE TABLE IF NOT EXISTS concept_embeddings (
 );
 
 -- =====================================================
+-- CONCEPT RELATIONSHIPS TABLE
+-- =====================================================
+
+-- Table for storing relationships between concepts
+CREATE TABLE IF NOT EXISTS concept_relationships (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    concept1 VARCHAR(255) NOT NULL,
+    concept2 VARCHAR(255) NOT NULL,
+    relationship_type VARCHAR(50) DEFAULT 'semantic_similarity',
+    relationship_score FLOAT DEFAULT 0.0,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(concept1, concept2)
+);
+
+-- =====================================================
 -- SEGMENT RELATIONSHIPS TABLE
 -- =====================================================
 
@@ -51,6 +68,7 @@ CREATE TABLE IF NOT EXISTS segment_relationships (
     relationship_type VARCHAR(50) DEFAULT 'prerequisite', -- prerequisite, related, follows, etc.
     similarity_score FLOAT DEFAULT 0.0,
     shared_concepts TEXT[],
+    metadata JSONB DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(source_segment_id, target_segment_id)
 );
@@ -90,6 +108,9 @@ WITH (m = 16, ef_construction = 64);
 CREATE INDEX IF NOT EXISTS idx_knowledge_base_segment_id 
 ON knowledge_base(segment_id);
 
+CREATE INDEX IF NOT EXISTS idx_knowledge_base_document_id 
+ON knowledge_base(document_id);
+
 CREATE INDEX IF NOT EXISTS idx_knowledge_base_content_type 
 ON knowledge_base(content_type);
 
@@ -126,7 +147,7 @@ CREATE OR REPLACE FUNCTION find_similar_content(
 )
 RETURNS TABLE (
     id UUID,
-    segment_id UUID,
+    segment_id VARCHAR(255),
     content TEXT,
     metadata JSONB,
     similarity FLOAT
@@ -293,6 +314,23 @@ CREATE POLICY "Users can insert RAG context cache" ON rag_context_cache
 
 CREATE POLICY "Users can update RAG context cache" ON rag_context_cache
     FOR UPDATE USING (true);
+
+-- =====================================================
+-- UNIQUE CONSTRAINTS FOR CONFLICT HANDLING
+-- =====================================================
+
+-- Add unique constraints for conflict handling
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'concept_embeddings_concept_name_unique'
+    ) THEN
+        ALTER TABLE concept_embeddings ADD CONSTRAINT concept_embeddings_concept_name_unique UNIQUE (concept_name);
+    END IF;
+END $$;
+
+-- concept_relationships already has unique constraint on (concept1, concept2)
 
 -- =====================================================
 -- SAMPLE DATA FOR TESTING

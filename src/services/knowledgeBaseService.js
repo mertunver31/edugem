@@ -115,10 +115,190 @@ class KnowledgeBaseService {
   }
 
   // =====================================================
-  // CONCEPT STORAGE
+  // SEGMENT STORAGE (Enhanced Content Service için)
   // =====================================================
 
-  async storeConcept(conceptName, conceptDescription, subjectArea, difficultyLevel = 1, relatedConcepts = []) {
+  async storeSegment(documentId, segmentId, content, metadata = {}) {
+    try {
+      console.log(`💾 Storing segment: ${segmentId}`);
+      
+      // Embedding oluştur
+      const embeddingResult = await geminiEmbeddingService.generateSegmentEmbedding(content, segmentId);
+      
+      if (!embeddingResult.success) {
+        throw new Error(`Failed to generate embedding: ${embeddingResult.error}`);
+      }
+      
+      // Knowledge base'e kaydet - mevcut veritabanı yapısına uygun
+      const { data, error } = await supabase
+        .from('knowledge_base')
+        .insert({
+          segment_id: segmentId, // VARCHAR(255) - lesson ID'leri için
+          document_id: documentId, // UUID - documents tablosuna referans
+          content: content,
+          embeddings: embeddingResult.embedding,
+          metadata: {
+            ...metadata,
+            ...embeddingResult.metadata,
+            storedAt: new Date().toISOString()
+          },
+          content_type: metadata.content_type || 'lesson_content',
+          relevance_score: 1.0
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
+      console.log(`✅ Segment stored successfully (ID: ${data.id})`);
+      
+      return {
+        success: true,
+        knowledgeBaseId: data.id,
+        segmentId: segmentId,
+        embeddingDimensions: embeddingResult.dimensions,
+        timestamp: new Date().toISOString()
+      };
+      
+    } catch (error) {
+      console.error(`❌ Error storing segment ${segmentId}:`, error);
+      return {
+        success: false,
+        error: error.message,
+        segmentId: segmentId,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  // =====================================================
+  // CONCEPT STORAGE (Enhanced Content Service için)
+  // =====================================================
+
+  async storeConcept(conceptName, conceptDescription, metadata = {}) {
+    try {
+      console.log(`🧠 Storing concept: ${conceptName}`);
+      
+      // Concept description'ı 100 karakter ile sınırla
+      const truncatedDescription = conceptDescription.length > 100 
+        ? conceptDescription.substring(0, 97) + '...' 
+        : conceptDescription;
+      
+      // Concept embedding oluştur
+      const embeddingResult = await geminiEmbeddingService.generateConceptEmbedding(conceptName, truncatedDescription);
+      
+      if (!embeddingResult.success) {
+        throw new Error(`Failed to generate concept embedding: ${embeddingResult.error}`);
+      }
+      
+      // Concept embeddings tablosuna kaydet - mevcut veritabanı yapısına uygun
+      const { data, error } = await supabase
+        .from('concept_embeddings')
+        .upsert({
+          concept_name: conceptName,
+          concept_description: truncatedDescription,
+          embeddings: embeddingResult.embedding,
+          related_concepts: metadata.related_concepts || [],
+          difficulty_level: metadata.difficulty_level || 1,
+          subject_area: metadata.subject_area || 'general',
+          metadata: {
+            ...metadata,
+            ...embeddingResult.metadata,
+            storedAt: new Date().toISOString()
+          }
+        }, {
+          onConflict: 'concept_name',
+          ignoreDuplicates: false
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
+      console.log(`✅ Concept stored successfully (ID: ${data.id})`);
+      
+      return {
+        success: true,
+        conceptId: data.id,
+        conceptName: conceptName,
+        embeddingDimensions: embeddingResult.dimensions,
+        timestamp: new Date().toISOString()
+      };
+      
+    } catch (error) {
+      console.error(`❌ Error storing concept ${conceptName}:`, error);
+      return {
+        success: false,
+        error: error.message,
+        conceptName: conceptName,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  // =====================================================
+  // CONCEPT RELATIONSHIP STORAGE
+  // =====================================================
+
+  async storeConceptRelationship(concept1, concept2, relationshipScore, metadata = {}) {
+    try {
+      console.log(`🔗 Storing concept relationship: ${concept1} <-> ${concept2}`);
+      
+      // Concept relationships tablosuna kaydet - mevcut veritabanı yapısına uygun
+      const { data, error } = await supabase
+        .from('concept_relationships')
+        .upsert({
+          concept1: concept1,
+          concept2: concept2,
+          relationship_type: metadata.relationship_type || 'semantic_similarity',
+          relationship_score: relationshipScore,
+          metadata: {
+            ...metadata,
+            storedAt: new Date().toISOString()
+          }
+        }, {
+          onConflict: 'concept1,concept2',
+          ignoreDuplicates: false
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
+      console.log(`✅ Concept relationship stored successfully (ID: ${data.id})`);
+      
+      return {
+        success: true,
+        relationshipId: data.id,
+        concept1: concept1,
+        concept2: concept2,
+        score: relationshipScore,
+        timestamp: new Date().toISOString()
+      };
+      
+    } catch (error) {
+      console.error(`❌ Error storing concept relationship:`, error);
+      return {
+        success: false,
+        error: error.message,
+        concept1: concept1,
+        concept2: concept2,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  // =====================================================
+  // CONCEPT STORAGE (Original)
+  // =====================================================
+
+  async storeConceptOriginal(conceptName, conceptDescription, subjectArea, difficultyLevel = 1, relatedConcepts = []) {
     try {
       console.log(`🧠 Storing concept: ${conceptName}`);
       

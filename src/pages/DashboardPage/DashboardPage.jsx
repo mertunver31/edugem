@@ -24,6 +24,7 @@ import PDFExtractionTest from '../../components/PDFExtractionTest/PDFExtractionT
 import FullPipelineTest from '../../components/FullPipelineTest/FullPipelineTest'
 import GeminiEmbeddingTest from '../../components/GeminiEmbeddingTest/GeminiEmbeddingTest'
 import RetrievalTest from '../../components/RetrievalTest/RetrievalTest'
+import MindMapLearningPathTest from '../../components/MindMapLearningPathTest/MindMapLearningPathTest'
 import './DashboardPage.css'
 
 const DashboardPage = () => {
@@ -38,7 +39,7 @@ const DashboardPage = () => {
   useEffect(() => {
     if (!devMode) {
       // Development mode kapandığında, eğer development tab'ındaysa courses'a yönlendir
-              const developmentTabs = ['pdf-test', 'gemini-test', 'document-understanding', 'segment-planner', 'task-queue', 'text-worker', 'image-worker', 'concurrency-control', 'pdf-pipeline', 'course-structure', 'course-visual-integration', 'enhanced-content', 'pdf-extraction', 'full-pipeline', 'gemini-embedding-test', 'retrieval-test']
+              const developmentTabs = ['pdf-test', 'gemini-test', 'document-understanding', 'segment-planner', 'task-queue', 'text-worker', 'image-worker', 'concurrency-control', 'pdf-pipeline', 'course-structure', 'course-visual-integration', 'enhanced-content', 'pdf-extraction', 'full-pipeline', 'gemini-embedding-test', 'retrieval-test', 'mind-map-learning-path-test']
       if (developmentTabs.includes(activeTab)) {
         setActiveTab('courses')
       }
@@ -98,6 +99,8 @@ const DashboardPage = () => {
                return devMode ? <GeminiEmbeddingTest /> : <CoursesPage />
              case 'retrieval-test':
                return devMode ? <RetrievalTest /> : <CoursesPage />
+             case 'mind-map-learning-path-test':
+               return devMode ? <MindMapLearningPathTest /> : <CoursesPage />
       
       default:
         return <CoursesPage />
