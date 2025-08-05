@@ -407,7 +407,11 @@ const CoursesPage = () => {
           )}
         </div>
 
-        <div className="upload-section" style={{display: 'none'}}>
+        <div className="upload-section">
+          <div className="section-header">
+            <h3>Panoramik Görüntü Yükle</h3>
+            <p>Panoramik ders ortamı için görüntü yükleyin</p>
+          </div>
           <PanoramicUploader onFileSelect={handleFileSelect} />
           {selectedFile && (
             <PanoramicUploadForm

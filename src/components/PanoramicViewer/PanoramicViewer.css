@@ -402,4 +402,115 @@
   padding: 10px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
+}
+
+/* Kamera Kontrol Butonları */
+.camera-controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.camera-button {
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 160px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+}
+
+.camera-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.camera-button.active {
+  background: rgba(78, 205, 196, 0.8);
+  border-color: #4ecdc4;
+  color: white;
+  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+}
+
+.camera-button:not(.active) {
+  background: rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #cccccc;
+}
+
+.camera-button:not(.active):hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+/* Serbest Kamera Kontrolleri Bilgisi */
+.free-camera-info {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 15px;
+  margin-top: 10px;
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.free-camera-info h5 {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4ecdc4;
+  text-align: center;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.key {
+  background: rgba(255, 255, 255, 0.2);
+  color: #4ecdc4;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  min-width: 20px;
+  text-align: center;
+  font-family: monospace;
+}
+
+.action {
+  color: #cccccc;
+  font-size: 0.75rem;
+}
+
+.camera-hint {
+  margin: 10px 0 0 0;
+  font-size: 0.7rem;
+  color: #4ecdc4;
+  text-align: center;
+  font-style: italic;
+  padding: 5px;
+  background: rgba(78, 205, 196, 0.1);
+  border-radius: 4px;
 } 

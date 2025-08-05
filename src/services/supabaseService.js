@@ -3,7 +3,8 @@ import { supabase } from '../config/supabase'
 // Supabase bağlantısını test et
 export const testConnection = async () => {
   try {
-    const { data, error } = await supabase.from('test').select('*').limit(1)
+    // Mevcut bir tablo ile test et (users tablosu)
+    const { data, error } = await supabase.from('users').select('id').limit(1)
     if (error) {
       console.error('Supabase bağlantı hatası:', error)
       return false
