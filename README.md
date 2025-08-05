@@ -4,6 +4,8 @@
 > 
 > PDF'leri otomatik analiz eden, segment'lere bölen ve öğrenme materyallerine dönüştüren modern web uygulaması.
 
+<!-- Test commit - GitHub push testi -->
+
 ## 🌟 **Özellikler**
 
 ### 📚 **PDF İşleme & AI Entegrasyonu**
