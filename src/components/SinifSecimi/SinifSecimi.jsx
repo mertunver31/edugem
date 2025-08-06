@@ -33,8 +33,13 @@ const SinifSecimi = ({ selectedDers, onSinifSec, onClose, onGeriDon }) => {
   }
 
   const handleDevamEt = () => {
+    console.log('SinifSecimi - handleDevamEt çağrıldı:', { selectedImage })
     if (selectedImage) {
+      console.log('SinifSecimi - onSinifSec çağrılıyor')
       onSinifSec(selectedImage)
+      console.log('SinifSecimi - onSinifSec çağrısı tamamlandı')
+    } else {
+      console.log('SinifSecimi - selectedImage yok')
     }
   }
 
@@ -103,22 +108,70 @@ const SinifSecimi = ({ selectedDers, onSinifSec, onClose, onGeriDon }) => {
               </div>
               
               <div className="modal-actions">
-                <CustomButton
-                  text="Geri Dön"
+                <button
                   onClick={handleGeriDon}
-                  variant="secondary"
-                />
-                <CustomButton
-                  text="İptal"
+                  style={{
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    minWidth: '120px',
+                    zIndex: 99999,
+                    position: 'relative',
+                    display: 'block',
+                    visibility: 'visible',
+                    opacity: 1
+                  }}
+                >
+                  Geri Dön
+                </button>
+                <button
                   onClick={handleIptal}
-                  variant="secondary"
-                />
-                <CustomButton
-                  text="Sınıfa Gir"
+                  style={{
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    minWidth: '120px',
+                    zIndex: 99999,
+                    position: 'relative',
+                    display: 'block',
+                    visibility: 'visible',
+                    opacity: 1
+                  }}
+                >
+                  İptal
+                </button>
+                <button
                   onClick={handleDevamEt}
                   disabled={!selectedImage}
-                  variant="primary"
-                />
+                  style={{
+                    backgroundColor: selectedImage ? '#3498db' : '#ccc',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: selectedImage ? 'pointer' : 'not-allowed',
+                    minWidth: '120px',
+                    zIndex: 99999,
+                    position: 'relative',
+                    display: 'block',
+                    visibility: 'visible',
+                    opacity: 1
+                  }}
+                >
+                  Sınıfa Gir
+                </button>
               </div>
             </>
           )}

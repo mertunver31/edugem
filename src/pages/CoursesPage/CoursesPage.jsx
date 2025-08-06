@@ -166,10 +166,12 @@ const CoursesPage = () => {
 
   // Ders seçimi handlers
   const handleDersSecimiBaslat = () => {
+    console.log('Ders seçimi başlatılıyor')
     setShowDersSecimi(true)
   }
 
   const handleDersSec = (ders) => {
+    console.log('handleDersSec çağrıldı:', { ders })
     setSelectedDers(ders)
     setShowDersSecimi(false)
     setShowSinifSecimi(true)
@@ -182,6 +184,7 @@ const CoursesPage = () => {
 
   // Sınıf seçimi handlers
   const handleSinifSec = (sinif) => {
+    console.log('handleSinifSec çağrıldı:', { sinif })
     setSelectedSinif(sinif)
     setShowSinifSecimi(false)
     // Panoramik sınıfa yönlendir
@@ -350,6 +353,7 @@ const CoursesPage = () => {
       )}
 
       {/* Ders Seçimi Modal */}
+      {console.log('showDersSecimi:', showDersSecimi)}
       {showDersSecimi && (
         <DersSecimi
           onDersSec={handleDersSec}

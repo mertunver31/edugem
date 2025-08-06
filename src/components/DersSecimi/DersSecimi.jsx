@@ -45,6 +45,7 @@ const DersSecimi = ({ onDersSec, onClose }) => {
   }
 
   const handleDevamEt = () => {
+    console.log('Devam Et butonuna tıklandı', { selectedDocument })
     if (selectedDocument) {
       onDersSec(selectedDocument)
     }
@@ -64,6 +65,7 @@ const DersSecimi = ({ onDersSec, onClose }) => {
         </div>
         
         <div className="modal-body">
+          {console.log('DersSecimi render ediliyor', { documents, selectedDocument })}
           {isLoading ? (
             <div className="loading-state">
               <div className="loading-spinner"></div>
@@ -102,17 +104,49 @@ const DersSecimi = ({ onDersSec, onClose }) => {
               </div>
               
               <div className="modal-actions">
-                <CustomButton
-                  text="İptal"
+                <button
                   onClick={handleIptal}
-                  variant="secondary"
-                />
-                <CustomButton
-                  text="Devam Et"
+                  style={{
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    minWidth: '120px',
+                    zIndex: 99999,
+                    position: 'relative',
+                    display: 'block',
+                    visibility: 'visible',
+                    opacity: 1
+                  }}
+                >
+                  İptal
+                </button>
+                <button
                   onClick={handleDevamEt}
                   disabled={!selectedDocument}
-                  variant="primary"
-                />
+                  style={{
+                    backgroundColor: selectedDocument ? '#3498db' : '#ccc',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: selectedDocument ? 'pointer' : 'not-allowed',
+                    minWidth: '120px',
+                    zIndex: 99999,
+                    position: 'relative',
+                    display: 'block',
+                    visibility: 'visible',
+                    opacity: 1
+                  }}
+                >
+                  Devam Et
+                </button>
               </div>
             </>
           )}
