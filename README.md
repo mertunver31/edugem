@@ -13,6 +13,34 @@
 - **Document Understanding**: Başlık yapısı, sayfa numaraları ve içerik türü tespiti
 - **Segment Planning**: PDF'leri öğrenme segmentlerine otomatik bölümleme
 - **Smart Validation**: Overlap kontrolü, boşluk tespiti ve segment birleştirme
+- **PDF Text Extraction**: PDF.js ile metin, görsel ve tablo çıkarma sistemi
+- **Enhanced Content Generation**: AI ile detaylı eğitim içeriği üretimi
+- **Master Pipeline System**: 7 aşamalı otomatik kurs oluşturma sistemi
+
+### 🎙️ **Podcast & TTS Sistemi**
+- **Text-to-Speech**: Gemini TTS API ile sesli içerik üretimi
+- **Podcast Generation**: Ders içeriklerinden otomatik podcast oluşturma
+- **Voice Options**: Zephyr, Nova, Gemini ses seçenekleri
+- **Audio Processing**: WAV formatında ses dosyası oluşturma ve oynatma
+
+### 👨‍🏫 **AI Öğretmen Sistemi**
+- **AI Teacher Creation**: Gemini AI ile öğretmen karakteri oluşturma
+- **Teacher Profiles**: Branş, uzmanlık, kişilik ve öğretim stili
+- **Avatar Integration**: Ready Player Me ile 3D öğretmen avatarları
+- **Chat System**: AI öğretmenlerle etkileşimli sohbet
+- **Lesson Content**: AI öğretmenlere ders içeriği atama
+
+### 🏫 **Sınıf Yönetimi**
+- **Classroom Chat**: AI öğretmenlerle sınıf ortamında sohbet
+- **Participant Management**: Sınıf katılımcılarını yönetme
+- **Real-time Communication**: Canlı mesajlaşma sistemi
+- **Context-Aware Responses**: Ders bağlamına uygun AI yanıtları
+
+### 📖 **Ders Seçimi & Sınıf Yönetimi**
+- **Course Selection**: Enhanced content'i hazır dersleri seçme
+- **Classroom Selection**: Panoramik sınıf ortamı seçimi
+- **Interactive Navigation**: Ders ve sınıf seçim arayüzleri
+- **Status Tracking**: Ders hazırlık durumu takibi
 
 ### 🎭 **Avatar Sistemi**
 - **Ready Player Me Integration**: 3D avatar oluşturma
@@ -73,6 +101,9 @@ VITE_READY_PLAYER_ME_SUBDOMAIN=your_subdomain
 
 # Hugging Face API
 VITE_HUGGINGFACE_API_KEY=your_huggingface_api_key
+
+# Development Mode
+VITE_DEV_MODE=true
 ```
 
 ## 📊 **Proje Durumu**
@@ -358,6 +389,45 @@ const progressTracking = {
 - ✅ **Test Component** - MindMapLearningPathTest bileşeni
 - ✅ **PanoramicViewer Integration** - Panoramik dünyaya entegrasyon
 
+#### **GÜN 15: Podcast & TTS System** ✅ **TAMAMLANDI**
+- ✅ **Text-to-Speech Integration** - Gemini TTS API ile sesli içerik üretimi
+- ✅ **Voice Options** - Zephyr, Nova, Gemini ses seçenekleri (Türkçe/İngilizce)
+- ✅ **Audio Processing** - WAV formatında ses dosyası oluşturma ve oynatma
+- ✅ **Podcast Generation** - Ders içeriklerinden otomatik podcast oluşturma
+- ✅ **Episode Management** - Podcast bölümü oluşturma ve yönetimi
+- ✅ **Download Support** - Ses dosyasını indirme özelliği
+- ✅ **Supabase Edge Function** - TTS API entegrasyonu
+- ✅ **Test Component** - PodcastTestArea bileşeni
+
+#### **GÜN 16: AI Teacher System** ✅ **TAMAMLANDI**
+- ✅ **AI Teacher Creation** - Gemini AI ile öğretmen karakteri oluşturma
+- ✅ **Teacher Profiles** - Branş, uzmanlık, kişilik ve öğretim stili
+- ✅ **Avatar Integration** - Ready Player Me ile 3D öğretmen avatarları
+- ✅ **Chat System** - AI öğretmenlerle etkileşimli sohbet
+- ✅ **Lesson Content** - AI öğretmenlere ders içeriği atama
+- ✅ **Statistics Tracking** - Öğretmen performans ve istatistik takibi
+- ✅ **Database Integration** - AI teachers ve lesson_contents tabloları
+- ✅ **Test Components** - AITeacherAvatarCreator, AITeacherEditor, AITeacherChat bileşenleri
+
+#### **GÜN 17: Classroom Chat System** ✅ **TAMAMLANDI**
+- ✅ **Real-time Communication** - Canlı mesajlaşma sistemi
+- ✅ **AI Teacher Integration** - AI öğretmenlerle sınıf ortamında sohbet
+- ✅ **Participant Management** - Sınıf katılımcılarını yönetme
+- ✅ **Context-Aware Responses** - Ders bağlamına uygun AI yanıtları
+- ✅ **Position Tracking** - 3D ortamda katılımcı pozisyonları
+- ✅ **Message History** - Sohbet geçmişi saklama
+- ✅ **Database Integration** - Classroom messages ve participants tabloları
+- ✅ **Test Component** - ClassroomChat bileşeni
+
+#### **GÜN 18: Course Selection & Classroom Management** ✅ **TAMAMLANDI**
+- ✅ **Enhanced Content Filtering** - Sadece enhanced content'i hazır dersleri gösterme
+- ✅ **Course Status Tracking** - Ders hazırlık durumu takibi
+- ✅ **Interactive Selection** - Modal tabanlı ders seçim arayüzü
+- ✅ **Classroom Selection** - Panoramik sınıf ortamı seçimi
+- ✅ **Navigation Flow** - Ders → Sınıf seçim akışı
+- ✅ **Status Indicators** - Ders ve sınıf hazırlık durumu göstergeleri
+- ✅ **Test Components** - DersSecimi ve SinifSecimi bileşenleri
+
 **🎯 RAG Sistemi Aşamaları:**
 1. **Vector Database Kurulumu** ✅ **TAMAMLANDI** - pgvector extension ve tablolar
 2. **Gemini Embedding Service** ✅ **TAMAMLANDI** - text-embedding-004 entegrasyonu
@@ -423,13 +493,25 @@ src/
 │   ├── RetrievalTest/ # Retrieval Service test (Mevcut yapıya entegre) ✅
 │   ├── MindMapLearningPathTest/ # Mind Map & Learning Path test ✅
 │   ├── DevelopmentModeIndicator/ # Development mode göstergesi
+│   ├── PodcastTestArea/       # Podcast & TTS test alanı
+│   ├── AITeacherAvatarCreator/ # AI öğretmen avatar oluşturucu
+│   ├── AITeacherEditor/       # AI öğretmen düzenleyici
+│   ├── AITeacherChat/         # AI öğretmen sohbet
+│   ├── AITeacherSelector/     # AI öğretmen seçici
+│   ├── ClassroomChat/         # Sınıf sohbet sistemi
+│   ├── DersSecimi/            # Ders seçim modalı
+│   ├── SinifSecimi/           # Sınıf seçim modalı
 │   ├── AvatarPage/            # Avatar oluşturma
 │   └── PanoramicViewer/       # 360° görüntüleyici (3D Mind Map & Learning Path entegreli)
 ├── pages/                     # Sayfa bileşenleri
 │   ├── LoginPage/             # Giriş sayfası
 │   ├── DashboardPage/         # Ana dashboard
 │   ├── CreateCoursePage/      # Kurs oluşturma
-│   └── CoursesPage/           # Kurslar listesi
+│   ├── CoursesPage/           # Kurslar listesi
+│   ├── TeachersPage/          # AI öğretmenler sayfası
+│   ├── OnlineLessonsPage/     # Online dersler sayfası
+│   ├── ProfilePage/           # Kullanıcı profili sayfası
+│   └── TestsPage/             # Test sayfaları
 ├── services/                  # API servisleri
 │   ├── pdfService.js          # PDF işlemleri
 │   ├── segmentService.js      # Segment algoritması
@@ -454,6 +536,12 @@ src/
 │   ├── mindMapGeneratorService.js # Mind Map Generator servisi ✅
 │   ├── learningPathGeneratorService.js # Learning Path Generator servisi ✅
 │   ├── forceGraph3DService.js # 3D Force Graph servisi ✅
+│   ├── podcastService.js      # Podcast & TTS servisi
+│   ├── aiTeacherService.js    # AI öğretmen servisi
+│   ├── classroomChatService.js # Sınıf sohbet servisi
+│   ├── geminiService.js       # Gemini AI servisi
+│   ├── panoramicImageService.js # Panoramik görüntü servisi
+│   ├── authService.js         # Kimlik doğrulama servisi
 │   └── supabaseService.js     # Supabase bağlantısı
 ├── config/                    # Konfigürasyon
 │   ├── supabase.js           # Supabase client
@@ -463,7 +551,9 @@ src/
 supabase/
 ├── functions/                 # Edge Functions
 │   ├── pdf_broker/           # PDF webhook handler
-│   └── gemini_document_understanding/  # AI processing
+│   ├── gemini_document_understanding/  # AI processing
+│   ├── tts/                  # Text-to-Speech API
+│   └── image-search/         # Image search API
 ├── migrations/               # Database migrations
 │   └── 20241201000000_vector_database_rag.sql ✅ **YENİ**
 └── config.toml              # Supabase konfigürasyonu
@@ -471,6 +561,44 @@ supabase/
 **Database Files:**
 ├── database_vector_rag.sql ✅ **YENİ** - Vector database setup
 ├── test_vector_database.sql ✅ **YENİ** - Vector database test script
+├── database_ai_teachers.sql - AI öğretmenler tablosu
+├── database_mind_maps.sql - Mind map tablosu
+├── database_pipeline.sql - Pipeline tablosu
+├── database_task_queue.sql - Task queue tablosu
+├── database_pdf_extraction.sql - PDF extraction tablosu
+├── database_course_structure.sql - Course structure tablosu
+├── database_document_understanding.sql - Document understanding tablosu
+├── database_rls_policies.sql - Row Level Security politikaları
+├── database_update.sql - Database güncellemeleri
+├── create_user_profile_trigger.sql - Kullanıcı profili trigger'ı
+├── create_existing_user_profiles.sql - Mevcut kullanıcı profilleri
+├── assign_default_panoramic_images.sql - Default panoramik görüntüler
+├── create_default_panoramic_bucket.sql - Default panoramik bucket
+├── fix_user_trigger.sql - Kullanıcı trigger düzeltmeleri
+├── cleanup_test_data.sql - Test verisi temizleme
+├── test_mind_maps.sql - Mind map test verileri
+├── test_rag_system.sql - RAG sistem test verileri
+├── reset_vector_database.sql - Vector database sıfırlama
+├── fix_ai_teachers_table.sql - AI öğretmenler tablosu düzeltmeleri
+├── test_mind_map_learning_path.sql - Mind map learning path test
+├── fix_worker_results.sql - Worker sonuçları düzeltmeleri
+├── create_task_function.sql - Task oluşturma fonksiyonu
+├── disable_panoramic_trigger.sql - Panoramik trigger devre dışı
+├── simple_panoramic_trigger.sql - Basit panoramik trigger
+├── cleanup_wrong_panoramic_paths.sql - Yanlış panoramik yolları temizleme
+├── update_default_panoramic_images_with_real_data.sql - Default panoramik görüntüleri güncelleme
+├── default_panoramic_images_for_new_users.sql - Yeni kullanıcılar için default görüntüler
+├── assign_default_panoramic_images_dynamic.sql - Dinamik default panoramik görüntü atama
+├── assign_default_panoramic_images_simple.sql - Basit default panoramik görüntü atama
+├── check_default_panoramic_images.sql - Default panoramik görüntüleri kontrol
+
+**Documentation Files:**
+├── AI_README.md - AI entegrasyonu dokümantasyonu
+├── PANORAMIC_IMAGES_SETUP.md - Panoramik görüntüler kurulum rehberi
+├── RAG_TEST_GUIDE.md - RAG sistem test kılavuzu
+├── PDF_ROADMAP.md - PDF işleme roadmap'i
+├── SUPABASE_SETUP.md - Supabase kurulum rehberi
+├── readyplayermesetup.txt - Ready Player Me kurulum notları
 ```
 
 ## 🤖 **AI Entegrasyonu**
@@ -995,6 +1123,254 @@ const toggleDevMode = () => {
 Course Data → Mind Map Generation → Learning Path Generation → 3D Scene Integration → Panoramic Experience
 ```
 
+### **15. Podcast & TTS System**
+```
+Text Content → Gemini TTS API → Audio Processing → WAV Conversion → Audio Playback
+```
+
+**Podcast Sistemi Özellikleri:**
+- **Gemini TTS Integration**: Google Gemini TTS API ile sesli içerik üretimi
+- **Voice Options**: Zephyr, Nova, Gemini ses seçenekleri (Türkçe/İngilizce)
+- **Audio Processing**: WAV formatında ses dosyası oluşturma
+- **Episode Management**: Podcast bölümü oluşturma ve yönetimi
+- **Audio Playback**: Tarayıcıda ses dosyası oynatma
+- **Download Support**: Ses dosyasını indirme özelliği
+
+**TTS İşlem Akışı:**
+```javascript
+// 1. Metin hazırlama
+const text = 'Merhaba, bu bir test podcast\'idir. EduGems platformunda sesli eğitim içeriği oluşturuyoruz.';
+
+// 2. Ses seçenekleri
+const options = {
+  voice: {
+    name: 'Zephyr',
+    languageCode: 'tr-TR'
+  }
+};
+
+// 3. TTS API çağrısı
+const audioBuffer = await podcastService.synthesizeText(text, options);
+
+// 4. WAV formatına dönüştürme
+const wavBlob = podcastService.convertToWAV(audioBuffer, 24000);
+
+// 5. Podcast bölümü oluşturma
+const episode = await podcastService.createPodcastEpisode(title, text, options);
+```
+
+**Supabase Edge Function (TTS):**
+```typescript
+// supabase/functions/tts/index.ts
+const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+const payload = {
+  model: "gemini-2.5-flash-preview-tts",
+  contents: [{ parts: [{ text }] }],
+  generationConfig: {
+    responseModalities: ["AUDIO"],
+    speechConfig: {
+      voiceConfig: {
+        prebuiltVoiceConfig: { voiceName }
+      }
+    }
+  }
+};
+```
+
+### **16. AI Teacher System**
+```
+Teacher Creation → Character Generation → Avatar Integration → Chat System → Lesson Management
+```
+
+**AI Öğretmen Sistemi Özellikleri:**
+- **Character Generation**: Gemini AI ile öğretmen karakteri oluşturma
+- **Profile Management**: Branş, uzmanlık, kişilik ve öğretim stili
+- **Avatar Integration**: Ready Player Me ile 3D öğretmen avatarları
+- **Interactive Chat**: AI öğretmenlerle etkileşimli sohbet
+- **Lesson Content**: AI öğretmenlere ders içeriği atama
+- **Statistics Tracking**: Öğretmen performans ve istatistik takibi
+
+**AI Öğretmen Oluşturma Süreci:**
+```javascript
+// 1. Öğretmen profili oluşturma
+const teacherData = {
+  name: 'Dr. Ahmet',
+  subject: 'Matematik',
+  specialty: 'Cebir',
+  personality_type: 'Dostane ve Samimi',
+  teaching_style: 'Etkileşimli ve Soru-Cevap',
+  experience_level: 8,
+  education_level: 'Üniversite',
+  character_description: 'Deneyimli matematik öğretmeni'
+};
+
+// 2. Gemini AI ile karakter oluşturma
+const characterPrompt = `
+Sen ${teacherData.name} adında bir AI öğretmensin. 
+Branş: ${teacherData.subject}
+Uzmanlık: ${teacherData.specialty}
+Kişilik: ${teacherData.personality_type}
+Öğretim Stili: ${teacherData.teaching_style}
+Deneyim Seviyesi: ${teacherData.experience_level}/10
+Eğitim Seviyesi: ${teacherData.education_level}
+
+Bu bilgilere göre kendini tanıt ve nasıl bir öğretmen olduğunu açıkla.
+`;
+
+// 3. AI öğretmen oluşturma
+const teacher = await aiTeacherService.createAITeacher(teacherData);
+
+// 4. Avatar oluşturma
+const avatarUrl = await aiTeacherService.updateTeacherAvatar(teacherId, avatarUrl);
+```
+
+**Chat Sistemi:**
+```javascript
+// AI öğretmenle sohbet
+const response = await aiTeacherService.chatWithAITeacher(teacherId, message, {
+  lessonContext: 'Mevcut ders bağlamı',
+  subject: 'Matematik',
+  difficulty: 'Orta'
+});
+
+// Sohbet geçmişi
+const history = await aiTeacherService.getConversationHistory(teacherId);
+
+// Ders içeriği ekleme
+await aiTeacherService.addLessonContent(teacherId, {
+  title: 'Cebir Temelleri',
+  content: 'Ders içeriği...',
+  subject: 'Matematik',
+  difficulty: 'Başlangıç'
+});
+```
+
+### **17. Classroom Chat System**
+```
+Classroom Creation → Participant Management → Real-time Chat → AI Response Generation → Context Integration
+```
+
+**Sınıf Sohbet Sistemi Özellikleri:**
+- **Real-time Communication**: Canlı mesajlaşma sistemi
+- **AI Teacher Integration**: AI öğretmenlerle sınıf ortamında sohbet
+- **Participant Management**: Sınıf katılımcılarını yönetme
+- **Context-Aware Responses**: Ders bağlamına uygun AI yanıtları
+- **Position Tracking**: 3D ortamda katılımcı pozisyonları
+- **Message History**: Sohbet geçmişi saklama
+
+**Sınıf Yönetimi:**
+```javascript
+// Sınıf mesajlarını getirme
+const messages = await classroomChatService.getClassroomMessages(classroomId);
+
+// Kullanıcı mesajı gönderme
+const message = await classroomChatService.sendUserMessage(classroomId, messageText, {
+  lessonContext: 'Mevcut ders bağlamı',
+  subject: 'Matematik',
+  aiTeacher: teacherData
+});
+
+// AI öğretmen yanıtı oluşturma
+const aiResponse = await classroomChatService.generateAIResponse(classroomId, userMessage, {
+  aiTeacher: teacherData,
+  lessonContext: 'Ders içeriği...',
+  subject: 'Matematik'
+});
+
+// Sınıf katılımcılarını yönetme
+const participants = await classroomChatService.getClassroomParticipants(classroomId);
+
+// AI öğretmeni sınıfa ekleme
+await classroomChatService.addAITeacherToClassroom(classroomId, teacherId, {
+  x: 0, y: 0, z: 0
+});
+
+// Kullanıcıyı sınıfa ekleme
+await classroomChatService.addUserToClassroom(classroomId, {
+  x: 5, y: 0, z: 5
+});
+```
+
+**Real-time Subscription:**
+```javascript
+// Sınıf mesajlarına abone olma
+const unsubscribe = classroomChatService.subscribeToClassroomMessages(classroomId, (messages) => {
+  console.log('Yeni mesajlar:', messages);
+});
+
+// Sınıf katılımcılarına abone olma
+const unsubscribeParticipants = classroomChatService.subscribeToClassroomParticipants(classroomId, (participants) => {
+  console.log('Katılımcı güncellemeleri:', participants);
+});
+```
+
+### **18. Course Selection & Classroom Management System**
+```
+Enhanced Content Check → Course Selection → Classroom Selection → Interactive Navigation → Status Tracking
+```
+
+**Ders Seçimi Sistemi Özellikleri:**
+- **Enhanced Content Filtering**: Sadece enhanced content'i hazır dersleri gösterme
+- **Course Status Tracking**: Ders hazırlık durumu takibi
+- **Interactive Selection**: Modal tabanlı ders seçim arayüzü
+- **Course Information**: Ders başlığı, tarih ve durum bilgileri
+- **Empty State Handling**: Ders yoksa uygun mesaj gösterme
+
+**Sınıf Seçimi Sistemi Özellikleri:**
+- **Panoramic Image Integration**: Kullanıcının panoramik görüntülerini listeleme
+- **Classroom Preview**: Sınıf görüntüsü önizleme
+- **Selection Interface**: Modal tabanlı sınıf seçim arayüzü
+- **Status Indicators**: Sınıf hazırlık durumu göstergeleri
+- **Navigation Flow**: Ders → Sınıf seçim akışı
+
+**Seçim Akışı:**
+```javascript
+// 1. Ders seçimi
+const DersSecimi = ({ onDersSec, onClose }) => {
+  // Enhanced content'i hazır dersleri getir
+  const documents = await supabase
+    .from('documents')
+    .select('*')
+    .not('enhanced_content', 'is', null)
+    .order('created_at', { ascending: false });
+
+  // Ders seçimi
+  const handleDersSec = (document) => {
+    onDersSec(document);
+  };
+};
+
+// 2. Sınıf seçimi
+const SinifSecimi = ({ selectedDers, onSinifSec, onClose, onGeriDon }) => {
+  // Kullanıcının panoramik görüntülerini getir
+  const images = await getUserPanoramicImages();
+
+  // Sınıf seçimi
+  const handleSinifSec = (image) => {
+    onSinifSec(image);
+  };
+};
+
+// 3. Seçim akışı
+const handleDersSecimiBaslat = () => {
+  setShowDersSecimi(true);
+};
+
+const handleDersSec = (ders) => {
+  setSelectedDers(ders);
+  setShowDersSecimi(false);
+  setShowSinifSecimi(true);
+};
+
+const handleSinifSec = (sinif) => {
+  setSelectedSinif(sinif);
+  setShowSinifSecimi(false);
+  // Panoramik sınıfa gir
+  handleEnterClass(sinif);
+};
+```
+
 **3D Mind Map & Learning Path Özellikleri:**
 - **🌌 Evren Teması**: Mind map ve learning path verileri evrenin içindeki gezegen sistemleri olarak görünür
 - **Entegre Deneyim**: Ayrı modal pencereler yerine panoramik dünyanın bir parçası
@@ -1479,6 +1855,125 @@ await knowledgeBaseService.addContent({
 
 // Semantic search
 const results = await knowledgeBaseService.searchSimilar(query, limit);
+```
+
+### **Podcast & TTS Services**
+```javascript
+// Podcast Service
+const podcastService = new PodcastService();
+
+// Metni sese dönüştürme
+const audioBuffer = await podcastService.synthesizeText(text, {
+  voice: { name: 'Zephyr', languageCode: 'tr-TR' }
+});
+
+// Podcast bölümü oluşturma
+const episode = await podcastService.createPodcastEpisode(title, content, options);
+
+// Ses dosyasını oynatma
+const audio = await podcastService.playAudio(audioBlob);
+
+// Ses dosyasını indirme
+podcastService.downloadAudio(audioBlob, 'podcast.wav');
+```
+
+### **AI Teacher Services**
+```javascript
+// AI Teacher Service
+const aiTeacherService = new AITeacherService();
+
+// AI öğretmen listesi
+const teachers = await aiTeacherService.getAITeachers();
+
+// AI öğretmen oluşturma
+const teacher = await aiTeacherService.createAITeacher({
+  name: 'Dr. Ahmet',
+  subject: 'Matematik',
+  specialty: 'Cebir',
+  personality_type: 'Dostane ve Samimi',
+  teaching_style: 'Etkileşimli ve Soru-Cevap',
+  experience_level: 8,
+  education_level: 'Üniversite',
+  character_description: 'Deneyimli matematik öğretmeni'
+});
+
+// AI öğretmenle sohbet
+const response = await aiTeacherService.chatWithAITeacher(teacherId, message, context);
+
+// AI öğretmen istatistikleri
+const stats = await aiTeacherService.getTeacherStats();
+```
+
+### **Classroom Chat Services**
+```javascript
+// Classroom Chat Service
+const classroomChatService = new ClassroomChatService();
+
+// Sınıf mesajlarını getirme
+const messages = await classroomChatService.getClassroomMessages(classroomId);
+
+// Kullanıcı mesajı gönderme
+const message = await classroomChatService.sendUserMessage(classroomId, messageText, contextData);
+
+// AI öğretmen yanıtı oluşturma
+const aiResponse = await classroomChatService.generateAIResponse(classroomId, userMessage, contextData);
+
+// Sınıf katılımcılarını getirme
+const participants = await classroomChatService.getClassroomParticipants(classroomId);
+
+// AI öğretmeni sınıfa ekleme
+await classroomChatService.addAITeacherToClassroom(classroomId, teacherId, position);
+```
+
+### **Gemini AI Services**
+```javascript
+// Gemini Service
+const geminiService = new GeminiService();
+
+// PDF chunking
+const chunks = geminiService.createPDFChunks(totalPages, chunkSize);
+
+// Token hesaplama
+const tokenCount = geminiService.estimateTokens(text);
+
+// PDF'den text çıkarma
+const text = await geminiService.extractTextFromPDF(base64PDF);
+
+// Document understanding
+const outline = await geminiService.extractDocumentOutline(fileUrl);
+
+// Text content generation
+const content = await geminiService.generateTextContent(prompt, context);
+
+// Visual content generation
+const visual = await geminiService.generateVisualContent(prompt, context);
+
+// Rate limit kontrolü
+const limits = geminiService.checkRateLimits();
+
+// Bağlantı testi
+const testResult = await geminiService.testGeminiConnection();
+```
+
+### **Panoramic Image Services**
+```javascript
+// Panoramic Image Service
+const panoramicImageService = new PanoramicImageService();
+
+// Kullanıcının panoramik görüntülerini getirme
+const images = await panoramicImageService.getUserPanoramicImages();
+
+// Panoramik görüntü yükleme
+const result = await panoramicImageService.uploadPanoramicFile(file, fileName);
+
+// Panoramik görüntü kaydetme
+const savedImage = await panoramicImageService.savePanoramicImage(imageData);
+
+// Panoramik görüntü silme
+const deleteResult = await panoramicImageService.deletePanoramicImage(imageId);
+
+// Default panoramik görüntüleri alma
+const defaultImages = await panoramicImageService.getDefaultPanoramicImages();
 ```
 
 ### **Mind Map & Learning Path Services**

@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // Gemini API Konfigürasyonu
-const GEMINI_API_KEY = 'AIzaSyCR4LeqshlDhCoMGCPfmJyLgEkdpzqdTVU'
+const GEMINI_API_KEY = 'AIzaSyBEmpNEoDdPWAUnQxgDguPHygn8MuNlU-M'
 
 // Gemini client oluştur
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
@@ -177,16 +177,31 @@ export const generateTextContent = async (prompt, context = '') => {
     
     const fullPrompt = context ? `${context}\n\n${prompt}` : prompt
     
-    const result = await model.generateContent(fullPrompt)
+    // JSON formatında yanıt vermemesi için ek talimat ekle
+    const enhancedPrompt = `${fullPrompt}\n\nÖNEMLİ: Yanıtını sadece düz metin olarak ver, JSON formatında verme. Sadece doğrudan yanıtını yaz.`
+    
+    const result = await model.generateContent(enhancedPrompt)
     const response = await result.response
     const text = response.text()
     
     console.log('Text generation tamamlandı')
     
+    // Eğer yanıt JSON formatında ise, sadece content kısmını al
+    let cleanText = text
+    try {
+      const jsonResponse = JSON.parse(text)
+      if (jsonResponse.content) {
+        cleanText = jsonResponse.content
+      }
+    } catch (parseError) {
+      // JSON parse edilemezse, orijinal text'i kullan
+      cleanText = text
+    }
+    
     return {
       success: true,
-      content: text,
-      tokens: estimateTokens(text)
+      content: cleanText,
+      tokens: estimateTokens(cleanText)
     }
     
   } catch (error) {

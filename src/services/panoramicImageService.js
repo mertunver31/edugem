@@ -1,4 +1,5 @@
 import { supabase } from './supabaseService'
+import { getCurrentUser } from './authService'
 
 // Kullanıcının panoramik görüntülerini getir
 export const getUserPanoramicImages = async () => {
@@ -80,6 +81,30 @@ export const deletePanoramicImage = async (imageId) => {
     return { success: true }
   } catch (error) {
     console.error('Panoramik görüntü silme hatası:', error.message)
+    return { success: false, error: error.message }
+  }
+}
+
+// Default panoramic resimleri kullanıcıya ata
+export const assignDefaultPanoramicImages = async () => {
+  try {
+    const userResult = await getCurrentUser()
+    if (!userResult.success) {
+      return { success: false, error: 'Kullanıcı bilgileri alınamadı' }
+    }
+
+    const { data, error } = await supabase.rpc('assign_default_panoramic_images_to_user', {
+      user_id: userResult.user.id
+    })
+
+    if (error) {
+      console.error('Default panoramic assignment error:', error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Default panoramic assignment error:', error)
     return { success: false, error: error.message }
   }
 } 

@@ -1,10 +1,16 @@
 .dashboard-navigation {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   padding: 25px 30px;
   border-radius: 25px;
-  margin: 0 30px 30px 30px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  max-width: calc(100vw - 40px);
 }
 
 .nav-tabs {
@@ -130,4 +136,48 @@
     margin: 5px 0;
     padding: 8px;
   }
+} 
+
+/* Açılır Kapanır Navigasyon */
+.dashboard-navigation.collapsed {
+  width: 120px;
+  padding: 25px 15px;
+}
+
+.dashboard-navigation.collapsed .nav-tabs {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-100%);
+}
+
+.nav-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+.collapse-toggle {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.collapse-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.dashboard-navigation.collapsed .nav-header {
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+.dashboard-navigation.collapsed .collapse-toggle {
+  transform: rotate(180deg);
 } 

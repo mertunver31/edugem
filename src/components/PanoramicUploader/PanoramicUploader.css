@@ -1,14 +1,15 @@
 .panoramic-uploader {
   width: 100%;
+  background: transparent;
 }
 
 .upload-area {
-  border: 3px dashed #e1e5e9;
+  border: 3px dashed rgba(255, 255, 255, 0.3);
   border-radius: 15px;
   padding: 40px;
   text-align: center;
   transition: all 0.3s ease;
-  background: #fafbfc;
+  background: transparent;
   position: relative;
   min-height: 200px;
   display: flex;
@@ -17,19 +18,19 @@
 }
 
 .upload-area:hover {
-  border-color: #667eea;
-  background: #f8f9ff;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: transparent;
 }
 
 .upload-area.drag-active {
-  border-color: #667eea;
-  background: #f0f2ff;
+  border-color: rgba(255, 255, 255, 0.7);
+  background: transparent;
   transform: scale(1.02);
 }
 
 .upload-area.has-file {
-  border-color: #28a745;
-  background: #f8fff9;
+  border-color: rgba(40, 167, 69, 0.7);
+  background: transparent;
 }
 
 .file-input {
@@ -51,18 +52,23 @@
   font-size: 1.5rem;
   margin-bottom: 10px;
   font-weight: 600;
+  text-shadow: none;
+  
 }
 
 .upload-content p {
-  color: #666;
+  color: #555;
   font-size: 1rem;
   margin-bottom: 5px;
+  text-shadow: none;
+  
 }
 
 .file-info {
-  color: #999;
+  color: #666;
   font-size: 0.9rem;
   margin-bottom: 20px;
+  text-shadow: none;
 }
 
 .browse-button {
@@ -85,11 +91,13 @@
   color: #333;
   margin-bottom: 10px;
   font-size: 1.2rem;
+  text-shadow: none;
 }
 
 .file-preview .file-info p {
-  color: #666;
+  color: #555;
   margin-bottom: 5px;
+  text-shadow: none;
 }
 
 .file-actions {
@@ -141,8 +149,9 @@
 }
 
 .upload-progress p {
-  color: #666;
+  color: #555;
   font-size: 0.9rem;
+  text-shadow: none;
 }
 
 @media (max-width: 768px) {

@@ -112,12 +112,52 @@ class AvatarMovementController {
       // Z ekseni sınırlarını kontrol et (userpath alanı içinde kal)
       const zMin = -200 // Userpath başlangıcı
       const zMax = 100  // Kameraya yakın sınır
+      // Portal collision kontrolü (portal z pozisyonu: 180)
+      const portalZ = 180
+      const portalCollisionDistance = 115 // Portal'a yaklaşma mesafesi
       
       if (currentPosition.z < zMin) {
         currentPosition.z = zMin
       }
       if (currentPosition.z > zMax) {
         currentPosition.z = zMax
+      }
+      
+      // Portal'a çok yaklaştıysa ilerlemeyi engelle
+      if (currentPosition.z >= portalZ - portalCollisionDistance) {
+        currentPosition.z = portalZ - portalCollisionDistance
+      }
+
+      // === TELESKOP 1 ÇARPIŞMA KONTROLÜ ===
+      // PanoramicViewer'da teleskop1: x=40, y=yaklaşık -18, z=0, scale=10
+      const telescope1X = 40
+      const telescope1Z = 0
+      const telescopeCollisionRadius = 18 // Teleskop çevresinde çarpışma yarıçapı
+      if (
+        Math.abs(currentPosition.x - telescope1X) < telescopeCollisionRadius &&
+        Math.abs(currentPosition.z - telescope1Z) < telescopeCollisionRadius
+      ) {
+        // X ekseninden yaklaşıyorsa geri it
+        if (currentPosition.x > telescope1X) {
+          currentPosition.x = telescope1X + telescopeCollisionRadius
+        } else {
+          currentPosition.x = telescope1X - telescopeCollisionRadius
+        }
+      }
+
+      // === TELESKOP 2 ÇARPIŞMA KONTROLÜ ===
+      // PanoramicViewer'da teleskop2: x=-40, y=yaklaşık -18, z=0, scale=10
+      const telescope2X = -40
+      const telescope2Z = 0
+      if (
+        Math.abs(currentPosition.x - telescope2X) < telescopeCollisionRadius &&
+        Math.abs(currentPosition.z - telescope2Z) < telescopeCollisionRadius
+      ) {
+        if (currentPosition.x > telescope2X) {
+          currentPosition.x = telescope2X + telescopeCollisionRadius
+        } else {
+          currentPosition.x = telescope2X - telescopeCollisionRadius
+        }
       }
 
       // Avatarı hareket ettir ve döndür

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LoginForm from '../../components/LoginForm/LoginForm'
-import { signIn } from '../../services/authService'
+import { signIn, signUp } from '../../services/authService'
 import * as THREE from 'three'
 import './LoginPage.css'
 
@@ -73,7 +73,7 @@ const LoginPage = () => {
     setError('')
     
     try {
-      const result = await signIn(credentials.username, credentials.password)
+      const result = await signIn(credentials.email, credentials.password)
       
       if (result.success) {
         console.log('Başarılı giriş:', result.user)
@@ -89,6 +89,27 @@ const LoginPage = () => {
     }
   }
 
+  const handleRegister = async (credentials) => {
+    setIsLoading(true)
+    setError('')
+    
+    try {
+      const result = await signUp(credentials.email, credentials.password, credentials.name)
+      
+      if (result.success) {
+        console.log('Başarılı kayıt:', result.user)
+        setError('Kayıt başarılı! E-posta adresinizi doğrulayın.')
+      } else {
+        setError(result.error || 'Kayıt başarısız')
+      }
+    } catch (error) {
+      console.error('Kayıt hatası:', error)
+      setError('Kayıt sırasında bir hata oluştu')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     // 3) ref'u verirseniz arka plan sphere buraya render olacak
     <div className="login-page" ref={bgRef}>
@@ -97,7 +118,12 @@ const LoginPage = () => {
           <h1>EduGem</h1>
           <p>360° Sınıf Deneyimi</p>
         </div>
-        <LoginForm onLogin={handleLogin} isLoading={isLoading} error={error} />
+        <LoginForm 
+          onLogin={handleLogin} 
+          onRegister={handleRegister}
+          isLoading={isLoading} 
+          error={error} 
+        />
       </div>
     </div>
   )

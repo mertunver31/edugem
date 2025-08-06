@@ -10,14 +10,19 @@ class Avatar3DLoader {
   }
 
   async loadAvatar(scene, avatarUrl, position = { x: 0, y: 0, z: 0 }) {
+    console.log('Avatar3DLoader.loadAvatar çağrıldı:', { avatarUrl, position })
+    
     try {
       // Önceki avatarı temizle
       this.removeAvatar(scene)
 
       return new Promise((resolve, reject) => {
+        console.log('Avatar yükleme başlatılıyor:', avatarUrl)
+        
         this.loader.load(
           avatarUrl,
           (gltf) => {
+            console.log('Avatar GLTF yüklendi:', gltf)
             const avatar = gltf.scene
             
             // Avatar boyutunu ayarla - daha büyük yap
@@ -40,7 +45,7 @@ class Avatar3DLoader {
               this.setupAnimations(avatar, gltf.animations)
             }
             
-            console.log('Avatar başarıyla yüklendi:', avatar)
+            console.log('Avatar başarıyla yüklendi:', avatar, 'Pozisyon:', avatar.position)
             resolve(avatar)
           },
           (progress) => {

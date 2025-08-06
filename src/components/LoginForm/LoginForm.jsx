@@ -3,10 +3,13 @@ import CustomButton from '../CustomButton/CustomButton'
 import CustomInput from '../CustomInput/CustomInput'
 import './LoginForm.css'
 
-const LoginForm = ({ onLogin, isLoading, error }) => {
+const LoginForm = ({ onLogin, onRegister, isLoading, error }) => {
+  const [isRegisterMode, setIsRegisterMode] = useState(false)
   const [formData, setFormData] = useState({
-    username: '',
-    password: ''
+    email: '',
+    password: '',
+    confirmPassword: '',
+    name: ''
   })
   const [errors, setErrors] = useState({})
 
@@ -28,14 +31,28 @@ const LoginForm = ({ onLogin, isLoading, error }) => {
   const validateForm = () => {
     const newErrors = {}
     
-    if (!formData.username.trim()) {
-      newErrors.username = 'Kullanıcı adı gerekli'
+    if (!formData.email.trim()) {
+      newErrors.email = 'E-posta gerekli'
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Geçerli bir e-posta adresi girin'
     }
     
     if (!formData.password.trim()) {
       newErrors.password = 'Şifre gerekli'
     } else if (formData.password.length < 6) {
       newErrors.password = 'Şifre en az 6 karakter olmalı'
+    }
+
+    if (isRegisterMode) {
+      if (!formData.name.trim()) {
+        newErrors.name = 'Ad gerekli'
+      }
+      
+      if (!formData.confirmPassword.trim()) {
+        newErrors.confirmPassword = 'Şifre tekrarı gerekli'
+      } else if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'Şifreler eşleşmiyor'
+      }
     }
 
     setErrors(newErrors)
@@ -46,19 +63,46 @@ const LoginForm = ({ onLogin, isLoading, error }) => {
     e.preventDefault()
     
     if (validateForm()) {
-      onLogin(formData)
+      if (isRegisterMode) {
+        onRegister(formData)
+      } else {
+        onLogin(formData)
+      }
     }
+  }
+
+  const toggleMode = () => {
+    setIsRegisterMode(!isRegisterMode)
+    setFormData({
+      email: '',
+      password: '',
+      confirmPassword: '',
+      name: ''
+    })
+    setErrors({})
   }
 
   return (
     <form className="login-form" onSubmit={handleSubmit}>
+      {isRegisterMode && (
+        <CustomInput
+          type="text"
+          name="name"
+          placeholder="Ad Soyad"
+          value={formData.name}
+          onChange={handleInputChange}
+          error={errors.name}
+          disabled={isLoading}
+        />
+      )}
+      
       <CustomInput
-        type="text"
-        name="username"
-        placeholder="Kullanıcı Adı"
-        value={formData.username}
+        type="email"
+        name="email"
+        placeholder="E-posta"
+        value={formData.email}
         onChange={handleInputChange}
-        error={errors.username}
+        error={errors.email}
         disabled={isLoading}
       />
       
@@ -71,15 +115,38 @@ const LoginForm = ({ onLogin, isLoading, error }) => {
         error={errors.password}
         disabled={isLoading}
       />
+
+      {isRegisterMode && (
+        <CustomInput
+          type="password"
+          name="confirmPassword"
+          placeholder="Şifre Tekrarı"
+          value={formData.confirmPassword}
+          onChange={handleInputChange}
+          error={errors.confirmPassword}
+          disabled={isLoading}
+        />
+      )}
       
       {error && <div className="error-message">{error}</div>}
       
       <CustomButton
         type="submit"
-        text={isLoading ? "Giriş Yapılıyor..." : "Giriş Yap"}
+        text={isLoading ? (isRegisterMode ? "Kayıt Yapılıyor..." : "Giriş Yapılıyor...") : (isRegisterMode ? "Kayıt Ol" : "Giriş Yap")}
         disabled={isLoading}
         className="login-button"
       />
+
+      <div className="toggle-mode">
+        <button 
+          type="button" 
+          onClick={toggleMode}
+          className="toggle-button"
+          disabled={isLoading}
+        >
+          {isRegisterMode ? "Zaten hesabınız var mı? Giriş yapın" : "Hesabınız yok mu? Kayıt olun"}
+        </button>
+      </div>
     </form>
   )
 }

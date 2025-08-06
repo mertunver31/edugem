@@ -8,7 +8,7 @@ import AvatarSelector from '../../components/AvatarSelector/AvatarSelector'
 import DersSecimi from '../../components/DersSecimi/DersSecimi'
 import SinifSecimi from '../../components/SinifSecimi/SinifSecimi'
 import CustomButton from '../../components/CustomButton/CustomButton'
-import { getUserPanoramicImages, savePanoramicImage, uploadPanoramicFile, deletePanoramicImage } from '../../services/panoramicImageService'
+import { getUserPanoramicImages, savePanoramicImage, uploadPanoramicFile, deletePanoramicImage, assignDefaultPanoramicImages } from '../../services/panoramicImageService'
 import { getCurrentUser } from '../../services/authService'
 import './CoursesPage.css'
 
@@ -30,6 +30,9 @@ const CoursesPage = () => {
   const [showSinifSecimi, setShowSinifSecimi] = useState(false)
   const [selectedDers, setSelectedDers] = useState(null)
   const [selectedSinif, setSelectedSinif] = useState(null)
+  
+  // Akordiyon state'leri
+  const [accordionOpen, setAccordionOpen] = useState(true)
 
   useEffect(() => {
     loadImages()
@@ -92,7 +95,8 @@ const CoursesPage = () => {
         await loadImages()
         setShowUploadForm(false)
         setSelectedFile(null)
-        alert('Panoramik görüntü başarıyla kaydedildi!')
+        // Başarı mesajını console'a yazdır (alert yerine)
+        console.log('✅ Panoramik görüntü başarıyla kaydedildi!')
       } else {
         throw new Error(saveResult.error)
       }
@@ -194,6 +198,28 @@ const CoursesPage = () => {
     setShowDersSecimi(true)
   }
 
+  const toggleAccordion = () => {
+    setAccordionOpen((prev) => !prev)
+  }
+
+  const handleGetDefaultImages = async () => {
+    setIsLoading(true)
+    try {
+      const result = await assignDefaultPanoramicImages()
+      if (result.success) {
+        console.log('✅ Default panoramic resimler başarıyla atandı!')
+        // Listeyi yenile
+        await loadImages()
+      } else {
+        console.error('❌ Default resim atama hatası:', result.error)
+      }
+    } catch (error) {
+      console.error('Default resim atama hatası:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="courses-page">
       <div className="main-dashboard">
@@ -201,34 +227,98 @@ const CoursesPage = () => {
           <h1>Ana Sayfa</h1>
         </div>
         
-        <div className="stats-grid">
-          <div className="stat-card purple">
-            <div className="stat-icon">📚</div>
-            <div className="stat-content">
-              <h3>Toplam Dersler</h3>
-              <div className="stat-number">0</div>
-            </div>
-          </div>
-          
-          <div className="stat-card blue">
-            <div className="stat-icon">🎭</div>
-            <div className="stat-content">
-              <h3>Avatarlar</h3>
-              <div className="stat-number">2</div>
-            </div>
-          </div>
-          
-          <div className="stat-card red">
-            <div className="stat-icon">💻</div>
-            <div className="stat-content">
-              <h3>Enhanced Content</h3>
-              <div className="stat-number">0</div>
-            </div>
-          </div>
-        </div>
+
       </div>
       
-      <div className="courses-section">
+      {/* Akordiyon Container */}
+      <div className="accordion-container">
+        <div className="accordion-header merged" onClick={toggleAccordion}>
+          <div className="accordion-title-group">
+            <span>Panoramik Ders Ortamı</span>
+          </div>
+          <span className="accordion-arrow">{accordionOpen ? '▼' : '▶'}</span>
+        </div>
+        {accordionOpen && (
+          <div className="accordion-content-group">
+            {/* Yükleme Alanı */}
+            <div className="accordion-content">
+              <div className="content-section-header">
+                <span className="section-icon">📤</span>
+                <h3>Panoramik Görüntü Yükle</h3>
+              </div>
+              <p>Panoramik ders ortamı için görüntü yükleyin</p>
+              <PanoramicUploader onFileSelect={handleFileSelect} />
+              {selectedFile && (
+                <PanoramicUploadForm
+                  file={selectedFile}
+                  onSubmit={handleUploadFormSubmit}
+                  onCancel={handleUploadFormCancel}
+                  isLoading={isUploading}
+                />
+              )}
+            </div>
+            {/* Avatar Alanı */}
+            <div className="accordion-content">
+              <div className="content-section-header">
+                <span className="section-icon">🎭</span>
+                <h3>Ders Avatarı</h3>
+              </div>
+              <div className="avatar-selection-content">
+                {selectedAvatar ? (
+                  <div className="selected-avatar-info">
+                    <span className="avatar-icon">🎭</span>
+                    <span className="avatar-name">{selectedAvatar.name}</span>
+                    <CustomButton
+                      text="Değiştir"
+                      onClick={handleShowAvatarSelector}
+                      variant="secondary"
+                      className="change-avatar-button"
+                    />
+                  </div>
+                ) : (
+                  <CustomButton
+                    text="Avatar Seç"
+                    onClick={handleShowAvatarSelector}
+                    variant="secondary"
+                    className="select-avatar-button"
+                  />
+                )}
+              </div>
+              <p className="avatar-info-text">
+                Seçtiğiniz avatar panoramik ders ortamında 3D karakteriniz olarak görünecektir.
+              </p>
+            </div>
+            {/* Görüntü Listesi Alanı */}
+            <div className="accordion-content">
+              <div className="content-section-header">
+                <span className="section-icon">🖼️</span>
+                <h3>Panoramik Görüntüler</h3>
+              </div>
+              {images.length === 0 && (
+                <div className="no-images-section">
+                  <p>Henüz panoramic resminiz yok. Default resimleri alabilir veya kendi resminizi yükleyebilirsiniz.</p>
+                  <CustomButton
+                    text="🎁 Default Panoramic Resimleri Al"
+                    onClick={handleGetDefaultImages}
+                    disabled={isLoading}
+                    className="default-images-button"
+                  />
+                </div>
+              )}
+              <PanoramicImageList
+                images={images}
+                onSelectImage={handleSelectImage}
+                onDeleteImage={handleDeleteImage}
+                isLoading={isLoadingImages}
+                onEnterClass={handleEnterClass}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Panoramik Görüntüler Başlık Kartı */}
+      <div className="panoramic-header-card">
         <div className="section-header">
           <h2>Panoramik Görüntüler</h2>
           <p>360° panoramik görüntülerinizi yönetin ve görüntüleyin</p>
@@ -240,61 +330,6 @@ const CoursesPage = () => {
               className="panoramic-study-button"
             />
           </div>
-        </div>
-
-        <div className="upload-section">
-          <div className="section-header">
-            <h3>Panoramik Görüntü Yükle</h3>
-            <p>Panoramik ders ortamı için görüntü yükleyin</p>
-          </div>
-          <PanoramicUploader onFileSelect={handleFileSelect} />
-          {selectedFile && (
-            <PanoramicUploadForm
-              file={selectedFile}
-              onSubmit={handleUploadFormSubmit}
-              onCancel={handleUploadFormCancel}
-              isLoading={isUploading}
-            />
-          )}
-        </div>
-
-        {/* Avatar Seçimi Bölümü */}
-        <div className="avatar-selection-section">
-          <h3>Ders Avatarı</h3>
-          <div className="avatar-selection-content">
-            {selectedAvatar ? (
-              <div className="selected-avatar-info">
-                <span className="avatar-icon">🎭</span>
-                <span className="avatar-name">{selectedAvatar.name}</span>
-                <CustomButton
-                  text="Değiştir"
-                  onClick={handleShowAvatarSelector}
-                  variant="secondary"
-                  className="change-avatar-button"
-                />
-              </div>
-            ) : (
-              <CustomButton
-                text="Avatar Seç"
-                onClick={handleShowAvatarSelector}
-                variant="secondary"
-                className="select-avatar-button"
-              />
-            )}
-          </div>
-          <p className="avatar-info-text">
-            Seçtiğiniz avatar panoramik ders ortamında 3D karakteriniz olarak görünecektir.
-          </p>
-        </div>
-
-        <div className="images-section">
-          <PanoramicImageList
-            images={images}
-            onSelectImage={handleSelectImage}
-            onDeleteImage={handleDeleteImage}
-            isLoading={isLoadingImages}
-            onEnterClass={handleEnterClass}
-          />
         </div>
       </div>
       

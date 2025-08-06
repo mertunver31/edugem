@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage/DashboardPage'
 import CreateCoursePage from './pages/CreateCoursePage/CreateCoursePage'
 import GeminiEmbeddingTest from './components/GeminiEmbeddingTest/GeminiEmbeddingTest'
 import MindMapLearningPathTest from './components/MindMapLearningPathTest/MindMapLearningPathTest'
+import PodcastTestArea from './components/PodcastTestArea/PodcastTestArea'
 import DevelopmentModeIndicator from './components/DevelopmentModeIndicator/DevelopmentModeIndicator'
 import { testConnection } from './services/supabaseService'
 import './App.css'
@@ -25,6 +26,7 @@ function App() {
           <Route path="/create-course" element={<CreateCoursePage />} />
           <Route path="/gemini-embedding-test" element={<GeminiEmbeddingTest />} />
           <Route path="/mind-map-learning-path-test" element={<MindMapLearningPathTest />} />
+          <Route path="/podcast-test" element={<PodcastTestArea />} />
         </Routes>
       </div>
     </Router>

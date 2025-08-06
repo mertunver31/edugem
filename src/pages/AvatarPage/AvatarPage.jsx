@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import CustomButton from '../../components/CustomButton/CustomButton'
 import AvatarCreatorComponent from '../../components/AvatarCreator/AvatarCreator'
 import AvatarPreview from '../../components/AvatarPreview/AvatarPreview'
+import Avatar3DHead from '../../components/Avatar3DHead/Avatar3DHead'
 import { getUserAvatars, deleteAvatar } from '../../services/avatarService'
 import { getCurrentUser } from '../../services/authService'
 import './AvatarPage.css'
@@ -182,28 +183,20 @@ const AvatarPage = () => {
             <div className="saved-avatars-grid">
               {avatars.length > 0 ? (
                 avatars.map((avatar) => (
-                  <div key={avatar.id} className="saved-avatar-card">
-                    <div className="avatar-thumbnail">
-                      <span className="avatar-icon">🎭</span>
-                    </div>
+                                     <div key={avatar.id} className="saved-avatar-card">
+                     <div className="avatar-thumbnail">
+                       {avatar.avatar_url ? (
+                         <Avatar3DHead avatarUrl={avatar.avatar_url} />
+                       ) : (
+                         <span className="avatar-icon">🎭</span>
+                       )}
+                     </div>
                     <div className="avatar-details">
                       <h4>{avatar.name}</h4>
                       <p>Oluşturulma: {formatDate(avatar.created_at)}</p>
                       <span className="avatar-status active">Aktif</span>
                     </div>
                     <div className="avatar-card-actions">
-                      <button 
-                        className="use-btn"
-                        onClick={() => window.open(avatar.avatar_url, '_blank')}
-                      >
-                        Görüntüle
-                      </button>
-                      <button 
-                        className="edit-btn"
-                        onClick={() => window.open(avatar.avatar_url, '_blank')}
-                      >
-                        Düzenle
-                      </button>
                       <button 
                         className="delete-btn"
                         onClick={() => handleDeleteAvatar(avatar.id)}

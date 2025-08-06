@@ -95,7 +95,6 @@ const PanoramicUploader = ({ onFileSelect }) => {
   }
 
   const handleUploadAreaClick = () => {
-    alert('Upload area tıklandı!')
     if (!selectedFile) {
       handleBrowseClick()
     }

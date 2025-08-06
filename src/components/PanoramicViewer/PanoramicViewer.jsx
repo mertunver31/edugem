@@ -2,9 +2,14 @@ import React, { useState, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import CustomButton from '../CustomButton/CustomButton'
 import Avatar3DLoader from '../Avatar3DLoader/Avatar3DLoader'
+import ClassroomChat from '../ClassroomChat/ClassroomChat'
+import AITeacherSelector from '../AITeacherSelector/AITeacherSelector'
+import AITeacherChat from '../AITeacherChat/AITeacherChat'
 import forceGraph3DService from '../../services/forceGraph3DService'
+import podcastService from '../../services/podcastService'
 import './PanoramicViewer.css'
 
 const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, selectedDers }) => {
@@ -16,6 +21,38 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   const [mindMapData, setMindMapData] = useState(null)
   const [learningPathData, setLearningPathData] = useState(null)
   const [cameraMode, setCameraMode] = useState('avatar') // 'avatar' veya 'free'
+  const [showChat, setShowChat] = useState(false)
+  const [showAITeacherChat, setShowAITeacherChat] = useState(false)
+  const [classroomId, setClassroomId] = useState(null)
+  const [showTeacherSelector, setShowTeacherSelector] = useState(false)
+  const [selectedAITeacher, setSelectedAITeacher] = useState(null)
+  const [aiTeacherAvatar, setAiTeacherAvatar] = useState(null)
+  const [showSettings, setShowSettings] = useState(false)
+  const [selectedVisualization, setSelectedVisualization] = useState(null) // 'mindmap' veya 'learningpath'
+  const [isInfoPanelCollapsed, setIsInfoPanelCollapsed] = useState(false) // Info panel akordiyon için
+  const [isToolsCardCollapsed, setIsToolsCardCollapsed] = useState(false) // Tools card akordiyon için
+  const [showLessonContent, setShowLessonContent] = useState(false) // Ders içeriği paneli için
+  const [extractedLessonData, setExtractedLessonData] = useState(null) // Çıkarılan ders verisi
+  
+  // Audio playback states
+  const [audioText, setAudioText] = useState('Merhaba, panoramik sınıfta sesli eğitim deneyimi yaşıyorsunuz.')
+  const [isAudioLoading, setIsAudioLoading] = useState(false)
+  const [audioEpisode, setAudioEpisode] = useState(null)
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false)
+  const [audioError, setAudioError] = useState(null)
+  const [selectedAudioVoice, setSelectedAudioVoice] = useState({ name: 'Zephyr', languageCode: 'tr-TR' })
+  const audioRef = useRef(null)
+
+  // Debug için state değişikliklerini takip et
+  useEffect(() => {
+    console.log('State değişiklikleri:', {
+      showTeacherSelector,
+      isViewerActive,
+      selectedAITeacher: selectedAITeacher?.name,
+      aiTeacherAvatar: aiTeacherAvatar,
+      hasAvatarLoader: !!avatarLoaderRef.current
+    })
+  }, [showTeacherSelector, isViewerActive, selectedAITeacher, aiTeacherAvatar])
   const cameraModeRef = useRef('avatar') // Ref ile takip et
   const viewerRef = useRef(null)
   const sceneRef = useRef(null)
@@ -38,10 +75,10 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   useEffect(() => {
     if (selectedDers && selectedDers.id) {
       loadMindMapAndLearningPath(selectedDers.id)
+      // Sınıf ID'sini oluştur (gerçek uygulamada veritabanından gelecek)
+      setClassroomId(`classroom_${selectedDers.id}_${Date.now()}`)
     }
   }, [selectedDers])
-
-
 
   useEffect(() => {
     if (isViewerActive && viewerRef.current) {
@@ -51,6 +88,16 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       cleanup3DViewer()
     }
   }, [isViewerActive])
+
+  useEffect(() => {
+    if (mindMapData && viewerRef.current) {
+      console.log('Panoramik sınıfa 3D Mind Map force-directed olarak yüklendi:', mindMapData)
+      forceGraph3DService.createMindMap3D(mindMapData, viewerRef.current)
+    } else if (learningPathData && viewerRef.current) {
+      console.log('Panoramik sınıfa 3D Learning Path force-directed olarak yüklendi:', learningPathData)
+      forceGraph3DService.createLearningPath3D(learningPathData, viewerRef.current)
+    }
+  }, [mindMapData, learningPathData])
 
   // Mouse kontrolleri için event listener'lar
   useEffect(() => {
@@ -81,8 +128,7 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
         lastMouseX = event.clientX
         lastMouseY = event.clientY
         
-        // DEBUG LOG
-        console.log('Mouse move:', { deltaX, deltaY, rotationX: freeCameraRef.current.rotationX, rotationY: freeCameraRef.current.rotationY })
+        // Mouse hareketi log'u kaldırıldı - performans için
       }
     }
 
@@ -90,14 +136,19 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       isMouseDown = false
     }
 
-    window.addEventListener('mousedown', handleMouseDown)
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseup', handleMouseUp)
+    // Mouse event'lerini sadece 3D viewer aktifken ekle
+    if (isViewerActive && viewerRef.current) {
+      viewerRef.current.addEventListener('mousedown', handleMouseDown)
+      viewerRef.current.addEventListener('mousemove', handleMouseMove)
+      viewerRef.current.addEventListener('mouseup', handleMouseUp)
+    }
 
     return () => {
-      window.removeEventListener('mousedown', handleMouseDown)
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
+      if (viewerRef.current) {
+        viewerRef.current.removeEventListener('mousedown', handleMouseDown)
+        viewerRef.current.removeEventListener('mousemove', handleMouseMove)
+        viewerRef.current.removeEventListener('mouseup', handleMouseUp)
+      }
     }
   }, [cameraMode])
 
@@ -276,6 +327,29 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       userPath.name = 'userPath'
       scene.add(userPath)
 
+
+
+      // === TELESKOP GLB EKLE ===
+      const telescopeLoader = new GLTFLoader()
+      telescopeLoader.load(
+        '/telescope.glb',
+        (gltf) => {
+          // UserPath'in merkezine, uygun bir y ve z ile yerleştir
+          gltf.scene.position.set(userPath.position.x+40, userPath.position.y+12, 0) // z=0 userpath ortası
+          gltf.scene.name = 'telescopeGLB'
+          gltf.scene.scale.set(10, 10, 10) // Portal ile benzer büyüklük
+          gltf.scene.rotation.y = Math.PI / 2 // Gerekirse döndür
+          scene.add(gltf.scene)
+          console.log('Teleskop GLB sahneye eklendi:', gltf.scene)
+        },
+        undefined,
+        (error) => {
+          console.error('Teleskop GLB yüklenemedi:', error)
+        }
+      )
+
+
+
       // Yol kenarları (korkuluk) oluştur
       const railingGeometry = new THREE.BoxGeometry(2, 10, 200)
       const railingMaterial = new THREE.MeshBasicMaterial({ color: 0x95a5a6 })
@@ -300,6 +374,22 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
         loadSelectedAvatar(scene)
       }
 
+      // AI öğretmen avatarını yükle
+      if (aiTeacherAvatar && avatarLoaderRef.current) {
+        console.log('AI öğretmen avatarı yükleniyor:', aiTeacherAvatar)
+        console.log('AvatarLoader hazır:', !!avatarLoaderRef.current)
+        console.log('Scene hazır:', !!scene)
+        
+        // Hemen yükle, gecikme olmadan
+        loadAITeacherAvatar(scene)
+      } else {
+        console.log('AI öğretmen avatarı yüklenemedi:', {
+          hasAiTeacherAvatar: !!aiTeacherAvatar,
+          hasAvatarLoader: !!avatarLoaderRef.current,
+          aiTeacherAvatar: aiTeacherAvatar
+        })
+      }
+
       // Işıklandırma
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
       scene.add(ambientLight)
@@ -315,6 +405,8 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       controls.minDistance = 50
       controls.maxDistance = 800
       controls.enabled = cameraMode === 'free' // Sadece serbest modda etkin
+      controls.enablePan = true // Pan etkin
+      controls.enableZoom = true // Zoom etkin
       controlsRef.current = controls
 
       // Serbest kamera pozisyonunu sakla
@@ -344,9 +436,22 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
         const intersects = raycaster.intersectObjects(scene.children)
 
         for (const intersect of intersects) {
-          if (intersect.object.name === 'devScreen' && intersect.object.userData.element) {
-            const element = intersect.object.userData.element
-            element.style.display = element.style.display === 'none' ? 'block' : 'none'
+          if (intersect.object.name === 'devScreen') {
+            // Dev screen'e tıklandığında ders içeriğini çıkar ve göster
+            if (selectedDers && selectedDers.enhanced_content) {
+              console.log('Dev screen\'e tıklandı - Ders içeriği çıkarılıyor')
+              setExtractedLessonData(selectedDers)
+              setShowLessonContent(true)
+            }
+            break
+          }
+          
+          // 1. teleskopa tıklandığında learning path gezegenlerini yakından göster
+          if (intersect.object.name === 'telescopeGLB' && learningPathData) {
+            console.log('1. teleskopa tıklandı - Learning path gezegenleri yakından gösteriliyor')
+            // Kamerayı learning path gezegenlerinin olduğu bölgeye taşı
+            camera.position.set(150, 50, -100) // Learning path başlangıç pozisyonu
+            camera.lookAt(150, 50, -100)
             break
           }
         }
@@ -368,10 +473,14 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
 
       // Window resize handler
       const handleResize = () => {
+        if (!viewerRef.current || !camera || !renderer) return
+        
         camera.aspect = viewerRef.current.clientWidth / viewerRef.current.clientHeight
         camera.updateProjectionMatrix()
         renderer.setSize(viewerRef.current.clientWidth, viewerRef.current.clientHeight)
-        renderer.cssRenderer.setSize(viewerRef.current.clientWidth, viewerRef.current.clientHeight)
+        if (renderer.cssRenderer) {
+          renderer.cssRenderer.setSize(viewerRef.current.clientWidth, viewerRef.current.clientHeight)
+        }
       }
       window.addEventListener('resize', handleResize)
 
@@ -405,7 +514,51 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     }
   }
 
+  const loadAITeacherAvatar = async (scene) => {
+    console.log('loadAITeacherAvatar çağrıldı:', { aiTeacherAvatar, hasAvatarLoader: !!avatarLoaderRef.current })
+    
+    if (!aiTeacherAvatar || !avatarLoaderRef.current) {
+      console.log('AI öğretmen avatar yüklenemedi:', { aiTeacherAvatar, hasAvatarLoader: !!avatarLoaderRef.current })
+      return
+    }
+
+    try {
+      console.log('AI öğretmen avatarı yükleniyor...')
+      const teacherAvatar = await avatarLoaderRef.current.loadAvatar(
+        scene, 
+        aiTeacherAvatar, 
+        { x: 0, y: -30, z: -150 } // Dev screen'in önünde
+      )
+      
+      if (teacherAvatar) {
+        // AI öğretmen avatarını öğretmen olarak işaretle
+        teacherAvatar.name = 'aiTeacher'
+        
+        // AI öğretmen avatarını dev screen'e doğru döndür
+        teacherAvatar.rotation.y = Math.PI // 180 derece döndür
+        
+        console.log('AI öğretmen avatarı başarıyla yüklendi:', selectedAITeacher?.name, teacherAvatar.position)
+        
+        // AI öğretmen avatarını takip etmeyecek şekilde ayarla
+        // Sadece kullanıcı avatarını takip et
+        if (avatarRef.current && avatarRef.current.name !== 'aiTeacher') {
+          initializeAvatarFollowCamera(avatarRef.current, scene)
+        }
+      } else {
+        console.log('AI öğretmen avatarı yüklenemedi: teacherAvatar null')
+      }
+    } catch (error) {
+      console.error('AI öğretmen avatar yükleme hatası:', error)
+    }
+  }
+
   const initializeAvatarFollowCamera = (avatar, scene) => {
+    // Sadece kullanıcı avatarını takip et, AI öğretmen avatarını değil
+    if (avatar.name === 'aiTeacher') {
+      console.log('AI öğretmen avatarı takip edilmeyecek')
+      return
+    }
+    
     // Avatar referansını sakla
     avatarRef.current = avatar
     
@@ -416,9 +569,9 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       z: avatar.position.z + 30
     }
     
-         // Avatar takip kamerası sistemi
-     const followCamera = () => {
-       if (!avatar || !rendererRef.current?.camera || cameraModeRef.current !== 'avatar') return
+    // Avatar takip kamerası sistemi
+    const followCamera = () => {
+      if (!avatar || !rendererRef.current?.camera || cameraModeRef.current !== 'avatar') return
       
       const camera = rendererRef.current.camera
       
@@ -454,65 +607,103 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     // Kamera takip sistemini başlat
     updateCamera()
     
-    console.log('Avatar takip kamerası başlatıldı')
+    console.log('Kullanıcı avatar takip kamerası başlatıldı')
   }
 
   const createEnhancedContentOverlay = (scene, selectedDers) => {
-    // 1) HTML içeriği barındıracak bir div oluşturun
+    // Dev screen'de hiç içerik görünmesin, sadece tıklanabilir olsun
     const element = document.createElement('div')
-    element.innerHTML = renderEnhancedContent(selectedDers)
+    // Boş içerik - sadece tıklanabilir alan
+    element.innerHTML = ''
     Object.assign(element.style, {
       width: '100px',
       height: '60px',
-      background: 'white',
+      background: 'transparent', // Şeffaf arka plan
       borderRadius: '2px',
-      boxShadow: 'inset 0 0 5px rgba(0,0,0,0.2)',
-      overflow: 'auto',
       pointerEvents: 'auto',
-      border: '1px solid #1a1a1a',
-      display: 'none',
-      userSelect: 'none'
+      cursor: 'pointer', // Tıklanabilir olduğunu göster
+      userSelect: 'none',
+      display: 'block' // Her zaman görünür olsun
     })
 
-    // 2) Bu div'i CSS3DObject'e sarın
+    // CSS3DObject'e sar
     const cssObject = new CSS3DObject(element)
     const devScreen = scene.getObjectByName('devScreen')
     if (!devScreen) return
 
-    // Monitörün gerçek ölçülerine göre ölçekleyin
-    const [w, h] = [100, 60]  // PlaneGeometry args'ınız
+    // Monitörün gerçek ölçülerine göre ölçekle
     element.style.transformOrigin = 'center'
     cssObject.scale.set(1, 1, 1)  // 1:1 ölçek (100×60px → 100×60 birim)
     cssObject.position.set(0, 0, -199.5)  // Monitörün tam ön yüzünde
     cssObject.rotation.copy(devScreen.rotation)
     scene.add(cssObject)
 
-    // 3) Kapatma butonu artık div'in içinde çalışacak
-    const closeBtn = document.createElement('button')
-    closeBtn.textContent = '×'
-    Object.assign(closeBtn.style, {
-      position: 'absolute', 
-      top: '3px', 
-      right: '3px',
-      background: '#e74c3c', 
-      color: 'white',
-      border: 'none', 
-      borderRadius: '50%',
-      width: '12px', 
-      height: '12px', 
-      cursor: 'pointer',
-      fontSize: '8px',
-      zIndex: '1001'
-    })
-    closeBtn.onclick = (e) => {
-      e.stopPropagation() // Event'in yukarı yayılmasını engelle
-      element.style.display = 'none'
-    }
-    element.appendChild(closeBtn)
-
-    // Dev screen'e tıklama eventi ekle
+    // Dev screen'e referansları ekle
     devScreen.userData.cssObject = cssObject
     devScreen.userData.element = element
+  }
+
+  const renderLessonContentPanel = (lessonData) => {
+    if (!lessonData || !lessonData.enhanced_content) return null
+    
+    const { enhanced_content } = lessonData
+    
+    const handleCloseLessonPanel = () => {
+      setShowLessonContent(false)
+      // Dev screen'de artık gizlenecek içerik yok, sadece panel kapanır
+    }
+    
+    return (
+      <div className="lesson-content-panel">
+        <div className="lesson-content-header">
+          <h2>{lessonData.title || lessonData.file_name}</h2>
+          <CustomButton
+            text="✕"
+            onClick={handleCloseLessonPanel}
+            variant="secondary"
+            className="close-lesson-button"
+          />
+        </div>
+        <div className="lesson-content-body">
+          {enhanced_content.chapters && enhanced_content.chapters.map((chapter, chapterIndex) => (
+            <div key={chapterIndex} className="chapter-section">
+              <h3 className="chapter-title">📖 {chapter.title}</h3>
+              {chapter.content && chapter.content.lessons && chapter.content.lessons.map((lesson, lessonIndex) => (
+                <div key={lessonIndex} className="lesson-section">
+                  <h4 className="lesson-title">🎯 {lesson.title}</h4>
+                  {lesson.content && (
+                    <div className="lesson-content">
+                      {lesson.content.explanatory_text && (
+                        <div className="content-section">
+                          <h5>📝 Açıklayıcı Metin</h5>
+                          <p>{lesson.content.explanatory_text}</p>
+                        </div>
+                      )}
+                      {lesson.content.key_points && lesson.content.key_points.length > 0 && (
+                        <div className="content-section">
+                          <h5>✅ Anahtar Noktalar</h5>
+                          <ul>
+                            {lesson.content.key_points.map((point, pointIndex) => (
+                              <li key={pointIndex}>{point}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {lesson.content.summary && (
+                        <div className="content-section">
+                          <h5>📋 Özet</h5>
+                          <p>{lesson.content.summary}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   const renderEnhancedContent = (selectedDers) => {
@@ -588,7 +779,11 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       animationRef.current = null
     }
     if (viewerRef.current && viewerRef.current.handleResize) {
-      window.removeEventListener('resize', viewerRef.current.handleResize)
+      try {
+        window.removeEventListener('resize', viewerRef.current.handleResize)
+      } catch (error) {
+        console.warn('Resize event listener removal failed:', error)
+      }
     }
     if (rendererRef.current) {
       rendererRef.current.dispose()
@@ -610,9 +805,15 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       controlsRef.current.dispose()
       controlsRef.current = null
     }
-    if (avatarLoaderRef.current && sceneRef.current) {
-      avatarLoaderRef.current.removeAvatar(sceneRef.current)
-      avatarLoaderRef.current = null
+    if (avatarLoaderRef.current) {
+      try {
+        if (sceneRef.current) {
+          avatarLoaderRef.current.removeAvatar(sceneRef.current)
+        }
+        avatarLoaderRef.current = null
+      } catch (error) {
+        console.warn('Avatar loader cleanup failed:', error)
+      }
     }
     
     // Kamera referansını temizle
@@ -910,34 +1111,47 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
 
   const switchToAvatarCamera = () => {
     setCameraMode('avatar')
-    cameraModeRef.current = 'avatar' // Ref'i de güncelle
+    cameraModeRef.current = 'avatar'
+    
+    // OrbitControls'ı devre dışı bırak
     if (controlsRef.current) {
       controlsRef.current.enabled = false
     }
-    // Avatar kamerasına geçerken ilk pozisyona dön
-    if (rendererRef.current?.camera && avatarRef.current) {
+    
+    // Avatar kamerasına geçerken smooth geçiş
+    if (rendererRef.current?.camera && avatarRef.current && avatarRef.current.name !== 'aiTeacher') {
       const camera = rendererRef.current.camera
       const avatar = avatarRef.current
       
-      // İlk avatar kamera pozisyonuna dön
+      // Avatar'ın arkasında sabit mesafede pozisyon
+      const offsetX = 0
+      const offsetY = 20  // Biraz yukarıda
+      const offsetZ = 30  // Arkada
+      
       camera.position.set(
-        avatar.position.x + initialAvatarCameraPosition.current.x,
-        avatar.position.y + initialAvatarCameraPosition.current.y,
-        avatar.position.z + initialAvatarCameraPosition.current.z
+        avatar.position.x + offsetX,
+        avatar.position.y + offsetY,
+        avatar.position.z + offsetZ
       )
       
       // Avatar'a bak
       camera.lookAt(avatar.position)
+      
+      console.log('👤 Avatar kamerasına geçildi')
+    } else {
+      console.log('⚠️ Avatar kamerasına geçilemedi - avatar bulunamadı')
     }
-    console.log('Avatar kamerasına geçildi - İlk pozisyona döndü')
   }
 
   const switchToFreeCamera = () => {
     setCameraMode('free')
-    cameraModeRef.current = 'free' // Ref'i de güncelle
+    cameraModeRef.current = 'free'
+    
+    // OrbitControls'ı etkinleştir
     if (controlsRef.current) {
-      controlsRef.current.enabled = false // OrbitControls'ı devre dışı bırak
+      controlsRef.current.enabled = true
     }
+    
     // Serbest kameraya geçerken mevcut pozisyonu kullan
     if (rendererRef.current?.camera) {
       const camera = rendererRef.current.camera
@@ -948,8 +1162,11 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
         rotationX: 0,
         rotationY: 0
       }
+      
+      console.log('🌍 Serbest kameraya geçildi - Mouse ile kontrol edebilirsiniz')
+    } else {
+      console.log('⚠️ Serbest kameraya geçilemedi - kamera bulunamadı')
     }
-    console.log('Serbest kameraya geçildi - Mouse ile bakış açısı değiştirebilirsiniz')
   }
 
   const updateFreeCamera = () => {
@@ -961,10 +1178,7 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     const rotationX = freeCameraRef.current.rotationX
     const rotationY = freeCameraRef.current.rotationY
 
-    // DEBUG LOG - sadece serbest modda log ver
-    if (cameraModeRef.current === 'free') {
-      console.log('updateFreeCamera', { rotationX, rotationY, cameraMode: cameraModeRef.current })
-    }
+            // Debug log'ları kaldırıldı - performans için
 
     // Kamera pozisyonunu güncelle
     camera.position.set(
@@ -990,8 +1204,30 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   }
 
   const handleViewImage = () => {
+    console.log('3D Ortama Gir butonuna tıklandı, isViewerReady:', isViewerReady)
     if (!isViewerReady) return
-    setIsViewerActive(true)
+    console.log('AI öğretmen seçici modal açılıyor')
+    setShowTeacherSelector(true)
+  }
+
+  const handleTeacherSelected = (teacher) => {
+    console.log('AI öğretmen seçildi:', teacher.name, 'Avatar URL:', teacher.avatar_url)
+    setSelectedAITeacher(teacher)
+    // AI öğretmen avatarını yükle
+    if (teacher.avatar_url) {
+      console.log('AI öğretmen avatar URL ayarlanıyor:', teacher.avatar_url)
+      setAiTeacherAvatar(teacher.avatar_url)
+    } else {
+      console.log('AI öğretmenin avatar URL i yok')
+    }
+    setShowTeacherSelector(false) // Modal'ı kapat
+    setIsViewerActive(true) // 3D ortamı aç
+  }
+
+  const handleSkipTeacher = () => {
+    console.log('AI öğretmen seçimi atlandı')
+    setShowTeacherSelector(false) // Modal'ı kapat
+    setIsViewerActive(true) // 3D ortamı aç
   }
 
   const handleClose = () => {
@@ -1002,17 +1238,101 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     onClose()
   }
 
+  const handleExitFromMindMap = () => {
+    // Sadece mind map'i kapat, panoramik sınıfa geri dön
+    console.log('Mind map\'ten çıkış yapılıyor, panoramik sınıfa dönülüyor')
+    
+    // 3D görselleştirmeyi tamamen temizle
+    forceGraph3DService.cleanup()
+    
+    // State'leri sıfırla
+    setSelectedVisualization(null)
+    setShowSettings(false)
+    
+    // Panoramik görüntüyü yeniden yüklemek için state'i geçici olarak değiştir
+    setIsViewerActive(false)
+    setTimeout(() => {
+      setIsViewerActive(true)
+    }, 50)
+    
+    console.log('Mind map tamamen temizlendi, panoramik görüntü yeniden yüklendi')
+  }
+
+  // Audio playback functions
+  const handleAudioSynthesize = async () => {
+    if (!audioText.trim()) {
+      setAudioError('Lütfen metin girin')
+      return
+    }
+
+    setIsAudioLoading(true)
+    setAudioError(null)
+
+    try {
+      const options = {
+        voice: {
+          name: selectedAudioVoice.name,
+          languageCode: selectedAudioVoice.languageCode
+        }
+      }
+
+      const newEpisode = await podcastService.createPodcastEpisode('Panoramik Sınıf Ses', audioText, options)
+      setAudioEpisode(newEpisode)
+    } catch (err) {
+      setAudioError(err.message)
+    } finally {
+      setIsAudioLoading(false)
+    }
+  }
+
+  const handleAudioPlay = async () => {
+    if (!audioEpisode) return
+
+    try {
+      setIsAudioPlaying(true)
+      const audio = await podcastService.playAudio(audioEpisode.audioBlob)
+      audioRef.current = audio
+      
+      audio.onended = () => setIsAudioPlaying(false)
+      audio.onerror = () => {
+        setIsAudioPlaying(false)
+        setAudioError('Ses oynatma hatası')
+      }
+
+      await audio.play()
+    } catch (err) {
+      setIsAudioPlaying(false)
+      setAudioError(err.message)
+    }
+  }
+
+  const handleAudioStop = () => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      setIsAudioPlaying(false)
+    }
+  }
+
+  const formatAudioDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
   return (
     <div className={`panoramic-viewer-container${isCinemaMode ? ' cinema-fullscreen' : ''}`}>
-      <div className={`viewer-header${isCinemaMode ? ' cinema-header' : ''}`}>
-        <h3>{imageFile.title || 'Panoramik Görüntü'}</h3>
-        <CustomButton
-          text="✕"
-          onClick={handleClose}
-          variant="secondary"
-          className={`close-button${isCinemaMode ? ' cinema-close' : ''}`}
-        />
-      </div>
+      {!isViewerActive && (
+        <div className={`viewer-header${isCinemaMode ? ' cinema-header' : ''}`}>
+          <h3>{imageFile.title || 'Panoramik Görüntü'}</h3>
+          <CustomButton
+            text="✕"
+            onClick={handleClose}
+            variant="secondary"
+            className={`close-button${isCinemaMode ? ' cinema-close' : ''}`}
+          />
+        </div>
+      )}
 
       {isLoading ? (
         <div className="loading-section">
@@ -1052,72 +1372,321 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       {/* 3D Panoramik görüntüleyici alanı */}
       {isViewerActive && (
         <>
+          {/* 3D Ortam Çıkış Butonu */}
+          <div className="viewer-exit-button">
+            <CustomButton
+              text="✕ Çıkış"
+              onClick={handleExitFromMindMap}
+              variant="secondary"
+              className="exit-button"
+              title="Mind map'ten çık, panoramik sınıfa dön"
+            />
+          </div>
+
+          {/* Araçlar Kartı */}
+          <div className={`tools-card ${isToolsCardCollapsed ? 'collapsed' : ''}`}>
+            <div className="tools-header" onClick={() => setIsToolsCardCollapsed(!isToolsCardCollapsed)}>
+              <h4>🛠️ Araçlar</h4>
+              <span className="collapse-icon">{isToolsCardCollapsed ? '▶️' : '▼'}</span>
+            </div>
+            <div className="tools-content">
+              {/* Kamera Kontrolleri */}
+              <div className="tools-section">
+                <h5>📷 Kamera Kontrolleri</h5>
+                <div className="tools-buttons">
+                  <CustomButton
+                    text="👤 Avatar Kamerası"
+                    onClick={switchToAvatarCamera}
+                    variant={cameraMode === 'avatar' ? 'primary' : 'secondary'}
+                    className={`tool-button ${cameraMode === 'avatar' ? 'active' : ''}`}
+                    disabled={!selectedAvatar}
+                  />
+                  <CustomButton
+                    text="🌍 Serbest Kamera"
+                    onClick={switchToFreeCamera}
+                    variant={cameraMode === 'free' ? 'primary' : 'secondary'}
+                    className={`tool-button ${cameraMode === 'free' ? 'active' : ''}`}
+                  />
+                </div>
+                {cameraMode === 'free' && (
+                  <div className="camera-info">
+                    <p>🎮 Mouse ile 360° bakış açısı değiştirebilirsiniz</p>
+                  </div>
+                )}
+              </div>
+
+              {/* 3D Görselleştirme Araçları */}
+              <div className="tools-section">
+                <h5>🌌 3D Görselleştirme</h5>
+                <div className="tools-buttons">
+                  {mindMapData && (
+                    <CustomButton
+                      text="🧠 Mind Map"
+                      onClick={() => {
+                        setSelectedVisualization('mindmap')
+                        if (mindMapData && viewerRef.current) {
+                          forceGraph3DService.cleanup()
+                          forceGraph3DService.createMindMap3D(mindMapData, viewerRef.current)
+                        }
+                      }}
+                      variant={selectedVisualization === 'mindmap' ? 'primary' : 'secondary'}
+                      className="tool-button"
+                    />
+                  )}
+                  {learningPathData && (
+                    <CustomButton
+                      text="🛤️ Learning Path"
+                      onClick={() => {
+                        setSelectedVisualization('learningpath')
+                        if (learningPathData && viewerRef.current) {
+                          forceGraph3DService.cleanup()
+                          forceGraph3DService.createLearningPath3D(learningPathData, viewerRef.current)
+                        }
+                      }}
+                      variant={selectedVisualization === 'learningpath' ? 'primary' : 'secondary'}
+                      className="tool-button"
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Ses Oynatma Araçları */}
+              <div className="tools-section">
+                <h5>🎙️ Ses Oynatma</h5>
+                <div className="audio-input-group">
+                  <textarea
+                    value={audioText}
+                    onChange={(e) => setAudioText(e.target.value)}
+                    placeholder="Sese dönüştürülecek metin..."
+                    rows={3}
+                    className="audio-textarea"
+                  />
+                  <select
+                    value={`${selectedAudioVoice.name}-${selectedAudioVoice.languageCode}`}
+                    onChange={(e) => {
+                      const [name, languageCode] = e.target.value.split('-')
+                      setSelectedAudioVoice({ name, languageCode })
+                    }}
+                    className="audio-voice-select"
+                  >
+                    <option value="Zephyr-tr-TR">Zephyr (Türkçe)</option>
+                    <option value="Zephyr-en-US">Zephyr (İngilizce)</option>
+                    <option value="Nova-tr-TR">Nova (Türkçe)</option>
+                    <option value="Nova-en-US">Nova (İngilizce)</option>
+                    <option value="Gemini-tr-TR">Gemini (Türkçe)</option>
+                    <option value="Gemini-en-US">Gemini (İngilizce)</option>
+                  </select>
+                </div>
+                <div className="tools-buttons">
+                  <CustomButton
+                    text={isAudioLoading ? '🔄 Sentezleniyor...' : '🎵 Ses Oluştur'}
+                    onClick={handleAudioSynthesize}
+                    disabled={isAudioLoading || !audioText.trim()}
+                    variant="secondary"
+                    className="tool-button"
+                  />
+                  {audioEpisode && (
+                    <>
+                      <CustomButton
+                        text={isAudioPlaying ? '⏹️ Durdur' : '▶️ Oynat'}
+                        onClick={isAudioPlaying ? handleAudioStop : handleAudioPlay}
+                        variant="primary"
+                        className="tool-button"
+                      />
+                      <div className="audio-info">
+                        <span>Süre: {formatAudioDuration(audioEpisode.duration)}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+                {audioError && (
+                  <div className="audio-error">
+                    <span>❌ {audioError}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Ana Sayfaya Dön */}
+              <div className="tools-section">
+                <h5>🏠 Navigasyon</h5>
+                <div className="tools-buttons">
+                  <CustomButton
+                    text="🏠 Ana Sayfaya Dön"
+                    onClick={handleClose}
+                    variant="secondary"
+                    className="tool-button"
+                  />
+                </div>
+              </div>
+
+              {/* Bilgi Paneli */}
+              {(mindMapData || learningPathData || selectedAITeacher) && (
+                <div className="tools-section">
+                  <h5>ℹ️ Evren Bilgileri</h5>
+                  <div className="info-list">
+                    {selectedAITeacher && (
+                      <div className="info-item">
+                        <span className="info-icon">👨‍🏫</span>
+                        <span className="info-text">{selectedAITeacher.name} - {selectedAITeacher.subject}</span>
+                      </div>
+                    )}
+                    {mindMapData && (
+                      <div className="info-item">
+                        <span className="info-icon">🧠</span>
+                        <span className="info-text">Mind Map Sistemi Aktif</span>
+                      </div>
+                    )}
+                    {learningPathData && (
+                      <div className="info-item">
+                        <span className="info-icon">🛤️</span>
+                        <span className="info-text">Learning Path Sistemi Aktif</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="tools-hint">
+                    💡 Gezegenleri keşfetmek için fare ile döndürün ve yakınlaştırın
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div 
             ref={viewerRef} 
             className={`panoramic-viewer${isCinemaMode ? ' cinema-viewer' : ''}`}
           ></div>
           
-          {/* Kamera Kontrol Butonları */}
-          {selectedAvatar && (
-            <div className="camera-controls">
-              <CustomButton
-                text="👤 Avatar Kamerası"
-                onClick={switchToAvatarCamera}
-                variant={cameraMode === 'avatar' ? 'primary' : 'secondary'}
-                className={`camera-button ${cameraMode === 'avatar' ? 'active' : ''}`}
-              />
-              <CustomButton
-                text="🌍 Serbest Kamera"
-                onClick={switchToFreeCamera}
-                variant={cameraMode === 'free' ? 'primary' : 'secondary'}
-                className={`camera-button ${cameraMode === 'free' ? 'active' : ''}`}
-              />
-              
-                                            {/* Serbest Kamera Kontrolleri Bilgisi */}
-                {cameraMode === 'free' && (
-                  <div className="free-camera-info">
-                    <h5>🎮 Serbest Kamera Kontrolleri</h5>
-                    <div className="controls-grid">
-                      <div className="control-item">
-                        <span className="key">🖱️</span>
-                        <span className="action">Mouse ile bakış açısı</span>
+
+
+
+
+
+
+          {/* 3D Görselleştirme Ayar Ekranı */}
+          {showSettings && (
+            <div className="settings-panel">
+              <div className="settings-content">
+                <h4>🌌 3D Görselleştirme Ayarları</h4>
+                <div className="visualization-options">
+                  <div className="option-group">
+                    <h5>Görselleştirme Seçin:</h5>
+                    <div className="option-buttons">
+                      <CustomButton
+                        text="🧠 Mind Map"
+                        onClick={() => {
+                          setSelectedVisualization('mindmap')
+                          if (mindMapData && viewerRef.current) {
+                            forceGraph3DService.cleanup()
+                            forceGraph3DService.createMindMap3D(mindMapData, viewerRef.current)
+                          }
+                        }}
+                        variant={selectedVisualization === 'mindmap' ? 'primary' : 'secondary'}
+                        className="visualization-btn"
+                      />
+                      <CustomButton
+                        text="🛤️ Learning Path"
+                        onClick={() => {
+                          setSelectedVisualization('learningpath')
+                          if (learningPathData && viewerRef.current) {
+                            forceGraph3DService.cleanup()
+                            forceGraph3DService.createLearningPath3D(learningPathData, viewerRef.current)
+                          }
+                        }}
+                        variant={selectedVisualization === 'learningpath' ? 'primary' : 'secondary'}
+                        className="visualization-btn"
+                      />
+                    </div>
+                  </div>
+                  <div className="option-group">
+                    <h5>Mevcut Veriler:</h5>
+                    <div className="data-status">
+                      <div className="status-item">
+                        <span className="status-icon">🧠</span>
+                        <span className="status-text">
+                          Mind Map: {mindMapData ? '✅ Mevcut' : '❌ Yok'}
+                        </span>
                       </div>
-                      <div className="control-item">
-                        <span className="key">👆</span>
-                        <span className="action">Sol tık + sürükle</span>
+                      <div className="status-item">
+                        <span className="status-icon">🛤️</span>
+                        <span className="status-text">
+                          Learning Path: {learningPathData ? '✅ Mevcut' : '❌ Yok'}
+                        </span>
                       </div>
                     </div>
-                    <p className="camera-hint">💡 Mouse ile 360° bakış açısı değiştirebilirsiniz</p>
                   </div>
-                )}
-            </div>
-          )}
-
-          {/* 3D Mind Map ve Learning Path Bilgi Paneli */}
-          {(mindMapData || learningPathData) && (
-            <div className="info-panel">
-              <div className="info-content">
-                <h4>🌌 Evren Bilgileri</h4>
-                {mindMapData && (
-                  <div className="info-item">
-                    <span className="info-icon">🧠</span>
-                    <span className="info-text">Mind Map Sistemi Aktif</span>
+                  <div className="option-group">
+                    <h5>Kontroller:</h5>
+                    <div className="control-buttons">
+                      <CustomButton
+                        text="🔄 Temizle"
+                        onClick={handleExitFromMindMap}
+                        variant="secondary"
+                        className="control-btn"
+                      />
+                      <CustomButton
+                        text="📊 Yenile"
+                        onClick={() => {
+                          if (selectedVisualization === 'mindmap' && mindMapData) {
+                            forceGraph3DService.cleanup()
+                            forceGraph3DService.createMindMap3D(mindMapData, viewerRef.current)
+                          } else if (selectedVisualization === 'learningpath' && learningPathData) {
+                            forceGraph3DService.cleanup()
+                            forceGraph3DService.createLearningPath3D(learningPathData, viewerRef.current)
+                          }
+                        }}
+                        variant="secondary"
+                        className="control-btn"
+                      />
+                    </div>
                   </div>
-                )}
-                {learningPathData && (
-                  <div className="info-item">
-                    <span className="info-icon">🛤️</span>
-                    <span className="info-text">Learning Path Sistemi Aktif</span>
-                  </div>
-                )}
-                <p className="info-hint">
-                  Gezegenleri keşfetmek için fare ile döndürün ve yakınlaştırın
+                </div>
+                <p className="settings-hint">
+                  💡 Seçtiğiniz görselleştirme 3D sahneye yüklenecektir
                 </p>
               </div>
             </div>
           )}
+
+          {/* Classroom Chat */}
+          {showChat && classroomId && (
+            <div className="chat-panel">
+              <ClassroomChat 
+                classroomId={classroomId}
+                lessonContext={{
+                  subject: selectedDers?.subject || 'Genel',
+                  lessonContext: selectedDers?.title || 'Ders İçeriği',
+                  mindMapData: mindMapData,
+                  learningPathData: learningPathData,
+                  aiTeacher: selectedAITeacher
+                }}
+              />
+            </div>
+          )}
+
+          {/* AI Teacher Chat */}
+          {showAITeacherChat && selectedAITeacher && (
+            <div className="ai-teacher-chat-panel">
+              <AITeacherChat 
+                teacher={selectedAITeacher}
+                isOpen={showAITeacherChat}
+                onClose={() => setShowAITeacherChat(false)}
+              />
+            </div>
+          )}
         </>
       )}
+
+      {/* Ders İçeriği Paneli */}
+      {showLessonContent && extractedLessonData && (
+        renderLessonContentPanel(extractedLessonData)
+      )}
+
+      {/* AI Öğretmen Seçici Modal */}
+      <AITeacherSelector
+        isOpen={showTeacherSelector}
+        onClose={handleSkipTeacher}
+        onTeacherSelected={handleTeacherSelected}
+      />
     </div>
   )
 }

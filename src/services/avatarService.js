@@ -25,9 +25,44 @@ export const getUserAvatars = async () => {
   }
 }
 
+// Ready Player Me ile avatar oluştur
+export const createAvatarWithReadyPlayerMe = async () => {
+  try {
+    // Ready Player Me URL'ini aç
+    const readyPlayerMeUrl = 'https://readyplayer.me/'
+    
+    // Yeni pencerede Ready Player Me'yi aç
+    const newWindow = window.open(readyPlayerMeUrl, '_blank', 'width=1200,height=800')
+    
+    // Kullanıcıya talimat ver
+    alert('Ready Player Me açıldı. Avatarınızı oluşturduktan sonra URL\'i kopyalayıp buraya yapıştırın.')
+    
+    // URL girişi için prompt göster
+    const avatarUrl = prompt('Ready Player Me avatar URL\'inizi buraya yapıştırın:')
+    
+    if (!avatarUrl) {
+      return { success: false, error: 'Avatar URL\'i girilmedi' }
+    }
+
+    // URL'i doğrula
+    if (!avatarUrl.includes('readyplayer.me')) {
+      return { success: false, error: 'Geçersiz Ready Player Me URL\'i' }
+    }
+
+    return { success: true, avatarUrl }
+  } catch (error) {
+    console.error('Avatar oluşturma hatası:', error)
+    return { success: false, error: error.message }
+  }
+}
+
 // Avatar dosyasını Supabase Storage'a yükle
 export const uploadAvatarFile = async (file, fileName) => {
   try {
+    if (!file) {
+      throw new Error('Dosya seçilmedi')
+    }
+
     const fileExt = file.name.split('.').pop()
     const filePath = `avatars/${fileName}.${fileExt}`
 
@@ -47,6 +82,22 @@ export const uploadAvatarFile = async (file, fileName) => {
     return { success: true, filePath, publicUrl }
   } catch (error) {
     console.error('Avatar dosya yükleme hatası:', error.message)
+    return { success: false, error: error.message }
+  }
+}
+
+// AI Öğretmen için avatar oluştur (Ready Player Me ile)
+export const createAITeacherAvatar = async () => {
+  try {
+    const result = await createAvatarWithReadyPlayerMe()
+    
+    if (result.success) {
+      return { success: true, avatarUrl: result.avatarUrl }
+    } else {
+      return { success: false, error: result.error }
+    }
+  } catch (error) {
+    console.error('AI öğretmen avatar oluşturma hatası:', error)
     return { success: false, error: error.message }
   }
 }

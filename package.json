@@ -9,12 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@genkit-ai/googleai": "^1.15.5",
     "@google/generative-ai": "^0.24.1",
     "@huggingface/inference": "^4.6.1",
     "@readyplayerme/react-avatar-creator": "^0.5.0",
     "@supabase/supabase-js": "^2.53.0",
     "@types/three": "^0.178.1",
+    "accessor-fn": "^1.5.3",
     "d3": "^7.9.0",
+    "duckduckgo-images-api": "^1.0.5",
+    "duckduckgo-search": "^1.0.7",
+    "genkit": "^1.15.5",
+    "kapsule": "^1.16.3",
     "pannellum-react": "^1.2.5",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1",
@@ -23,7 +29,9 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.0",
     "tesseract.js": "^6.0.1",
-    "three": "^0.150.1"
+    "three": "^0.179.1",
+    "three-forcegraph": "^1.43.0",
+    "three-render-objects": "^1.40.4"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",

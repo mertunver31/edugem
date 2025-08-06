@@ -37,8 +37,7 @@ const DashboardHeader = () => {
         </div>
         <div className="header-right">
           <div className="user-greeting">
-            <span className="greeting-text">Hoş geldin, alifuat</span>
-            <span className="user-email">mankidultt127@gmail.com</span>
+            <span className="greeting-text">Hoş geldin</span>
           </div>
           <button className="logout-button" onClick={handleLogout}>
             Çıkış

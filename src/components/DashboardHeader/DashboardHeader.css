@@ -1,4 +1,6 @@
 .dashboard-header {
+  position: relative;
+  z-index: 10;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);

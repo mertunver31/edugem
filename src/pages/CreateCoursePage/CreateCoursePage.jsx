@@ -104,6 +104,32 @@ const CreateCoursePage = () => {
     setLearningPath(null)
   }
 
+  const handleDeleteDocument = async (documentId, event) => {
+    event.stopPropagation()
+    
+    if (!confirm('Bu dersi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', documentId)
+
+      if (error) {
+        throw new Error(`Ders silme hatası: ${error.message}`)
+      }
+
+      // Documents listesini güncelle
+      setDocuments(documents.filter(doc => doc.id !== documentId))
+      console.log('✅ Ders başarıyla silindi')
+    } catch (error) {
+      console.error('❌ Ders silme hatası:', error)
+      alert('Ders silinirken hata oluştu: ' + error.message)
+    }
+  }
+
   const handleFileSelect = (event) => {
     const file = event.target.files[0]
     if (file && file.type === 'application/pdf') {
@@ -383,9 +409,18 @@ const CreateCoursePage = () => {
                       className="document-card"
                       onClick={() => handleDocumentClick(document)}
                     >
-                      <div className="document-icon">📄</div>
+                      <div className="document-card-header">
+                        <div className="document-icon">📄</div>
+                        <button 
+                          className="delete-btn"
+                          onClick={(e) => handleDeleteDocument(document.id, e)}
+                          title="Dersi Sil"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                       <div className="document-info">
-                        <h3>{document.title || document.file_name}</h3>
+                        <h3>{document.course_title || document.file_name}</h3>
                         <p className="document-date">
                           {new Date(document.created_at).toLocaleDateString('tr-TR')}
                         </p>

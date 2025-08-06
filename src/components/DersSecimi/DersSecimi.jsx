@@ -86,6 +86,9 @@ const DersSecimi = ({ onDersSec, onClose }) => {
                   >
                     <div className="ders-icon">📄</div>
                     <div className="ders-info">
+                      {document.course_title && (
+                        <h4 className="ders-course-title">{document.course_title}</h4>
+                      )}
                       <h3>{document.title || document.file_name}</h3>
                       <p className="ders-date">
                         {new Date(document.created_at).toLocaleDateString('tr-TR')}

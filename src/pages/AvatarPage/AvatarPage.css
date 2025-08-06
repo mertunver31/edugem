@@ -315,8 +315,8 @@
 }
 
 .avatar-thumbnail {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   background: linear-gradient(135deg, #9c27b0, #7b1fa2);
   border-radius: 50%;
   display: flex;

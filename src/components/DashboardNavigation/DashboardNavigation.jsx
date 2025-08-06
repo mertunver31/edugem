@@ -3,12 +3,25 @@ import { isDevelopmentMode, toggleDevMode } from '../../config/development'
 import './DashboardNavigation.css'
 
 const DashboardNavigation = ({ activeTab, setActiveTab, devMode, setDevMode }) => {
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  
   const handleToggleDevMode = () => {
     toggleDevMode()
     setDevMode(!devMode)
   }
+  
   return (
-    <nav className="dashboard-navigation">
+    <nav className={`dashboard-navigation ${isCollapsed ? 'collapsed' : ''}`}>
+      <div className="nav-header">
+        <button
+          className="collapse-toggle"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          title={isCollapsed ? 'Navigasyonu Aç' : 'Navigasyonu Kapat'}
+        >
+          {isCollapsed ? '▶️' : '◀️'}
+        </button>
+      </div>
+      
       <div className="nav-tabs">
         {/* Production Navigation - Her zaman görünür */}
         <button
@@ -184,6 +197,13 @@ const DashboardNavigation = ({ activeTab, setActiveTab, devMode, setDevMode }) =
                  onClick={() => setActiveTab('mind-map-learning-path-test')}
                >
                  🧠 Mind Map & Learning Path Test
+               </button>
+               
+               <button
+                 className={`nav-tab ${activeTab === 'podcast-test' ? 'active' : ''}`}
+                 onClick={() => setActiveTab('podcast-test')}
+               >
+                 🎙️ Podcast TTS Test
                </button>
           </>
         )}

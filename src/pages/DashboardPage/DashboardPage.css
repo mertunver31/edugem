@@ -1,8 +1,57 @@
 .dashboard-page {
+  position: relative;
   min-height: 100vh;
-  background: linear-gradient(135deg, #6a5acd 0%, #4b0082 50%, #483d8b 100%);
+  overflow: hidden;
+}
+
+/* Three.js canvas tam ekran, z-index: 0 */
+.dashboard-page canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
 }
 
 .dashboard-content {
+  position: relative;
+  z-index: 1;
   min-height: calc(100vh - 200px);
+}
+
+.page-navigation {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.page-nav-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  padding: 12px 24px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.page-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.page-nav-btn.active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 } 
