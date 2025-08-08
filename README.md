@@ -2080,9 +2080,7 @@ await segmentService.updateSegmentStatus(segmentId, 'text_status', 'COMPLETED')
 4. Push edin (`git push origin feature/amazing-feature`)
 5. Pull Request oluşturun
 
-## 📄 **Lisans**
 
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
 
 ## 📞 **İletişim**
 
