@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import CustomButton from '../../components/CustomButton/CustomButton'
 import AvatarCreatorComponent from '../../components/AvatarCreator/AvatarCreator'
 import AvatarPreview from '../../components/AvatarPreview/AvatarPreview'
-import Avatar3DHead from '../../components/Avatar3DHead/Avatar3DHead'
-import { getUserAvatars, deleteAvatar } from '../../services/avatarService'
+import Avatar3DPreview from '../../components/Avatar3DPreview/Avatar3DPreview'; // Avatar3DHead yerine
+import { getUserAvatars, deleteAvatar, renameAvatar } from '../../services/avatarService'
 import { getCurrentUser } from '../../services/authService'
 import './AvatarPage.css'
 
@@ -13,6 +13,8 @@ const AvatarPage = () => {
   const [createdAvatarUrl, setCreatedAvatarUrl] = useState(null)
   const [avatars, setAvatars] = useState([])
   const [loadingAvatars, setLoadingAvatars] = useState(true)
+  const [editingAvatarId, setEditingAvatarId] = useState(null)
+  const [editingName, setEditingName] = useState('')
 
   // Mevcut avatarları yükle
   useEffect(() => {
@@ -56,6 +58,31 @@ const AvatarPage = () => {
         console.error('Avatar silme hatası:', error)
         alert('Avatar silinirken hata oluştu: ' + error.message)
       }
+    }
+  }
+
+  const handleStartEdit = (avatar) => {
+    setEditingAvatarId(avatar.id)
+    setEditingName(avatar.name || '')
+  }
+
+  const handleCancelEdit = () => {
+    setEditingAvatarId(null)
+    setEditingName('')
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingAvatarId || !editingName.trim()) return
+    try {
+      const result = await renameAvatar(editingAvatarId, editingName.trim())
+      if (result.success) {
+        await loadAvatars()
+        handleCancelEdit()
+      } else {
+        alert('Avatar ismi güncellenemedi: ' + result.error)
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message)
     }
   }
 
@@ -183,26 +210,22 @@ const AvatarPage = () => {
             <div className="saved-avatars-grid">
               {avatars.length > 0 ? (
                 avatars.map((avatar) => (
-                                     <div key={avatar.id} className="saved-avatar-card">
-                     <div className="avatar-thumbnail">
-                       {avatar.avatar_url ? (
-                         <Avatar3DHead avatarUrl={avatar.avatar_url} />
-                       ) : (
-                         <span className="avatar-icon">🎭</span>
-                       )}
-                     </div>
+                  <div key={avatar.id} className="saved-avatar-card">
+                    <div className="avatar-thumbnail">
+                      {avatar.avatar_url ? (
+                        <Avatar3DPreview avatarUrl={avatar.avatar_url} />
+                      ) : (
+                        <span className="avatar-icon">🎭</span>
+                      )}
+                    </div>
                     <div className="avatar-details">
-                      <h4>{avatar.name}</h4>
+                      <h4>{avatar.name || `Avatar #${avatar.id}`}</h4>
                       <p>Oluşturulma: {formatDate(avatar.created_at)}</p>
                       <span className="avatar-status active">Aktif</span>
                     </div>
                     <div className="avatar-card-actions">
-                      <button 
-                        className="delete-btn"
-                        onClick={() => handleDeleteAvatar(avatar.id)}
-                      >
-                        Sil
-                      </button>
+                      <button className="edit-btn" onClick={() => handleStartEdit(avatar)}>Düzenle</button>
+                      <button className="delete-btn" onClick={() => handleDeleteAvatar(avatar.id)}>Sil</button>
                     </div>
                   </div>
                 ))
@@ -213,15 +236,31 @@ const AvatarPage = () => {
                   <p>İlk avatarınızı oluşturmak için yukarıdaki butona tıklayın.</p>
                 </div>
               )}
-              
-              <div className="empty-avatar-slot" onClick={() => setShowCreator(true)}>
-                <span className="plus-icon">+</span>
-                <p>Yeni Avatar Oluştur</p>
-              </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* İsim düzenleme modalı */}
+      {editingAvatarId && (
+        <div className="edit-modal-overlay" onClick={handleCancelEdit}>
+          <div className="edit-modal" onClick={(e) => e.stopPropagation()}>
+            <h4>Avatar Adını Düzenle</h4>
+            <input
+              className="edit-modal-input"
+              value={editingName}
+              onChange={(e) => setEditingName(e.target.value)}
+              placeholder="Avatar adı"
+              autoFocus
+              maxLength={60}
+            />
+            <div className="edit-modal-actions">
+              <button className="save-btn" onClick={handleSaveEdit}>Kaydet</button>
+              <button className="cancel-btn" onClick={handleCancelEdit}>İptal</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showCreator && (
         <AvatarCreatorComponent

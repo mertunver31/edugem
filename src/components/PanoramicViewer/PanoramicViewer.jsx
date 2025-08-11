@@ -5,11 +5,11 @@ import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRe
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import CustomButton from '../CustomButton/CustomButton'
 import Avatar3DLoader from '../Avatar3DLoader/Avatar3DLoader'
-import ClassroomChat from '../ClassroomChat/ClassroomChat'
 import AITeacherSelector from '../AITeacherSelector/AITeacherSelector'
 import AITeacherChat from '../AITeacherChat/AITeacherChat'
 import forceGraph3DService from '../../services/forceGraph3DService'
 import podcastService from '../../services/podcastService'
+import lessonNotesService from '../../services/lessonNotesService'
 import './PanoramicViewer.css'
 
 const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, selectedDers }) => {
@@ -21,7 +21,6 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   const [mindMapData, setMindMapData] = useState(null)
   const [learningPathData, setLearningPathData] = useState(null)
   const [cameraMode, setCameraMode] = useState('avatar') // 'avatar' veya 'free'
-  const [showChat, setShowChat] = useState(false)
   const [showAITeacherChat, setShowAITeacherChat] = useState(false)
   const [classroomId, setClassroomId] = useState(null)
   const [showTeacherSelector, setShowTeacherSelector] = useState(false)
@@ -33,14 +32,17 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   const [isToolsCardCollapsed, setIsToolsCardCollapsed] = useState(false) // Tools card akordiyon için
   const [showLessonContent, setShowLessonContent] = useState(false) // Ders içeriği paneli için
   const [extractedLessonData, setExtractedLessonData] = useState(null) // Çıkarılan ders verisi
+  const [showMindMapPanel, setShowMindMapPanel] = useState(false) // Mind map veri paneli
+  const [activeBranchIndex, setActiveBranchIndex] = useState(null) // Seçili dal
   
   // Audio playback states
-  const [audioText, setAudioText] = useState('Merhaba, panoramik sınıfta sesli eğitim deneyimi yaşıyorsunuz.')
-  const [isAudioLoading, setIsAudioLoading] = useState(false)
-  const [audioEpisode, setAudioEpisode] = useState(null)
+  const [isPodcastLoading, setIsPodcastLoading] = useState(false)
+  const [podcastData, setPodcastData] = useState(null)
   const [isAudioPlaying, setIsAudioPlaying] = useState(false)
+  const [podcastScope, setPodcastScope] = useState({ type: 'full' }) // 'full' | 'chapter' | 'lesson'
+  const [selectedChapterIndex, setSelectedChapterIndex] = useState(null)
+  const [selectedLessonIndex, setSelectedLessonIndex] = useState(null)
   const [audioError, setAudioError] = useState(null)
-  const [selectedAudioVoice, setSelectedAudioVoice] = useState({ name: 'Zephyr', languageCode: 'tr-TR' })
   const audioRef = useRef(null)
 
   // Debug için state değişikliklerini takip et
@@ -66,6 +68,12 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   const freeCameraRef = useRef({ x: 0, y: 0, z: 100, rotationX: 0, rotationY: 0 })
   const initialAvatarCameraPosition = useRef({ x: 0, y: 20, z: 30 }) // İlk avatar kamera pozisyonu
 
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('')
+  const [isNotesLoading, setIsNotesLoading] = useState(false)
+  const [notesError, setNotesError] = useState(null)
+  const [showNotesPanel, setShowNotesPanel] = useState(false)
+
   useEffect(() => {
     if (imageFile) {
       prepareImage()
@@ -90,16 +98,21 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
   }, [isViewerActive])
 
   useEffect(() => {
-    if (mindMapData && viewerRef.current) {
+    // Force-directed görselleştirme sadece kullanıcı bu modu açıkça seçtiğinde çalışsın.
+    // Varsayılan panoramik sınıfta gezegen/küre temsilleri aktif kalsın.
+    if (!viewerRef.current) return
+    if (selectedVisualization === 'mindmap' && mindMapData) {
       console.log('Panoramik sınıfa 3D Mind Map force-directed olarak yüklendi:', mindMapData)
       forceGraph3DService.createMindMap3D(mindMapData, viewerRef.current)
-    } else if (learningPathData && viewerRef.current) {
+    } else if (selectedVisualization === 'learningpath' && learningPathData) {
       console.log('Panoramik sınıfa 3D Learning Path force-directed olarak yüklendi:', learningPathData)
       forceGraph3DService.createLearningPath3D(learningPathData, viewerRef.current)
     }
-  }, [mindMapData, learningPathData])
+  }, [mindMapData, learningPathData, selectedVisualization])
 
   // Mouse kontrolleri için event listener'lar
+  // Not: Mind map'ten çıkışta viewer yeniden oluşturulduğu için
+  // isViewerActive değiştiğinde de dinleyicileri yeniden bağlarız
   useEffect(() => {
     let isMouseDown = false
     let lastMouseX = 0
@@ -137,20 +150,22 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     }
 
     // Mouse event'lerini sadece 3D viewer aktifken ekle
-    if (isViewerActive && viewerRef.current) {
-      viewerRef.current.addEventListener('mousedown', handleMouseDown)
-      viewerRef.current.addEventListener('mousemove', handleMouseMove)
-      viewerRef.current.addEventListener('mouseup', handleMouseUp)
+    const targetEl = rendererRef.current?.cssRenderer?.domElement || viewerRef.current
+    if (isViewerActive && targetEl) {
+      targetEl.addEventListener('mousedown', handleMouseDown)
+      targetEl.addEventListener('mousemove', handleMouseMove)
+      targetEl.addEventListener('mouseup', handleMouseUp)
     }
 
     return () => {
-      if (viewerRef.current) {
-        viewerRef.current.removeEventListener('mousedown', handleMouseDown)
-        viewerRef.current.removeEventListener('mousemove', handleMouseMove)
-        viewerRef.current.removeEventListener('mouseup', handleMouseUp)
+      const cleanupTarget = rendererRef.current?.cssRenderer?.domElement || viewerRef.current
+      if (cleanupTarget) {
+        cleanupTarget.removeEventListener('mousedown', handleMouseDown)
+        cleanupTarget.removeEventListener('mousemove', handleMouseMove)
+        cleanupTarget.removeEventListener('mouseup', handleMouseUp)
       }
     }
-  }, [cameraMode])
+  }, [cameraMode, isViewerActive])
 
   const prepareImage = async () => {
     setIsLoading(true)
@@ -436,29 +451,28 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
         const intersects = raycaster.intersectObjects(scene.children)
 
         for (const intersect of intersects) {
-<<<<<<< HEAD
+          // Dev screen kontrolü
           if (intersect.object.name === 'devScreen') {
-            // Dev screen'e tıklandığında ders içeriğini çıkar ve göster
+            // Ders içeriğini panelde göster
             if (selectedDers && selectedDers.enhanced_content) {
               console.log('Dev screen\'e tıklandı - Ders içeriği çıkarılıyor')
               setExtractedLessonData(selectedDers)
               setShowLessonContent(true)
             }
+            // Varsa iliştirilmiş HTML elementini görünürlük açısından toggle et
+            if (intersect.object.userData && intersect.object.userData.element) {
+              const element = intersect.object.userData.element
+              element.style.display = element.style.display === 'none' ? 'block' : 'none'
+            }
             break
           }
-          
+
           // 1. teleskopa tıklandığında learning path gezegenlerini yakından göster
           if (intersect.object.name === 'telescopeGLB' && learningPathData) {
             console.log('1. teleskopa tıklandı - Learning path gezegenleri yakından gösteriliyor')
             // Kamerayı learning path gezegenlerinin olduğu bölgeye taşı
             camera.position.set(150, 50, -100) // Learning path başlangıç pozisyonu
             camera.lookAt(150, 50, -100)
-=======
-          // Dev screen kontrolü
-          if (intersect.object.name === 'devScreen' && intersect.object.userData.element) {
-            const element = intersect.object.userData.element
-            element.style.display = element.style.display === 'none' ? 'block' : 'none'
->>>>>>> aabae89fca48f61648f7d4dd921ef12167dced68
             break
           }
           
@@ -481,6 +495,8 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       }
 
       cssRenderer.domElement.addEventListener('click', handleMouseClick)
+      // WebGL canvas üzerinde de tıklamayı dinle (sağlamlık için)
+      renderer.domElement.addEventListener('click', handleMouseClick)
 
       // Mouse move handler for hover effects
       const handleMouseMove = (event) => {
@@ -851,18 +867,20 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       }
       
       rendererRef.current.dispose()
-<<<<<<< HEAD
       if (rendererRef.current.cssRenderer) {
         rendererRef.current.cssRenderer.domElement.remove()
         rendererRef.current.cssRenderer = null
       }
-      rendererRef.current = null
+      // Kamera referansını temizle
+      rendererRef.current.camera = null
     }
-    if (sceneRef.current) {
-      // Scene'deki tüm objeleri temizle
-      while(sceneRef.current.children.length > 0) {
-        const child = sceneRef.current.children[0]
-        sceneRef.current.remove(child)
+
+    // Scene'i ve kontrolleri temizle
+    const scene = sceneRef.current
+    if (scene) {
+      while (scene.children.length > 0) {
+        const child = scene.children[0]
+        scene.remove(child)
       }
       sceneRef.current = null
     }
@@ -872,8 +890,8 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     }
     if (avatarLoaderRef.current) {
       try {
-        if (sceneRef.current) {
-          avatarLoaderRef.current.removeAvatar(sceneRef.current)
+        if (scene) {
+          avatarLoaderRef.current.removeAvatar(scene)
         }
         avatarLoaderRef.current = null
       } catch (error) {
@@ -881,11 +899,9 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       }
     }
     
-    // Kamera referansını temizle
+    // Renderer referansını en sonda sıfırla
     if (rendererRef.current) {
-=======
->>>>>>> aabae89fca48f61648f7d4dd921ef12167dced68
-      rendererRef.current.camera = null
+      rendererRef.current = null
     }
 
     // 3D Force Graph'ları temizle
@@ -1234,6 +1250,17 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     } else {
       console.log('⚠️ Serbest kameraya geçilemedi - kamera bulunamadı')
     }
+
+    // Mind map veya diğer overlay işlemlerinden sonra
+    // event dinleyicilerinin aktif olduğundan emin ol
+    try {
+      const targetEl = rendererRef.current?.cssRenderer?.domElement || viewerRef.current
+      if (targetEl) {
+        targetEl.focus?.()
+      }
+    } catch (e) {
+      // no-op
+    }
   }
 
   const updateFreeCamera = () => {
@@ -1304,8 +1331,6 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     }
     onClose()
   }
-
-<<<<<<< HEAD
   const handleExitFromMindMap = () => {
     // Sadece mind map'i kapat, panoramik sınıfa geri dön
     console.log('Mind map\'ten çıkış yapılıyor, panoramik sınıfa dönülüyor')
@@ -1321,96 +1346,162 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
     setIsViewerActive(false)
     setTimeout(() => {
       setIsViewerActive(true)
+      // Yeniden aktif olduğunda serbest kamerayı hazırla
+      setTimeout(() => {
+        switchToFreeCamera()
+      }, 0)
     }, 50)
     
     console.log('Mind map tamamen temizlendi, panoramik görüntü yeniden yüklendi')
   }
 
   // Audio playback functions
-  const handleAudioSynthesize = async () => {
-    if (!audioText.trim()) {
-      setAudioError('Lütfen metin girin')
+  const isScopeSelectionValid = () => {
+    if (podcastScope?.type === 'chapter') {
+      return Number.isInteger(selectedChapterIndex)
+    }
+    if (podcastScope?.type === 'lesson') {
+      return Number.isInteger(selectedChapterIndex) && Number.isInteger(selectedLessonIndex)
+    }
+    return true
+  }
+
+  const handleFetchAndPlayPodcast = async () => {
+    if (!selectedDers || !selectedDers.id) {
+      setAudioError('Podcast oluşturmak için bir ders seçilmelidir.');
+      return;
+    }
+
+    if (!isScopeSelectionValid()) {
+      setAudioError('Lütfen geçerli bir bölüm/ders seçin.');
       return
     }
 
-    setIsAudioLoading(true)
-    setAudioError(null)
+    // Eğer mevcut bir audio nesnemiz ve podcast verimiz varsa ve sadece devam etmek istiyorsak
+    if (audioRef.current && podcastData?.audio_url) {
+      try {
+        await audioRef.current.play();
+        setIsAudioPlaying(true);
+        return;
+      } catch (e) {
+        // play başarısız olursa yeniden oluşturmayı deneyeceğiz
+      }
+    }
+
+    setIsPodcastLoading(true);
+    setAudioError(null);
 
     try {
-      const options = {
-        voice: {
-          name: selectedAudioVoice.name,
-          languageCode: selectedAudioVoice.languageCode
-        }
+      // Seçili kapsamı hazırla
+      let scope = null
+      if (podcastScope?.type === 'chapter' && Number.isInteger(selectedChapterIndex)) {
+        scope = { type: 'chapter', chapterIndex: selectedChapterIndex }
+      } else if (podcastScope?.type === 'lesson' && Number.isInteger(selectedChapterIndex) && Number.isInteger(selectedLessonIndex)) {
+        scope = { type: 'lesson', chapterIndex: selectedChapterIndex, lessonIndex: selectedLessonIndex }
+      } else {
+        scope = { type: 'full' }
       }
 
-      const newEpisode = await podcastService.createPodcastEpisode('Panoramik Sınıf Ses', audioText, options)
-      setAudioEpisode(newEpisode)
+      // Her seferinde güncel kapsam için isteği yap
+      const data = await podcastService.getOrCreatePodcastForDocument(selectedDers.id, scope);
+      setPodcastData(data);
+      if (data.audio_url) {
+        handleAudioPlay(data.audio_url);
+      }
     } catch (err) {
-      setAudioError(err.message)
+      console.error("Podcast getirme hatası:", err);
+      setAudioError(err.message || 'Podcast oluşturulurken bir hata oluştu.');
     } finally {
-      setIsAudioLoading(false)
+      setIsPodcastLoading(false);
     }
-  }
+  };
 
-  const handleAudioPlay = async () => {
-    if (!audioEpisode) return
-
-    try {
-      setIsAudioPlaying(true)
-      const audio = await podcastService.playAudio(audioEpisode.audioBlob)
-      audioRef.current = audio
-      
-      audio.onended = () => setIsAudioPlaying(false)
-      audio.onerror = () => {
-        setIsAudioPlaying(false)
-        setAudioError('Ses oynatma hatası')
-      }
-
-      await audio.play()
-    } catch (err) {
-      setIsAudioPlaying(false)
-      setAudioError(err.message)
+  const handleAudioPlay = (audioUrl) => {
+    // Aynı kaydı yeniden başlatmak yerine kaldığı yerden devam et
+    if (audioRef.current && audioRef.current.src === audioUrl) {
+      audioRef.current.play();
+      setIsAudioPlaying(true);
+      return;
     }
-  }
+    // Farklı bir kayıt veya ilk kez
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+    audio.onended = () => setIsAudioPlaying(false);
+    audio.onpause = () => setIsAudioPlaying(false);
+    audio.onerror = () => {
+      setIsAudioPlaying(false);
+      setAudioError('Ses oynatma hatası.');
+    }
+    audio.play();
+    setIsAudioPlaying(true);
+  };
+
+  const handleAudioPause = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      // currentTime korunur, tekrar play çağrıldığında devam eder
+      setIsAudioPlaying(false);
+    }
+  };
 
   const handleAudioStop = () => {
     if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
-      setIsAudioPlaying(false)
+      audioRef.current.pause();
+      try {
+        audioRef.current.currentTime = 0;
+      } catch (e) {
+        // no-op
+      }
+      setIsAudioPlaying(false);
     }
+  };
+
+  const handleAudioClose = () => {
+    // Tamamen kapat: durdur + referansları temizle + mevcut podcast verisini temizle
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    } catch (e) {
+      // no-op
+    } finally {
+      audioRef.current = null;
+      setIsAudioPlaying(false);
+    }
+    setPodcastData(null);
+    setAudioError(null);
   }
+
+  // Kapsam veya seçim değiştiğinde mevcut podcast ve ses durumunu sıfırla
+  useEffect(() => {
+    if (!selectedDers?.id) return
+    handleAudioClose()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [podcastScope?.type, selectedChapterIndex, selectedLessonIndex, selectedDers?.id])
 
   const formatAudioDuration = (seconds) => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
     return `${mins}:${secs.toString().padStart(2, '0')}`
-=======
+  }
+
   const showMindMapDetails = (clickedObject) => {
     if (!mindMapData) return
     
     console.log('🧠 Mind Map detayları gösteriliyor:', clickedObject.name)
     
-    // Tıklanan objenin bilgilerini al
-    let details = ''
-    let title = ''
-    
+    // Hedef dalı belirle ve paneli aç
     if (clickedObject.name === 'mindMapCentral') {
-      title = 'Merkez Konu'
-      details = mindMapData.centralTopic || mindMapData.central_topic || 'Merkez konu bilgisi'
+      setActiveBranchIndex(null)
     } else if (clickedObject.name.startsWith('mindMapBranch_')) {
       const branchIndex = parseInt(clickedObject.name.split('_')[1])
-      const branch = mindMapData.content?.[branchIndex] || mindMapData.branches?.[branchIndex]
-      
-      if (branch) {
-        title = branch.topic || `Dal ${branchIndex + 1}`
-        details = branch.subtopics ? branch.subtopics.join('\n• ') : 'Alt konular'
-      }
+      setActiveBranchIndex(Number.isNaN(branchIndex) ? null : branchIndex)
     }
-    
-    // Modal veya overlay ile detayları göster
-    showDetailsModal(title, details, 'mindmap')
+    setShowMindMapPanel(true)
   }
 
   const showLearningPathDetails = (clickedObject) => {
@@ -1494,7 +1585,45 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
         modal.remove()
       }
     }, 10000)
->>>>>>> aabae89fca48f61648f7d4dd921ef12167dced68
+  }
+
+  // HATA AYIKLAMA: selectedDers nesnesinin içeriğini konsola yazdır
+  useEffect(() => {
+    if (selectedDers) {
+      console.log("DEBUG: PanoramicViewer'a gelen 'selectedDers' nesnesi:", JSON.stringify(selectedDers, null, 2));
+    }
+  }, [selectedDers]);
+
+  useEffect(() => {
+    const loadNotes = async () => {
+      if (!selectedDers?.id) return
+      setIsNotesLoading(true)
+      setNotesError(null)
+      try {
+        const data = await lessonNotesService.getNotes(selectedDers.id)
+        setNotes(data)
+      } catch (e) {
+        setNotesError(e.message || 'Notlar yüklenemedi')
+      } finally {
+        setIsNotesLoading(false)
+      }
+    }
+    loadNotes()
+  }, [selectedDers?.id])
+
+  const handleSaveNote = async () => {
+    if (!newNote.trim()) return
+    setIsNotesLoading(true)
+    setNotesError(null)
+    try {
+      const saved = await lessonNotesService.addNote(selectedDers.id, newNote)
+      setNotes(prev => [saved, ...prev])
+      setNewNote('')
+    } catch (e) {
+      setNotesError(e.message || 'Not kaydedilemedi')
+    } finally {
+      setIsNotesLoading(false)
+    }
   }
 
   return (
@@ -1549,7 +1678,8 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
       {/* 3D Panoramik görüntüleyici alanı */}
       {isViewerActive && (
         <>
-          {/* 3D Ortam Çıkış Butonu */}
+          {/* 3D Ortam Çıkış Butonu (yalnızca mind map veya learning path açıkken) */}
+          {(selectedVisualization === 'mindmap' || selectedVisualization === 'learningpath') && (
           <div className="viewer-exit-button">
             <CustomButton
               text="✕ Çıkış"
@@ -1559,6 +1689,7 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
               title="Mind map'ten çık, panoramik sınıfa dön"
             />
           </div>
+          )}
 
           {/* Araçlar Kartı */}
           <div className={`tools-card ${isToolsCardCollapsed ? 'collapsed' : ''}`}>
@@ -1627,60 +1758,131 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
                 </div>
               </div>
 
-              {/* Ses Oynatma Araçları */}
+              {/* Ders Podcast Aracı */}
               <div className="tools-section">
-                <h5>🎙️ Ses Oynatma</h5>
-                <div className="audio-input-group">
-                  <textarea
-                    value={audioText}
-                    onChange={(e) => setAudioText(e.target.value)}
-                    placeholder="Sese dönüştürülecek metin..."
-                    rows={3}
-                    className="audio-textarea"
-                  />
-                  <select
-                    value={`${selectedAudioVoice.name}-${selectedAudioVoice.languageCode}`}
-                    onChange={(e) => {
-                      const [name, languageCode] = e.target.value.split('-')
-                      setSelectedAudioVoice({ name, languageCode })
-                    }}
-                    className="audio-voice-select"
-                  >
-                    <option value="Zephyr-tr-TR">Zephyr (Türkçe)</option>
-                    <option value="Zephyr-en-US">Zephyr (İngilizce)</option>
-                    <option value="Nova-tr-TR">Nova (Türkçe)</option>
-                    <option value="Nova-en-US">Nova (İngilizce)</option>
-                    <option value="Gemini-tr-TR">Gemini (Türkçe)</option>
-                    <option value="Gemini-en-US">Gemini (İngilizce)</option>
-                  </select>
-                </div>
-                <div className="tools-buttons">
-                  <CustomButton
-                    text={isAudioLoading ? '🔄 Sentezleniyor...' : '🎵 Ses Oluştur'}
-                    onClick={handleAudioSynthesize}
-                    disabled={isAudioLoading || !audioText.trim()}
-                    variant="secondary"
-                    className="tool-button"
-                  />
-                  {audioEpisode && (
-                    <>
-                      <CustomButton
-                        text={isAudioPlaying ? '⏹️ Durdur' : '▶️ Oynat'}
-                        onClick={isAudioPlaying ? handleAudioStop : handleAudioPlay}
-                        variant="primary"
-                        className="tool-button"
-                      />
-                      <div className="audio-info">
-                        <span>Süre: {formatAudioDuration(audioEpisode.duration)}</span>
-                      </div>
-                    </>
+                <h5>🎙️ Ders Podcast Özeti</h5>
+                {selectedDers ? (
+                  <>
+                {/* Kapsam Seçimi */}
+                <div className="podcast-scope">
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <CustomButton
+                      text={podcastScope.type === 'full' ? '📘 Tüm İçerik (Seçili)' : '📘 Tüm İçerik'}
+                      onClick={() => setPodcastScope({ type: 'full' })}
+                      variant={podcastScope.type === 'full' ? 'primary' : 'secondary'}
+                      className="tool-button"
+                    />
+                    <CustomButton
+                      text={podcastScope.type === 'chapter' ? '📗 Bölüm' : '📗 Bölüm'}
+                      onClick={() => setPodcastScope({ type: 'chapter' })}
+                      variant={podcastScope.type === 'chapter' ? 'primary' : 'secondary'}
+                      className="tool-button"
+                    />
+                    <CustomButton
+                      text={podcastScope.type === 'lesson' ? '📒 Ders' : '📒 Ders'}
+                      onClick={() => setPodcastScope({ type: 'lesson' })}
+                      variant={podcastScope.type === 'lesson' ? 'primary' : 'secondary'}
+                      className="tool-button"
+                    />
+                  </div>
+                  {(podcastScope.type === 'chapter' || podcastScope.type === 'lesson') && selectedDers?.enhanced_content?.chapters && (
+                    <div style={{ marginTop: 8 }}>
+                      <label style={{ fontSize: 12, marginRight: 6 }}>Bölüm seç:</label>
+                      <select
+                        value={selectedChapterIndex ?? ''}
+                        onChange={(e) => {
+                          const idx = e.target.value === '' ? null : parseInt(e.target.value, 10)
+                          setSelectedChapterIndex(Number.isNaN(idx) ? null : idx)
+                          setSelectedLessonIndex(null)
+                        }}
+                        style={{ padding: 4 }}
+                      >
+                        <option value="">—</option>
+                        {selectedDers.enhanced_content.chapters.map((ch, idx) => (
+                          <option key={idx} value={idx}>{ch.title || `Bölüm ${idx + 1}`}</option>
+                        ))}
+                      </select>
+                      {podcastScope.type === 'lesson' && Number.isInteger(selectedChapterIndex) && selectedDers.enhanced_content.chapters[selectedChapterIndex]?.content?.lessons && (
+                        <>
+                          <label style={{ fontSize: 12, margin: '0 6px 0 12px' }}>Ders seç:</label>
+                          <select
+                            value={selectedLessonIndex ?? ''}
+                            onChange={(e) => {
+                              const idx = e.target.value === '' ? null : parseInt(e.target.value, 10)
+                              setSelectedLessonIndex(Number.isNaN(idx) ? null : idx)
+                            }}
+                            style={{ padding: 4 }}
+                          >
+                            <option value="">—</option>
+                            {selectedDers.enhanced_content.chapters[selectedChapterIndex].content.lessons.map((ls, lidx) => (
+                              <option key={lidx} value={lidx}>{ls.title || `Ders ${lidx + 1}`}</option>
+                            ))}
+                          </select>
+                        </>
+                      )}
+                    </div>
                   )}
                 </div>
+                <div className="tools-buttons" style={{ gap: 8, display: 'flex', flexWrap: 'wrap' }}>
+                  <CustomButton
+                        text={
+                          isPodcastLoading
+                            ? '🔄 Hazırlanıyor...'
+                            : (isAudioPlaying
+                                ? '⏸️ Duraklat'
+                                : (audioRef.current ? '▶️ Devam Et' : '▶️ Örneği Dinle'))
+                        }
+                        onClick={isAudioPlaying ? handleAudioPause : handleFetchAndPlayPodcast}
+                        disabled={isPodcastLoading || !isScopeSelectionValid()}
+                        variant={isAudioPlaying ? 'secondary' : 'primary'}
+                        className="tool-button podcast-button"
+                      />
+                      <CustomButton
+                        text="⏹️ Durdur"
+                        onClick={handleAudioStop}
+                        disabled={isPodcastLoading || !audioRef.current}
+                        variant="secondary"
+                        className="tool-button"
+                      />
+                      <CustomButton
+                        text="🗙 Kapat"
+                        onClick={handleAudioClose}
+                        disabled={isPodcastLoading || (!audioRef.current && !podcastData)}
+                        variant="secondary"
+                        className="tool-button"
+                      />
+                      </div>
+                    {podcastData && (
+                      <div className="podcast-info">
+                        <p>"{podcastData.summary_text.substring(0, 100)}..."</p>
+                        {podcastData.duration_seconds > 0 && (
+                          <span>Süre: {Math.round(podcastData.duration_seconds)} sn</span>
+                        )}
+                      </div>
+                    )}
                 {audioError && (
                   <div className="audio-error">
                     <span>❌ {audioError}</span>
                   </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="tools-hint">Podcast için önce bir ders seçmelisiniz.</p>
                 )}
+              </div>
+
+              {/* Sohbet Araçları */}
+              <div className="tools-section">
+                <h5>💬 Sohbet</h5>
+                <div className="tools-buttons">
+                  <CustomButton
+                    text={showAITeacherChat ? '🗙 AI Öğretmen Sohbetini Kapat' : '👨‍🏫 AI Öğretmen Sohbetini Aç'}
+                    onClick={() => setShowAITeacherChat(prev => !prev)}
+                    variant={showAITeacherChat ? 'secondary' : 'primary'}
+                    className="tool-button"
+                    disabled={!selectedAITeacher}
+                  />
+                </div>
               </div>
 
               {/* Ana Sayfaya Dön */}
@@ -1824,21 +2026,7 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
             </div>
           )}
 
-          {/* Classroom Chat */}
-          {showChat && classroomId && (
-            <div className="chat-panel">
-              <ClassroomChat 
-                classroomId={classroomId}
-                lessonContext={{
-                  subject: selectedDers?.subject || 'Genel',
-                  lessonContext: selectedDers?.title || 'Ders İçeriği',
-                  mindMapData: mindMapData,
-                  learningPathData: learningPathData,
-                  aiTeacher: selectedAITeacher
-                }}
-              />
-            </div>
-          )}
+          {/* Classroom Chat kaldırıldı */}
 
           {/* AI Teacher Chat */}
           {showAITeacherChat && selectedAITeacher && (
@@ -1848,6 +2036,141 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
                 isOpen={showAITeacherChat}
                 onClose={() => setShowAITeacherChat(false)}
               />
+            </div>
+          )}
+
+          {/* Notes toggle button */}
+          {isViewerActive && (
+            <button
+              className="notes-toggle-btn"
+              onClick={() => setShowNotesPanel(prev => !prev)}
+              title="Ders Notları"
+            >
+              🗒️
+            </button>
+          )}
+
+          {/* Notes side panel */}
+          {showNotesPanel && (
+            <div className="notes-panel">
+              <div className="notes-header">
+                <h4>🗒️ Ders Notları</h4>
+                <CustomButton
+                  text="✕"
+                  onClick={() => setShowNotesPanel(false)}
+                  variant="secondary"
+                  className="close-graph-button"
+                />
+              </div>
+              <div className="notes-body">
+                {selectedDers ? (
+                  <>
+                    <textarea
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      placeholder="Bu ders için notlarınızı yazın..."
+                      rows={4}
+                      className="notes-textarea"
+                    />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <CustomButton
+                        text={isNotesLoading ? '💾 Kaydediliyor...' : '💾 Notu Kaydet'}
+                        onClick={handleSaveNote}
+                        disabled={isNotesLoading || !newNote.trim()}
+                        variant="primary"
+                        className="tool-button"
+                      />
+                    </div>
+                    {notesError && (
+                      <div className="audio-error" style={{ marginTop: 8 }}><span>❌ {notesError}</span></div>
+                    )}
+                    <div className="notes-list-panel">
+                      {isNotesLoading && notes.length === 0 && <p>Notlar yükleniyor...</p>}
+                      {notes.length === 0 && !isNotesLoading && <p>Henüz not yok.</p>}
+                      {notes.length > 0 && (
+                        <ul className="notes-items">
+                          {notes.map(n => (
+                            <li key={n.id} className="notes-item">
+                              <div className="notes-item-time">{new Date(n.created_at).toLocaleString()}</div>
+                              <div className="notes-item-content">{n.content}</div>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="tools-hint">Not eklemek için önce bir ders seçmelisiniz.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Mind Map Bilgi Paneli */}
+          {showMindMapPanel && mindMapData && (
+            <div className="mindmap-panel">
+              <div className="mindmap-panel-header">
+                <h4>🧠 Mind Map</h4>
+                <div className="mindmap-header-actions">
+                  {activeBranchIndex !== null && (
+                    <CustomButton
+                      text="← Geri"
+                      onClick={() => setActiveBranchIndex(null)}
+                      variant="secondary"
+                      className="close-graph-button"
+                    />
+                  )}
+                  <CustomButton
+                    text="✕"
+                    onClick={() => setShowMindMapPanel(false)}
+                    variant="secondary"
+                    className="close-graph-button"
+                  />
+                </div>
+              </div>
+              <div className="mindmap-panel-body">
+                {activeBranchIndex === null ? (
+                  <div className="mindmap-section">
+                    <div className="mindmap-central"> 
+                      <div className="central-title">Merkez Konu</div>
+                      <div className="central-text">{mindMapData.centralTopic || mindMapData.central_topic}</div>
+                    </div>
+                    {(mindMapData.content || mindMapData.branches) && (
+                      <div className="branches-list">
+                        {(mindMapData.content || mindMapData.branches).map((branch, idx) => (
+                          <button
+                            key={idx}
+                            className="branch-item"
+                            onClick={() => setActiveBranchIndex(idx)}
+                          >
+                            🌿 {branch.topic}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mindmap-section">
+                    {(() => {
+                      const branch = (mindMapData.content || mindMapData.branches)[activeBranchIndex] || {}
+                      return (
+                        <>
+                          <div className="branch-title">{branch.topic}</div>
+                          {Array.isArray(branch.subtopics) && branch.subtopics.length > 0 ? (
+                            <ul className="subtopics-list">
+                              {branch.subtopics.map((s, i) => (
+                                <li key={i}>• {typeof s === 'string' ? s : s?.topic || ''}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <div className="empty-text">Alt konu bulunamadı.</div>
+                          )}
+                        </>
+                      )
+                    })()}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </>

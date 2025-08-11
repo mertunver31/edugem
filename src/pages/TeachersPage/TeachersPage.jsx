@@ -3,7 +3,7 @@ import { getAITeachers, createAITeacher, deleteAITeacher, getTeacherStats, updat
 import AITeacherAvatarCreator from '../../components/AITeacherAvatarCreator/AITeacherAvatarCreator'
 import AITeacherEditor from '../../components/AITeacherEditor/AITeacherEditor'
 import AITeacherChat from '../../components/AITeacherChat/AITeacherChat'
-import Avatar3DHead from '../../components/Avatar3DHead/Avatar3DHead'
+import Avatar3DPreview from '../../components/Avatar3DPreview/Avatar3DPreview' // Yeni bileşeni import et
 import './TeachersPage.css'
 
 const TeachersPage = () => {
@@ -172,25 +172,25 @@ const TeachersPage = () => {
         </div>
 
         {/* İstatistikler */}
-        <div className="teachers-stats">
+          <div className="teachers-stats" style={{ color: '#1f2937' }}>
           <div className="stat-card">
             <div className="stat-icon">🤖</div>
             <div className="stat-content">
-              <h3>Toplam AI Öğretmen</h3>
+                <h3 style={{ color: '#1f2937' }}>Toplam AI Öğretmen</h3>
               <div className="stat-number">{stats.totalTeachers}</div>
             </div>
           </div>
           <div className="stat-card">
             <div className="stat-icon">💬</div>
             <div className="stat-content">
-              <h3>Toplam Konuşma</h3>
+                <h3 style={{ color: '#1f2937' }}>Toplam Konuşma</h3>
               <div className="stat-number">{stats.totalConversations}</div>
             </div>
           </div>
           <div className="stat-card">
             <div className="stat-icon">⭐</div>
             <div className="stat-content">
-              <h3>Ortalama Deneyim</h3>
+                <h3 style={{ color: '#1f2937' }}>Ortalama Deneyim</h3>
               <div className="stat-number">{stats.averageExperience}</div>
             </div>
           </div>
@@ -226,15 +226,12 @@ const TeachersPage = () => {
             ) : (
               teachers.map(teacher => (
               <div key={teacher.id} className="teacher-card">
-                <div className="teacher-avatar">
-                  <div className="avatar-circle">
-                      {teacher.avatar_url ? (
-                        <Avatar3DHead avatarUrl={teacher.avatar_url} />
-                      ) : (
-                        <span className="teacher-icon">👨‍🏫</span>
-                      )}
-                  </div>
-                  <div className="status-badge active">Aktif</div>
+                <div className="teacher-avatar-container">
+                  {teacher.avatar_url ? (
+                    <Avatar3DPreview avatarUrl={teacher.avatar_url} />
+                  ) : (
+                    <div className="teacher-icon-fallback">👨‍🏫</div>
+                  )}
                 </div>
 
                 <div className="teacher-info">

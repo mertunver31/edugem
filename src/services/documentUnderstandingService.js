@@ -1,46 +1,50 @@
-import { genAI, MODELS } from './geminiService'
-import { supabase } from '../config/supabase'
-import { getCurrentUser } from './authService'
+import { extractDocumentOutline as geminiExtractDocumentOutline } from './geminiService';
+import { supabase } from '../config/supabase';
+import { getCurrentUser } from './authService';
 
 // Gemini Document Understanding Service
 export class DocumentUnderstandingService {
   constructor() {
-    this.model = genAI.getGenerativeModel({ 
-      model: MODELS.DOCUMENT_UNDERSTANDING 
-    })
+    // Bu constructor artık boş olabilir çünkü model başlatma işlemi
+    // gemini_proxy Edge Function içinde yapılıyor.
   }
 
   // PDF dosyasını Gemini'ye yükle ve outline çıkar
   async extractDocumentOutline(documentId) {
     try {
-      console.log('Document Understanding başlatılıyor...', documentId)
+      console.log('Document Understanding başlatılıyor...', documentId);
       
       // 1. Kullanıcı kontrolü
-      const userResult = await getCurrentUser()
+      const userResult = await getCurrentUser();
       if (!userResult.success || !userResult.user) {
-        throw new Error('Kullanıcı girişi yapılmamış')
+        throw new Error('Kullanıcı girişi yapılmamış');
       }
 
-      // 2. Edge Function'ı çağır
-      console.log('Edge Function çağrılıyor...')
-      const { data, error } = await supabase.functions.invoke('gemini_document_understanding', {
-        body: {
-          documentId: documentId,
-          userId: userResult.user.id
-        }
-      })
+      // 2. Belge URL'sini al
+      const { data: document, error: docError } = await supabase
+        .from('documents')
+        .select('file_url')
+        .eq('id', documentId)
+        .single();
 
-      if (error) {
-        console.error('Edge Function hatası:', error)
-        throw new Error('Document Understanding işlemi başarısız: ' + error.message)
+      if (docError || !document) {
+        throw new Error('Belge bulunamadı veya URL alınamadı.');
+      }
+      
+      // 3. geminiService üzerinden yeni proxy fonksiyonunu çağır
+      console.log('geminiService aracılığıyla proxy çağrılıyor...');
+      const result = await geminiExtractDocumentOutline(document.file_url);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Document Understanding işlemi başarısız');
       }
 
-      if (!data.success) {
-        throw new Error(data.error || 'Document Understanding başarısız')
-      }
+      // Başarılı sonucu veritabanına kaydetme mantığı buraya eklenebilir,
+      // ancak şimdilik bu sorumluluk proxy'de veya başka bir serviste olabilir.
+      // Şimdilik sadece sonucu döndürüyoruz.
 
-      console.log('Document Understanding tamamlandı')
-      return data
+      console.log('Document Understanding tamamlandı');
+      return { ...result, documentId: documentId };
 
     } catch (error) {
       console.error('Document Understanding hatası:', error)
@@ -62,11 +66,9 @@ export class DocumentUnderstandingService {
         success: false,
         error: error.message,
         documentId: documentId
-      }
+      };
     }
   }
-
-
 
   // Rate limiting kontrolü
   async checkRateLimits() {
@@ -79,13 +81,11 @@ export class DocumentUnderstandingService {
     }
   }
 
-
-
   // Test fonksiyonu
   async testDocumentUnderstanding(documentId) {
     console.log('Document Understanding test başlatılıyor...')
     
-    const result = await this.extractDocumentOutline(documentId)
+    const result = await this.extractDocumentOutline(documentId);
     
     if (result.success) {
       console.log('✅ Document Understanding test başarılı')
@@ -98,4 +98,4 @@ export class DocumentUnderstandingService {
 }
 
 // Singleton instance
-export const documentUnderstandingService = new DocumentUnderstandingService() 
+export const documentUnderstandingService = new DocumentUnderstandingService(); 

@@ -70,10 +70,11 @@ class ForceGraph3DService {
           const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
             map: this.createTextTexture(node.label, node.color),
             transparent: true,
-            opacity: 1.0 // Tam opaklık
+            opacity: 1.0
           }))
-          sprite.scale.set(60, 35, 1) // Boyutları çok daha büyüttük
-          sprite.position.y = 25 // Kürenin üstünde daha yüksekte
+          // Yüksek DPI için daha büyük ölçek
+          sprite.scale.set(120, 70, 1)
+          sprite.position.y = 40
           
           // Küre ve sprite'ı bir grup içinde birleştir
           const group = new THREE.Group()
@@ -158,10 +159,10 @@ class ForceGraph3DService {
           const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
             map: this.createTextTexture(node.label, node.color),
             transparent: true,
-            opacity: 1.0 // Tam opaklık
+            opacity: 1.0
           }))
-          sprite.scale.set(60, 35, 1) // Boyutları çok daha büyüttük
-          sprite.position.y = 25 // Kürenin üstünde daha yüksekte
+          sprite.scale.set(120, 70, 1)
+          sprite.position.y = 40
           
           // Küre ve sprite'ı bir grup içinde birleştir
           const group = new THREE.Group()
@@ -494,12 +495,12 @@ class ForceGraph3DService {
    */
   createTextTexture(text, color) {
     const canvas = document.createElement('canvas')
-    const padding = 40
-    const fontSize = 48 // Font boyutunu çok daha büyüttük
+    const padding = 60
+    const fontSize = 72
     const ctx = canvas.getContext('2d')
     
-    // Çok yüksek çözünürlük için 4x scale
-    const scale = 4 // 4x çözünürlük artırımı
+    // Çok yüksek çözünürlük için 6x scale
+    const scale = 6
     
     // Text boyutunu hesapla
     ctx.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`
@@ -522,24 +523,38 @@ class ForceGraph3DService {
     ctx.fillStyle = '#000000'
     ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale)
     
-    // İç arka plan (node rengi)
+    // İç arka plan (node rengi) - yuvarlatılmış köşeler
+    const w = (canvas.width / scale)
+    const h = (canvas.height / scale)
+    const r = 14
     ctx.fillStyle = color
-    ctx.fillRect(5, 5, (canvas.width / scale) - 10, (canvas.height / scale) - 10)
+    roundedRect(ctx, 5, 5, w - 10, h - 10, r)
+    ctx.fill()
     
     // Border (daha kalın)
     ctx.strokeStyle = '#ffffff'
-    ctx.lineWidth = 6
-    ctx.strokeRect(3, 3, (canvas.width / scale) - 6, (canvas.height / scale) - 6)
+    ctx.lineWidth = 8
+    roundedRect(ctx, 3, 3, w - 6, h - 6, r)
+    ctx.stroke()
     
     // Text (daha net ve kontrastlı)
-    ctx.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`
-    ctx.fillStyle = '#000000' // Siyah text daha okunabilir
+    ctx.font = `600 ${fontSize}px 'Segoe UI', Arial, sans-serif`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(text, (canvas.width / scale) / 2, (canvas.height / scale) / 2)
+    const cx = (canvas.width / scale) / 2
+    const cy = (canvas.height / scale) / 2
+    // İnce outline ile keskinlik
+    ctx.lineWidth = 3
+    ctx.strokeStyle = 'rgba(0,0,0,0.45)'
+    ctx.strokeText(text, cx, cy)
+    ctx.fillStyle = '#0b1324'
+    ctx.fillText(text, cx, cy)
 
     const texture = new THREE.Texture(canvas)
     texture.needsUpdate = true
+    texture.anisotropy = 16
+    texture.minFilter = THREE.LinearFilter
+    texture.magFilter = THREE.LinearFilter
     return texture
   }
 
@@ -577,3 +592,18 @@ class ForceGraph3DService {
 }
 
 export default new ForceGraph3DService()
+
+// Yardımcı fonksiyon: yuvarlak köşeli dikdörtgen çiz
+function roundedRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath()
+  ctx.moveTo(x + radius, y)
+  ctx.lineTo(x + width - radius, y)
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
+  ctx.lineTo(x + width, y + height - radius)
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+  ctx.lineTo(x + radius, y + height)
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
+  ctx.lineTo(x, y + radius)
+  ctx.quadraticCurveTo(x, y, x + radius, y)
+  ctx.closePath()
+}

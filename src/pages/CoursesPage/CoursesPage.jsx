@@ -171,7 +171,9 @@ const CoursesPage = () => {
   }
 
   const handleDersSec = (ders) => {
-    console.log('handleDersSec çağrıldı:', { ders })
+    console.log('handleDersSec çağrıldı:', { ders });
+    // HATA AYIKLAMA: Gelen ders nesnesinin tamamını yazdır
+    console.log("DEBUG: Seçilen Ders Nesnesi:", JSON.stringify(ders, null, 2));
     setSelectedDers(ders)
     setShowDersSecimi(false)
     setShowSinifSecimi(true)

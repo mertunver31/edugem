@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase'
-import { genAI, MODELS } from './geminiService'
+import { generateContent } from './geminiService'
 
 /**
  * Course Structure Generator Service
@@ -7,9 +7,7 @@ import { genAI, MODELS } from './geminiService'
  */
 class CourseStructureService {
   constructor() {
-    this.model = genAI.getGenerativeModel({ 
-      model: MODELS.DOCUMENT_UNDERSTANDING 
-    })
+    // Artık client-side model başlatmıyoruz. Tüm çağrılar gemini_proxy üzerinden yapılır.
   }
 
   /**
@@ -251,9 +249,12 @@ class CourseStructureService {
         5. Sadece JSON döndür, başka açıklama ekleme
       `
 
-      const result = await this.model.generateContent(prompt)
-      const response = await result.response
-      const text = response.text()
+      const aiResult = await generateContent(prompt)
+      if (!aiResult.success) {
+        throw new Error(aiResult.error || 'AI yanıtı alınamadı')
+      }
+
+      const text = aiResult.data
 
       // JSON'ı parse et
       let courseStructure
@@ -282,62 +283,6 @@ class CourseStructureService {
       console.error('AI ile kurs yapısı oluşturma hatası:', error)
       throw error
     }
-  }
-
-  /**
-   * Segment ID'lerini eşleştir
-   * @param {Object} courseStructure - Kurs yapısı
-   * @param {Array} segments - Segment listesi
-   * @returns {Object} Güncellenmiş kurs yapısı
-   */
-  mapSegmentIds(courseStructure, segments) {
-    console.log('🔧 Segment ID mapping başlatılıyor...')
-    console.log('Mevcut segmentler:', segments.map(s => ({ id: s.id, title: s.title })))
-    
-    // Kullanılabilir segment ID'lerini hazırla
-    const availableSegmentIds = segments.map(seg => seg.id)
-    let usedSegmentIds = new Set()
-    let fixedCount = 0
-    
-    courseStructure.chapters.forEach(chapter => {
-      chapter.lessons.forEach(lesson => {
-        // Geçersiz UUID'leri düzelt
-        if (lesson.segmentId && !this.isValidUUID(lesson.segmentId)) {
-          console.log(`❌ Geçersiz UUID tespit edildi: ${lesson.segmentId} (Lesson: ${lesson.title})`)
-          
-          // Kullanılmamış bir segment ID'si bul
-          const availableId = availableSegmentIds.find(id => !usedSegmentIds.has(id))
-          if (availableId) {
-            lesson.segmentId = availableId
-            usedSegmentIds.add(availableId)
-            fixedCount++
-            console.log(`✅ Düzeltildi: ${lesson.title} -> ${availableId}`)
-          } else {
-            console.log(`❌ Kullanılabilir segment ID kalmadı`)
-          }
-        } else if (lesson.segmentId && this.isValidUUID(lesson.segmentId)) {
-          // Geçerli UUID'yi kullanıldı olarak işaretle
-          usedSegmentIds.add(lesson.segmentId)
-          console.log(`✅ Geçerli UUID: ${lesson.segmentId} (Lesson: ${lesson.title})`)
-        } else if (!lesson.segmentId) {
-          // Segment ID'si yoksa, kullanılmamış bir tane ata
-          const availableId = availableSegmentIds.find(id => !usedSegmentIds.has(id))
-          if (availableId) {
-            lesson.segmentId = availableId
-            usedSegmentIds.add(availableId)
-            fixedCount++
-            console.log(`✅ Ata: ${lesson.title} -> ${availableId}`)
-          }
-        }
-      })
-    })
-
-    if (fixedCount > 0) {
-      console.log(`🔧 ${fixedCount} segment ID düzeltildi`)
-    }
-
-    console.log('✅ Segment ID mapping tamamlandı')
-    return courseStructure
   }
 
   /**
@@ -451,6 +396,62 @@ class CourseStructureService {
       error: 'Bu fonksiyon artık kullanılmıyor. AI prompt\'ı düzeltildi.',
       documentId: documentId
     }
+  }
+
+  /**
+   * Segment ID'lerini eşleştir
+   * @param {Object} courseStructure - Kurs yapısı
+   * @param {Array} segments - Segment listesi
+   * @returns {Object} Güncellenmiş kurs yapısı
+   */
+  mapSegmentIds(courseStructure, segments) {
+    console.log('🔧 Segment ID mapping başlatılıyor...')
+    console.log('Mevcut segmentler:', segments.map(s => ({ id: s.id, title: s.title })))
+    
+    // Kullanılabilir segment ID'lerini hazırla
+    const availableSegmentIds = segments.map(seg => seg.id)
+    let usedSegmentIds = new Set()
+    let fixedCount = 0
+    
+    courseStructure.chapters.forEach(chapter => {
+      chapter.lessons.forEach(lesson => {
+        // Geçersiz UUID'leri düzelt
+        if (lesson.segmentId && !this.isValidUUID(lesson.segmentId)) {
+          console.log(`❌ Geçersiz UUID tespit edildi: ${lesson.segmentId} (Lesson: ${lesson.title})`)
+          
+          // Kullanılmamış bir segment ID'si bul
+          const availableId = availableSegmentIds.find(id => !usedSegmentIds.has(id))
+          if (availableId) {
+            lesson.segmentId = availableId
+            usedSegmentIds.add(availableId)
+            fixedCount++
+            console.log(`✅ Düzeltildi: ${lesson.title} -> ${availableId}`)
+          } else {
+            console.log(`❌ Kullanılabilir segment ID kalmadı`)
+          }
+        } else if (lesson.segmentId && this.isValidUUID(lesson.segmentId)) {
+          // Geçerli UUID'yi kullanıldı olarak işaretle
+          usedSegmentIds.add(lesson.segmentId)
+          console.log(`✅ Geçerli UUID: ${lesson.segmentId} (Lesson: ${lesson.title})`)
+        } else if (!lesson.segmentId) {
+          // Segment ID'si yoksa, kullanılmamış bir tane ata
+          const availableId = availableSegmentIds.find(id => !usedSegmentIds.has(id))
+          if (availableId) {
+            lesson.segmentId = availableId
+            usedSegmentIds.add(availableId)
+            fixedCount++
+            console.log(`✅ Ata: ${lesson.title} -> ${availableId}`)
+          }
+        }
+      })
+    })
+
+    if (fixedCount > 0) {
+      console.log(`🔧 ${fixedCount} segment ID düzeltildi`)
+    }
+
+    console.log('✅ Segment ID mapping tamamlandı')
+    return courseStructure
   }
 }
 

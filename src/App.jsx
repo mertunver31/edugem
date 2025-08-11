@@ -6,7 +6,6 @@ import CreateCoursePage from './pages/CreateCoursePage/CreateCoursePage'
 import GeminiEmbeddingTest from './components/GeminiEmbeddingTest/GeminiEmbeddingTest'
 import MindMapLearningPathTest from './components/MindMapLearningPathTest/MindMapLearningPathTest'
 import PodcastTestArea from './components/PodcastTestArea/PodcastTestArea'
-import DevelopmentModeIndicator from './components/DevelopmentModeIndicator/DevelopmentModeIndicator'
 import { testConnection } from './services/supabaseService'
 import './App.css'
 
@@ -19,7 +18,6 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <DevelopmentModeIndicator />
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />

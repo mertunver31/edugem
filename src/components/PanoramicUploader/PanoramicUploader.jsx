@@ -130,32 +130,15 @@ const PanoramicUploader = ({ onFileSelect }) => {
         {!selectedFile ? (
           <div className="upload-content">
             <div className="upload-icon">📷</div>
-            <h3>Panoramik Görüntü Yükleyin</h3>
-            <p>Dosyayı buraya sürükleyin veya seçmek için tıklayın</p>
-            <p className="file-info">Desteklenen formatlar: JPG, PNG (Max: 50MB)</p>
+            <h3 style={{ color: '#1f2937' }}>Panoramik Görüntü Yükleyin</h3>
+            <p style={{ color: '#374151' }}>Dosyayı buraya sürükleyin veya seçmek için tıklayın</p>
+            <p className="file-info" style={{ color: '#4b5563' }}>Desteklenen formatlar: JPG, PNG (Max: 50MB)</p>
             <CustomButton
               text="Dosya Seç"
               onClick={handleBrowseClick}
               variant="secondary"
               className="browse-button"
             />
-            <button 
-              onClick={() => {
-                console.log('Test button clicked')
-                alert('Test button çalışıyor!')
-              }}
-              style={{ 
-                marginTop: '10px', 
-                padding: '8px 16px', 
-                backgroundColor: '#ff6b6b', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Test Butonu
-            </button>
           </div>
         ) : (
           <div className="file-preview">

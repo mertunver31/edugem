@@ -1,7 +1,9 @@
 .dashboard-page {
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
+  /* Dikey kaydırmayı etkinleştir, yatay taşmaları gizle */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Three.js canvas tam ekran, z-index: 0 */
