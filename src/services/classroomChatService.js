@@ -1,6 +1,14 @@
-import { supabase } from '../config/supabase'
-import { generateTextContent } from './geminiService'
-import { getCurrentUser } from './authService'
+// Classroom chat servisi devre dışı bırakıldı
+export const getClassroomMessages = async () => ({ success: true, messages: [] })
+export const sendUserMessage = async () => ({ success: false, error: 'classroom_chat_disabled' })
+export const generateAIResponse = async () => ({ success: false, error: 'classroom_chat_disabled' })
+export const getClassroomParticipants = async () => ({ success: true, participants: [] })
+export const addAITeacherToClassroom = async () => ({ success: false, error: 'classroom_chat_disabled' })
+export const addUserToClassroom = async () => ({ success: false, error: 'classroom_chat_disabled' })
+export const updateParticipantPosition = async () => ({ success: false, error: 'classroom_chat_disabled' })
+export const removeParticipantFromClassroom = async () => ({ success: false, error: 'classroom_chat_disabled' })
+export const subscribeToClassroomMessages = () => ({ unsubscribe: () => {} })
+export const subscribeToClassroomParticipants = () => ({ unsubscribe: () => {} })
 
 // Sınıf mesajlarını getir
 export const getClassroomMessages = async (classroomId) => {

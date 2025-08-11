@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabase'
-import { genAI, MODELS, estimateTokens } from './geminiService'
+import { generateContent } from './geminiService'
 import { courseStructureService } from './courseStructureService'
 import segmentService from './segmentService'
 import { pdfTextExtractionService } from './pdfTextExtractionService'
@@ -12,9 +12,7 @@ import knowledgeBaseService from './knowledgeBaseService'
  */
 class EnhancedContentService {
   constructor() {
-    this.model = genAI.getGenerativeModel({ 
-      model: MODELS.TEXT_GENERATION 
-    })
+    // Artık client-side model başlatmıyoruz. Çağrılar gemini_proxy üzerinden yapılır.
   }
 
   /**
@@ -134,10 +132,6 @@ class EnhancedContentService {
 
   /**
    * Tek chapter için enhanced content üret (RAG ile zenginleştirilmiş context)
-   * @param {string} documentId - Document ID
-   * @param {Object} chapter - Chapter bilgileri
-   * @param {Object} courseStructure - Kurs yapısı
-   * @returns {Object} Chapter content
    */
   async generateChapterContent(documentId, chapter, courseStructure) {
     try {
@@ -154,7 +148,7 @@ class EnhancedContentService {
       const uniqueSegmentIds = [...new Set(allSegmentIds)]
       console.log(`📖 Chapter için ${uniqueSegmentIds.length} benzersiz segment bulundu`)
       
-      // Tüm segment içeriklerini birleştir (PDF extraction ile, Gemini için sadece text)
+      // Tüm segment içeriklerini birleştir (Gemini için sadece text)
       const chapterSegmentContent = await this.getSegmentContent(uniqueSegmentIds, documentId)
       if (!chapterSegmentContent.success) {
         throw new Error(`Chapter segment içerikleri alınamadı: ${chapterSegmentContent.error}`)
@@ -192,6 +186,74 @@ class EnhancedContentService {
 
     } catch (error) {
       console.error('Chapter content üretme hatası:', error)
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+  }
+
+  /**
+   * AI ile kurs yapısını/lesson içeriklerini üretmek için proxy fonksiyonunu kullanır
+   */
+  async generateContentWithAI(prompt) {
+    try {
+      const aiResponse = await generateContent(prompt)
+      if (!aiResponse.success) {
+        return { success: false, error: aiResponse.error }
+      }
+      return { success: true, data: aiResponse.data }
+    } catch (error) {
+      return { success: false, error: error.message }
+    }
+  }
+
+  /**
+   * Chapter için AI ile tüm lesson'ları tek seferde üret
+   */
+  async generateChapterContentWithAI(documentId, chapter, courseStructure, segmentContent, ragContext = null) {
+    try {
+      console.log(`🤖 Chapter için AI content üretimi başlatılıyor: ${chapter.title}`)
+      
+      // Chapter için optimize edilmiş prompt oluştur (RAG context ile)
+      const prompt = this.createChapterPrompt(chapter, courseStructure, segmentContent, ragContext)
+      
+      console.log(`📤 AI'ya gönderilen prompt uzunluğu: ${prompt.length} karakter`)
+      if (ragContext) {
+        console.log(`🔍 RAG context kullanıldı: ${ragContext.contextLength} karakter`)
+      }
+      
+      // Proxy ile AI content üret
+      const aiResponse = await this.generateContentWithAI(prompt)
+      if (!aiResponse.success) {
+        throw new Error(`AI content üretilemedi: ${aiResponse.error}`)
+      }
+      
+      console.log(`📥 AI'dan gelen response uzunluğu: ${aiResponse.data.length} karakter`)
+      
+      // Content'i parse et ve yapılandır
+      const structuredContent = this.parseAndStructureChapterContent(aiResponse.data, chapter)
+      if (!structuredContent.success) {
+        throw new Error(`Chapter content yapılandırılamadı: ${structuredContent.error}`)
+      }
+      
+      return {
+        success: true,
+        data: {
+          chapterTitle: chapter.title,
+          lessons: structuredContent.data.lessons,
+          metadata: {
+            generated_at: new Date().toISOString(),
+            lessonCount: structuredContent.data.lessons.length,
+            contentLength: JSON.stringify(structuredContent.data).length,
+            ragContextUsed: !!ragContext,
+            ragContextSize: ragContext ? ragContext.contextLength : 0
+          }
+        }
+      }
+
+    } catch (error) {
+      console.error('Chapter AI content üretme hatası:', error)
       return {
         success: false,
         error: error.message
@@ -1455,8 +1517,8 @@ class EnhancedContentService {
         console.log(`🔍 RAG context kullanıldı: ${ragContext.contextLength} karakter`)
       }
       
-      // Rate limiting ile AI content üret
-      const aiResponse = await this.generateContentWithRetry(prompt)
+      // Proxy ile AI content üret
+      const aiResponse = await this.generateContentWithAI(prompt)
       if (!aiResponse.success) {
         throw new Error(`AI content üretilemedi: ${aiResponse.error}`)
       }
@@ -1662,15 +1724,16 @@ class EnhancedContentService {
       try {
         console.log(`🤖 AI isteği gönderiliyor (Deneme ${attempt}/${maxRetries})`)
         
-        const result = await this.model.generateContent(prompt)
-        const response = await result.response
-        const text = response.text()
+        const aiResponse = await generateContent(prompt)
+        if (!aiResponse.success) {
+          throw new Error(aiResponse.error || 'AI yanıtı alınamadı')
+        }
         
         console.log(`✅ AI isteği başarılı (Deneme ${attempt})`)
         
         return {
           success: true,
-          data: text
+          data: aiResponse.data
         }
 
       } catch (error) {
@@ -1861,21 +1924,13 @@ class EnhancedContentService {
    */
   async generateContentWithAI(prompt) {
     try {
-      const result = await this.model.generateContent(prompt)
-      const response = await result.response
-      const text = response.text()
-      
-      return {
-        success: true,
-        data: text
+      const aiResponse = await generateContent(prompt)
+      if (!aiResponse.success) {
+        return { success: false, error: aiResponse.error }
       }
-
+      return { success: true, data: aiResponse.data }
     } catch (error) {
-      console.error('AI content üretme hatası:', error)
-      return {
-        success: false,
-        error: error.message
-      }
+      return { success: false, error: error.message }
     }
   }
 

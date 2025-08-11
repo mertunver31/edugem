@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { getAITeachers } from '../../services/aiTeacherService'
-import Avatar3DHead from '../Avatar3DHead/Avatar3DHead'
+import Avatar3DPreview from '../Avatar3DPreview/Avatar3DPreview'
 import './AITeacherSelector.css'
 
 const AITeacherSelector = ({ isOpen, onClose, onTeacherSelected }) => {
@@ -80,7 +80,7 @@ const AITeacherSelector = ({ isOpen, onClose, onTeacherSelected }) => {
                 >
                   <div className="teacher-avatar">
                     {teacher.avatar_url ? (
-                      <Avatar3DHead avatarUrl={teacher.avatar_url} />
+                      <Avatar3DPreview avatarUrl={teacher.avatar_url} />
                     ) : (
                       <span className="teacher-icon">👨‍🏫</span>
                     )}

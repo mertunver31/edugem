@@ -297,34 +297,37 @@
 }
 
 .saved-avatar-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
   padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 15px;
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .saved-avatar-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
 .avatar-thumbnail {
-  width: 120px;
-  height: 120px;
-  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
-  border-radius: 50%;
+  width: 100%;
+  height: 280px;
+  background: linear-gradient(135deg, rgba(3, 169, 244, 0.3), rgba(0, 150, 136, 0.4));
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  color: white;
-  box-shadow: 0 8px 25px rgba(156, 39, 176, 0.3);
+  margin-bottom: 15px;
+}
+
+.avatar-thumbnail .avatar-icon {
+  font-size: 5rem;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .avatar-details {
@@ -394,6 +397,41 @@
 .delete-btn {
   background: linear-gradient(135deg, #f44336, #d32f2f);
   color: white;
+}
+
+/* Inline edit styles */
+.avatar-edit-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.avatar-name-input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  min-width: 0;
+}
+
+.avatar-edit-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.small {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.cancel-btn {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
 }
 
 .use-btn:hover,
@@ -500,6 +538,49 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+}
+
+/* Edit name modal */
+.edit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.edit-modal {
+  width: min(520px, 92vw);
+  background: rgba(255,255,255,0.95);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.edit-modal h4 {
+  margin: 0 0 12px 0;
+  color: #2c3e50;
+}
+
+.edit-modal-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.edit-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
 }
 
 /* Responsive Design */

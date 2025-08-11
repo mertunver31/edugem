@@ -27,7 +27,9 @@ class PodcastService {
         body: {
           text: text,
           voiceName: finalOptions.voice.name,
-          languageCode: finalOptions.voice.languageCode
+          languageCode: finalOptions.voice.languageCode,
+          speakingRate: finalOptions.speakingRate ?? 1.15,
+          pitch: finalOptions.pitch ?? 0.5
         }
       });
 
@@ -174,6 +176,46 @@ class PodcastService {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
+
+  /**
+   * Belge için bir podcast özeti alır veya oluşturur.
+   * Önce veritabanında mevcut bir özet olup olmadığını kontrol eder.
+   * Yoksa, yeni bir tane oluşturmak için Edge Function'ı tetikler.
+   * @param {string} documentId - Podcast'in oluşturulacağı belgenin ID'si.
+   * @returns {Promise<object>} - Podcast verisini içeren bir promise.
+   */
+  async getOrCreatePodcastForDocument(documentId, scope = null) {
+    if (!documentId) {
+      throw new Error('Belge IDsi gereklidir.');
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('Podcast oluşturmak için kullanıcı girişi gereklidir.');
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('podcast_generator', {
+        body: scope ? { documentId, scope } : { documentId },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('Podcast verisi alınamadı.');
+      }
+
+      console.log('Podcast verisi başarıyla alındı:', data);
+      return data;
+    } catch (error) {
+      console.error('Podcast alma veya oluşturma hatası:', error);
+      throw error;
+    }
+  }
 }
 
-export default new PodcastService(); 
+// Class'tan bir örnek oluştur ve onu export et
+const podcastService = new PodcastService();
+export default podcastService; 

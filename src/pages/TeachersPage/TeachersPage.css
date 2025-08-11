@@ -63,18 +63,18 @@
 }
 
 .stat-content h3 {
-  color: white;
+  color: #1f2937; /* slate-800: okunaklı başlık */
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 8px 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: none;
 }
 
 .stat-number {
-  color: white;
+  color: #374151; /* slate-700: sayı */
   font-size: 2.2rem;
   font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: none;
 }
 
 /* Öğretmen Listesi */
@@ -122,8 +122,8 @@
 }
 
 .teacher-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
   border-radius: 20px;
   padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -131,35 +131,55 @@
   flex-direction: column;
   gap: 15px;
   transition: all 0.3s ease;
+  overflow: hidden; /* Ensure content stays within rounded corners */
 }
 
 .teacher-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.teacher-avatar-container {
+  width: 100%;
+  height: 280px; /* Increased height for full-body avatar */
+  background: linear-gradient(135deg, rgba(103, 58, 183, 0.3), rgba(63, 81, 181, 0.4));
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.teacher-icon-fallback {
+  font-size: 5rem;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .teacher-avatar {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Align to the top */
   justify-content: space-between;
+  margin-bottom: 15px; /* Add some space below avatar */
 }
 
 .avatar-circle {
-  width: 120px;
-  height: 120px;
-  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  width: 160px; /* Match the size prop */
+  height: 160px; /* Match the size prop */
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.4), rgba(123, 31, 162, 0.6));
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 3rem; /* Larger fallback icon */
   color: white;
-  box-shadow: 0 8px 25px rgba(156, 39, 176, 0.3);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .teacher-icon {
-  font-size: 2rem;
+  font-size: 4rem;
   color: white;
+  opacity: 0.8;
 }
 
 .teacher-avatar-img {
@@ -184,10 +204,10 @@
 
 .teacher-info h3 {
   color: white;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 8px 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .teacher-subject {

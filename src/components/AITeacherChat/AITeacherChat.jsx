@@ -8,6 +8,7 @@ const AITeacherChat = ({ teacher, isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef(null)
+  const messagesContainerRef = useRef(null)
 
   useEffect(() => {
     if (isOpen && teacher) {
@@ -19,8 +20,31 @@ const AITeacherChat = ({ teacher, isOpen, onClose }) => {
     scrollToBottom()
   }, [messages])
 
+  // Sayfa kaymasını engelle (arka plan sabit kalsın)
+  useEffect(() => {
+    if (!isOpen) return
+    const prevOverflow = document.body.style.overflow
+    const prevPaddingRight = document.body.style.paddingRight
+    const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth
+    document.body.style.overflow = 'hidden'
+    if (scrollBarWidth > 0) {
+      document.body.style.paddingRight = `${scrollBarWidth}px`
+    }
+    return () => {
+      document.body.style.overflow = prevOverflow
+      document.body.style.paddingRight = prevPaddingRight
+    }
+  }, [isOpen])
+
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      })
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' })
+    }
   }
 
   const loadConversationHistory = async () => {
@@ -28,13 +52,27 @@ const AITeacherChat = ({ teacher, isOpen, onClose }) => {
       setIsLoading(true)
       const result = await getConversationHistory(teacher.id)
       if (result.success) {
-        const formattedMessages = result.conversations.map(conv => ({
-          id: conv.id,
-          type: 'ai',
-          content: conv.response,
-          timestamp: new Date(conv.created_at),
-          context: conv.context
-        }))
+        // Her konuşma kaydı: önce kullanıcı mesajı, ardından AI cevabı
+        const formattedMessages = []
+        result.conversations.forEach(conv => {
+          if (conv.message) {
+            formattedMessages.push({
+              id: `${conv.id}-user`,
+              type: 'user',
+              content: conv.message,
+              timestamp: new Date(conv.created_at)
+            })
+          }
+          if (conv.response) {
+            formattedMessages.push({
+              id: `${conv.id}-ai`,
+              type: 'ai',
+              content: conv.response,
+              timestamp: new Date(conv.created_at),
+              context: conv.context
+            })
+          }
+        })
         setMessages(formattedMessages)
       } else {
         console.error('Konuşma geçmişi yüklenirken hata:', result.error)
@@ -136,7 +174,7 @@ const AITeacherChat = ({ teacher, isOpen, onClose }) => {
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
-        <div className="chat-messages">
+        <div className="chat-messages" ref={messagesContainerRef}>
           {isLoading ? (
             <div className="loading-message">
               <div className="loading-spinner">⏳</div>

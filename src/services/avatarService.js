@@ -139,3 +139,23 @@ export const deleteAvatar = async (avatarId) => {
     return { success: false, error: error.message }
   }
 } 
+
+// Avatar ismini güncelle
+export const renameAvatar = async (avatarId, newName) => {
+  try {
+    const { data, error } = await supabase
+      .from('avatars')
+      .update({ name: newName })
+      .eq('id', avatarId)
+      .select()
+
+    if (error) {
+      throw error
+    }
+
+    return { success: true, avatar: data?.[0] }
+  } catch (error) {
+    console.error('Avatar yeniden adlandırma hatası:', error.message)
+    return { success: false, error: error.message }
+  }
+}
