@@ -67,25 +67,25 @@ serve(async (req) => {
 
     // 1. Önbelleği (cache) kontrol et (yalnızca tam içerik için)
     if (!scope || scope?.type === 'full') {
-      let { data: existingPodcast, error: cacheError } = await supabaseAdmin
-        .from("lesson_podcasts")
-        .select("*")
-        .eq("document_id", documentId)
-        .eq("status", "completed")
-        .maybeSingle();
+    let { data: existingPodcast, error: cacheError } = await supabaseAdmin
+      .from("lesson_podcasts")
+      .select("*")
+      .eq("document_id", documentId)
+      .eq("status", "completed")
+      .maybeSingle();
 
-      if (cacheError) {
+    if (cacheError) {
         console.error("Cache kontrol hatası:", cacheError);
-      }
-
-      if (existingPodcast) {
-        // Mevcut özet metnini temizleyerek döndür
-        const cleaned = { ...existingPodcast, summary_text: sanitizeText(existingPodcast.summary_text || '') };
-        console.log("Önbellekten bulundu, mevcut podcast döndürülüyor (temizlenmiş metin).");
-        return new Response(JSON.stringify(cleaned), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        });
+    }
+      
+    if (existingPodcast) {
+      // Mevcut özet metnini temizleyerek döndür
+      const cleaned = { ...existingPodcast, summary_text: sanitizeText(existingPodcast.summary_text || '') };
+      console.log("Önbellekten bulundu, mevcut podcast döndürülüyor (temizlenmiş metin).");
+      return new Response(JSON.stringify(cleaned), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
       }
     }
 
@@ -213,23 +213,23 @@ ${baseText}`;
       
     // 6. Kayıt politikası: sadece tam içerik için veritabanına kaydet
     if (!scope || scopeType === 'full') {
-      const { data: newPodcast, error: insertError } = await supabaseAdmin
-        .from("lesson_podcasts")
-        .insert({
-          document_id: documentId,
-          user_id: (await supabaseAdmin.auth.getUser()).data.user.id,
-          summary_text: summaryText,
-          audio_url: audioUrl,
-          duration_seconds: duration,
-          status: "completed",
-        })
-        .select()
-        .single();
+    const { data: newPodcast, error: insertError } = await supabaseAdmin
+      .from("lesson_podcasts")
+      .insert({
+        document_id: documentId,
+        user_id: (await supabaseAdmin.auth.getUser()).data.user.id,
+        summary_text: summaryText,
+        audio_url: audioUrl,
+        duration_seconds: duration,
+        status: "completed",
+      })
+      .select()
+      .single();
 
-      if (insertError) throw insertError;
+    if (insertError) throw insertError;
 
-      console.log("Yeni podcast başarıyla oluşturuldu ve kaydedildi.");
-      return new Response(JSON.stringify(newPodcast), {
+    console.log("Yeni podcast başarıyla oluşturuldu ve kaydedildi.");
+    return new Response(JSON.stringify(newPodcast), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });

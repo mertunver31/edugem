@@ -1,14 +1,18 @@
-// Classroom chat servisi devre dışı bırakıldı
-export const getClassroomMessages = async () => ({ success: true, messages: [] })
-export const sendUserMessage = async () => ({ success: false, error: 'classroom_chat_disabled' })
-export const generateAIResponse = async () => ({ success: false, error: 'classroom_chat_disabled' })
-export const getClassroomParticipants = async () => ({ success: true, participants: [] })
-export const addAITeacherToClassroom = async () => ({ success: false, error: 'classroom_chat_disabled' })
-export const addUserToClassroom = async () => ({ success: false, error: 'classroom_chat_disabled' })
-export const updateParticipantPosition = async () => ({ success: false, error: 'classroom_chat_disabled' })
-export const removeParticipantFromClassroom = async () => ({ success: false, error: 'classroom_chat_disabled' })
-export const subscribeToClassroomMessages = () => ({ unsubscribe: () => {} })
-export const subscribeToClassroomParticipants = () => ({ unsubscribe: () => {} })
+import { supabase } from '../config/supabase'
+import { generateTextContent } from './geminiService'
+
+// Yardımcı: oturumdaki kullanıcıyı getir
+async function getCurrentUser() {
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    if (error || !data?.user) {
+      return { success: false, error: error?.message || 'user_not_found', user: null }
+    }
+    return { success: true, user: data.user }
+  } catch (e) {
+    return { success: false, error: e.message, user: null }
+  }
+}
 
 // Sınıf mesajlarını getir
 export const getClassroomMessages = async (classroomId) => {
