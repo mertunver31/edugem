@@ -1856,9 +1856,9 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
                       <div className="podcast-info">
                         <p>"{podcastData.summary_text.substring(0, 100)}..."</p>
                         {podcastData.duration_seconds > 0 && (
-                          <span>Süre: {Math.round(podcastData.duration_seconds)} sn</span>
+                        <span>Süre: {Math.round(podcastData.duration_seconds)} sn</span>
                         )}
-                      </div>
+                </div>
                     )}
                 {audioError && (
                   <div className="audio-error">
@@ -2035,6 +2035,7 @@ const PanoramicViewer = ({ imageFile, onClose, isCinemaMode, selectedAvatar, sel
                 teacher={selectedAITeacher}
                 isOpen={showAITeacherChat}
                 onClose={() => setShowAITeacherChat(false)}
+                classroomId={classroomId}
               />
             </div>
           )}

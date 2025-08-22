@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { chatWithAITeacher, getConversationHistory } from '../../services/aiTeacherService'
+import { getClassroomMessages } from '../../services/classroomChatService'
 import './AITeacherChat.css'
 
-const AITeacherChat = ({ teacher, isOpen, onClose }) => {
+const AITeacherChat = ({ teacher, isOpen, onClose, classroomId }) => {
   const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -50,29 +51,33 @@ const AITeacherChat = ({ teacher, isOpen, onClose }) => {
   const loadConversationHistory = async () => {
     try {
       setIsLoading(true)
+
+      // Öncelik: sınıf sohbet tablosundan tüm geçmiş (kullanıcı + AI)
+      if (classroomId) {
+        const res = await getClassroomMessages(classroomId)
+        if (res.success) {
+          const formatted = (res.messages || []).map((m) => ({
+            id: m.id,
+            type: m.sender_type === 'user' ? 'user' : 'ai',
+            content: m.message,
+            timestamp: new Date(m.created_at),
+            context: m.context_data || null
+          }))
+          setMessages(formatted)
+          return
+        }
+      }
+
+      // Geriye dönük uyumluluk: sadece AI yanıtlarını dönen eski servis
       const result = await getConversationHistory(teacher.id)
       if (result.success) {
-        // Her konuşma kaydı: önce kullanıcı mesajı, ardından AI cevabı
-        const formattedMessages = []
-        result.conversations.forEach(conv => {
-          if (conv.message) {
-            formattedMessages.push({
-              id: `${conv.id}-user`,
-              type: 'user',
-              content: conv.message,
-              timestamp: new Date(conv.created_at)
-            })
-          }
-          if (conv.response) {
-            formattedMessages.push({
-              id: `${conv.id}-ai`,
-              type: 'ai',
-              content: conv.response,
-              timestamp: new Date(conv.created_at),
-              context: conv.context
-            })
-          }
-        })
+        const formattedMessages = result.conversations.map(conv => ({
+          id: conv.id,
+          type: 'ai',
+          content: conv.response,
+          timestamp: new Date(conv.created_at),
+          context: conv.context
+        }))
         setMessages(formattedMessages)
       } else {
         console.error('Konuşma geçmişi yüklenirken hata:', result.error)
